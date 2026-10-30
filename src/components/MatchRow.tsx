@@ -45,7 +45,7 @@ export function MatchRow({
   const body = (
     <>
       <span className="grid min-w-0 gap-1">
-        <span className="truncate text-base">
+        <span className="text-base break-words">
           {nome(a)} <span className="text-ink-muted">contro</span> {nome(b)}
         </span>
         <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">

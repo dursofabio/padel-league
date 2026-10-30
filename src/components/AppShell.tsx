@@ -115,7 +115,9 @@ export function AppShell() {
         {/* Top bar (mobile/tablet) */}
         <header className="z-30 flex items-center justify-between gap-3 bg-court px-4 text-court-ink md:sticky md:top-0 lg:hidden">
           <Brand torneo={torneo?.nome} compatto />
-          <ProfiloLink nome={profile?.nome} loggato={!!user} variante="topbar" />
+          <div className="shrink-0">
+            <ProfiloLink nome={profile?.nome} loggato={!!user} variante="topbar" />
+          </div>
         </header>
 
         <main id="contenuto" key={loc.pathname} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-5 pb-28 md:px-6 lg:px-10 lg:pt-8 lg:pb-12">
@@ -123,7 +125,7 @@ export function AppShell() {
         </main>
 
         {/* Tab bar (mobile/tablet) */}
-        {voci.length > 0 && (
+        {voci.length > 1 && (
           <nav aria-label="Principale" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface lg:hidden">
             <ul className="mx-auto grid max-w-xl" style={{ gridTemplateColumns: `repeat(${inBarra.length + (inAltro.length ? 1 : 0)}, minmax(0,1fr))` }}>
               {inBarra.map((v) => (
@@ -180,11 +182,11 @@ export function AppShell() {
 
 function Brand({ torneo, compatto }: { torneo?: string; compatto?: boolean }) {
   return (
-    <Link to="/" className={cn('flex min-h-14 items-center gap-2.5', !compatto && 'px-5 py-4')}>
+    <Link to="/" className={cn('flex min-h-14 min-w-0 items-center gap-2.5', !compatto && 'px-5 py-4')}>
       <CourtMark />
-      <span className="grid leading-tight">
+      <span className="grid min-w-0 leading-tight">
         <span className="text-base font-bold">Padel League</span>
-        {torneo && <span className="max-w-[12rem] truncate text-xs text-court-ink-muted">{torneo}</span>}
+        {torneo && <span className="truncate text-sm text-court-ink-muted">{torneo}</span>}
       </span>
     </Link>
   );

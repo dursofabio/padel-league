@@ -69,7 +69,7 @@ export function StandingsTable({
           <tbody>
             {righe.map((r, i) => {
               const zona = zonaQualificazione(fasi, r.posizione, nGironi);
-              const zonaPrima = i > 0 ? zonaQualificazione(fasi, righe[i - 1].posizione, nGironi) : zona;
+              const zonaPrima = i > 0 ? zonaQualificazione(fasi, righe[i - 1].posizione, nGironi) : null;
               const mia = evidenzia === r.squadraId;
               return (
                 <Fragment key={r.squadraId}>
@@ -99,7 +99,7 @@ export function StandingsTable({
                   <th scope="row" className="py-2.5 pr-3 text-left font-normal">
                     <span className={cn(mia && 'font-bold')}>{nomeSquadra(squadraById, r.squadraId)}</span>
                     {zona && zona !== zonaPrima && <span className="sr-only">, inizio zona {zona}</span>}
-                    {zona && (
+                    {zona && zona !== zonaPrima && (
                       <span className="ml-2 rounded-full border border-line-strong px-1.5 text-xs font-semibold text-ink-muted">
                         {zona}
                       </span>

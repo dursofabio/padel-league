@@ -7,7 +7,7 @@
  * the grid stays behind "Mostra la griglia completa". Court names stay visible while scrolling.
  */
 import { CalendarRange, Check, ChevronLeft, ChevronRight, Clock3, Info, UserRoundX } from 'lucide-react';
-import { useCallback, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CourtLanes, LaneBlock, scalaDaCampi, type LanesScala } from '../../../../components/CourtLanes';
 import { ErrorState } from '../../../../components/states';
@@ -69,7 +69,9 @@ export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
   const [attivo, setAttivo] = useState<string | null>(null);
   const refs = useRef(new Map<string, HTMLButtonElement>());
   const campi = useMemo(() => [...tuttiCampi].sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0)), [tuttiCampi]);
-  const scala = useMemo(() => scalaDaCampi(campi, 0.8), [campi]);
+  // lanes grow with the user's text size, so slot labels are never clipped at 200% text (WCAG 1.4.4)
+  const rem = useRemPx();
+  const scala = useMemo(() => scalaDaCampi(campi, 0.8 * (rem / 16)), [campi, rem]);
 
   const fasce = useMemo(
     () => Object.fromEntries(giocatori.map((g) => [g, disp.data?.[g]?.fasce])) as Record<string, Fasce | undefined>,
@@ -485,7 +487,7 @@ function Legenda() {
             <li key={k} className="flex items-center gap-2 text-base">
               <span
                 aria-hidden
-                className={cn('grid size-7 place-items-center rounded-[6px] border', TONI_LEGENDA[ui.tono as keyof typeof TONI_LEGENDA], ui.pattern === 'hatch' && 'pattern-hatch')}
+                className={cn('grid size-7 shrink-0 place-items-center rounded-[6px] border', TONI_LEGENDA[ui.tono as keyof typeof TONI_LEGENDA], ui.pattern === 'hatch' && 'pattern-hatch')}
               >
                 <Icona className="size-4" />
               </span>
@@ -494,7 +496,7 @@ function Legenda() {
           );
         })}
         <li className="flex items-center gap-2 text-base">
-          <span aria-hidden className="grid size-7 place-items-center rounded-[6px] border border-line-strong bg-surface shadow-[0_0_0_4px_var(--ball)] outline-2 outline-court-deep dark:outline-ball">
+          <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-[6px] border border-line-strong bg-surface shadow-[0_0_0_4px_var(--ball)] outline-2 outline-court-deep dark:outline-ball">
             <Check className="size-4" strokeWidth={3} />
           </span>
           Selezionato
@@ -502,6 +504,18 @@ function Legenda() {
       </ul>
     </details>
   );
+}
+
+/** Root font size in px (user text-size preference), refreshed on resize / zoom. */
+function useRemPx(): number {
+  const leggi = () => (typeof window === 'undefined' ? 16 : parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+  const [rem, setRem] = useState(leggi);
+  useEffect(() => {
+    const aggiorna = () => setRem(leggi());
+    window.addEventListener('resize', aggiorna);
+    return () => window.removeEventListener('resize', aggiorna);
+  }, []);
+  return rem;
 }
 
 function SkeletonLanes() {
