@@ -11,6 +11,9 @@ import { afterAll } from 'vitest';
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL mancante: usa `npm run test:db`');
 
+// dates stay 'YYYY-MM-DD' strings, as PostgREST returns them
+pg.types.setTypeParser(1082, (v: string) => v);
+
 export const pool = new pg.Pool({ connectionString: url, max: 6 });
 afterAll(async () => {
   await pool.end();
