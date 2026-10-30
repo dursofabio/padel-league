@@ -2,14 +2,13 @@ import { ArrowRight, Check, CircleCheck, Flag } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sezione } from '../../components/PageHeader';
-import { useAzione } from '../../data/mutations';
+import { azioni, useAzione } from '../../data/mutations';
 import { prossimoPasso } from '../../lib/prossimoPasso';
 import { today } from '../../lib/time';
 import { gironi } from '../../lib/torneo';
 import { Button, ConfirmDialog, cn } from '../../ui';
 import { eccezioni, passiTorneo, statoPrecedente } from './logic';
 import { Nota } from './parti';
-import { impostaStatoTorneo } from './statoTorneo';
 import type { PropsSezione } from './tipi';
 
 const plurale = (n: number, uno: string, molti: string) => `${n} ${n === 1 ? uno : molti}`;
@@ -20,7 +19,7 @@ export default function Panoramica({ d }: PropsSezione) {
   const passo = useMemo(() => prossimoPasso(torneo, periodi, squadre, partite), [torneo, periodi, squadre, partite]);
   const ecc = useMemo(() => eccezioni(partite, periodi, today()), [partite, periodi]);
   const [conferma, setConferma] = useState(false);
-  const stato = useAzione(impostaStatoTorneo, {
+  const stato = useAzione(azioni.impostaStatoTorneo, {
     successo: (_r) => (torneo.stato === 'concluso' ? 'Torneo riaperto' : 'Torneo concluso'),
     onSuccess: () => setConferma(false),
   });
@@ -117,11 +116,13 @@ export default function Panoramica({ d }: PropsSezione) {
         )}
       </Sezione>
 
-      <Sezione titolo="Stato del torneo" id="org-stato">
+      <Sezione titolo="Gestione torneo" id="org-stato">
         <p className="max-w-prose text-ink-muted">
           {concluso
             ? 'Il torneo è concluso: classifiche e tabelloni restano visibili a tutti. Se serve correggere qualcosa, riaprilo.'
-            : 'Quando l’ultima finale è giocata, segna il torneo come concluso. Potrai riaprirlo da qui.'}
+            : torneo.stato === 'fasiFinali'
+              ? 'Quando l’ultima finale è giocata, segna il torneo come concluso. Potrai riaprirlo da qui.'
+              : 'Il torneo si conclude di solito dopo le finali. Se devi chiuderlo prima, puoi farlo da qui e riaprirlo in seguito.'}
         </p>
         <ConfirmDialog
           open={conferma}
@@ -139,7 +140,7 @@ export default function Panoramica({ d }: PropsSezione) {
           loading={stato.isPending}
           onConfirm={() => stato.mutate({ torneo: torneo.id, stato: concluso ? precedente : 'concluso' })}
           trigger={
-            <Button variant={concluso ? 'secondary' : 'danger'} className="justify-self-start">
+            <Button variant={concluso || torneo.stato === 'fasiFinali' ? 'secondary' : 'ghost'} className="justify-self-start">
               <Flag aria-hidden />
               {concluso ? 'Riapri il torneo' : 'Concludi il torneo'}
             </Button>
