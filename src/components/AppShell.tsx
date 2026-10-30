@@ -25,6 +25,8 @@ import { cn } from '../ui/cn';
 interface Voce {
   to: string;
   label: string;
+  /** Shorter label for the mobile tab bar (5 items in 390px). */
+  breve?: string;
   icon: LucideIcon;
   badge?: number;
   end?: boolean;
@@ -75,7 +77,7 @@ export function AppShell() {
   if (user) voci.push({ to: '/', label: 'Da fare', icon: ListTodo, end: true, badge: daAccettare || undefined });
   if (user && tid && hasRole('giocatore')) {
     voci.push({ to: `/t/${tid}/partite`, label: 'Partite', icon: CalendarDays });
-    voci.push({ to: `/t/${tid}/disponibilita`, label: 'Disponibilità', icon: CalendarRange });
+    voci.push({ to: `/t/${tid}/disponibilita`, label: 'Disponibilità', breve: 'Orari', icon: CalendarRange });
   }
   if (gestore) {
     // one entry: Richieste / Giornata / Ricorrenze / Campi are in the court area's own navigation
@@ -224,7 +226,7 @@ function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
               <Icon className="size-6" aria-hidden />
               {v.badge ? <Contatore n={v.badge} /> : null}
             </span>
-            <span className="max-w-full text-center leading-tight break-words">{v.label}</span>
+            <span className="max-w-full text-center leading-tight">{v.breve ?? v.label}</span>
           </>
         )}
       </NavLink>
@@ -236,7 +238,9 @@ function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
       className={({ isActive }) =>
         cn(
           'flex min-h-11 items-center gap-3 rounded-control px-3 text-base font-semibold',
-          isActive ? 'bg-court text-court-ink shadow-[inset_3px_0_0_var(--ball)]' : 'text-court-ink-muted hover:bg-court hover:text-court-ink',
+          isActive
+            ? 'bg-court text-court-ink ring-1 ring-court-line dark:bg-[oklch(0.4_0.1_256)] [&>svg]:text-ball'
+            : 'text-court-ink-muted hover:bg-court hover:text-court-ink',
         )
       }
     >

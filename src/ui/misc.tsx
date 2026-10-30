@@ -14,7 +14,7 @@ export function Checkbox({ className, ...p }: CheckboxPrimitive.CheckboxProps) {
   return (
     <CheckboxPrimitive.Root
       className={cn(
-        'grid size-6 shrink-0 place-items-center rounded-[6px] border-2 border-line-strong bg-surface data-[state=checked]:border-court data-[state=checked]:bg-court data-[state=checked]:text-court-ink',
+        'grid size-6 shrink-0 place-items-center rounded-[6px] border-2 border-line-strong bg-surface data-[state=checked]:border-court data-[state=checked]:bg-court data-[state=checked]:text-court-ink dark:data-[state=checked]:border-ball dark:data-[state=checked]:bg-ball dark:data-[state=checked]:text-ball-ink',
         className,
       )}
       {...p}
@@ -30,12 +30,12 @@ export function Switch({ className, ...p }: SwitchPrimitive.SwitchProps) {
   return (
     <SwitchPrimitive.Root
       className={cn(
-        'relative h-7 w-12 shrink-0 rounded-full border-2 border-transparent bg-line-strong transition-colors data-[state=checked]:bg-court',
+        'relative h-7 w-12 shrink-0 rounded-full border-2 border-transparent bg-line-strong transition-colors data-[state=checked]:bg-court dark:data-[state=checked]:bg-ball',
         className,
       )}
       {...p}
     >
-      <SwitchPrimitive.Thumb className="block size-6 rounded-full bg-surface shadow transition-transform data-[state=checked]:translate-x-5" />
+      <SwitchPrimitive.Thumb className="block size-6 rounded-full bg-surface shadow transition-transform data-[state=checked]:translate-x-5 dark:data-[state=checked]:bg-court-deep" />
     </SwitchPrimitive.Root>
   );
 }
@@ -65,7 +65,7 @@ export function Segmented<T extends string>({
         <RadioGroup.Item
           key={o.value}
           value={o.value}
-          className="min-h-11 rounded-[6px] px-3 text-sm font-semibold text-ink-muted data-[state=checked]:bg-court data-[state=checked]:text-court-ink"
+          className="min-h-11 rounded-[6px] px-3 text-sm font-semibold text-ink-muted data-[state=checked]:bg-court data-[state=checked]:text-court-ink dark:data-[state=checked]:bg-ball dark:data-[state=checked]:text-ball-ink"
         >
           {o.label}
         </RadioGroup.Item>

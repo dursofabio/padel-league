@@ -38,7 +38,7 @@ export function ChipFasce({ fasce, onRimuovi }: { fasce: string[]; onRimuovi: (f
   return (
     <ul className="flex flex-wrap gap-2">
       {fasce.map((f) => (
-        <li key={f} className="inline-flex min-h-11 items-center rounded-full bg-court pl-4 text-court-ink">
+        <li key={f} className="inline-flex min-h-11 items-center rounded-full bg-court pl-4 text-court-ink dark:bg-info-soft dark:text-info-ink dark:ring-1 dark:ring-info">
           <span className="tabular font-semibold">{etichettaFascia(f)}</span>
           <button
             type="button"
@@ -63,7 +63,7 @@ export function PresetFasce({ onScegli, attivo }: { onScegli: (da: string, a: st
           key={p.nome}
           variant="secondary"
           aria-pressed={attivo === undefined ? undefined : attivo === p.nome}
-          className="h-auto py-2 text-left whitespace-normal aria-pressed:bg-court aria-pressed:text-court-ink"
+          className="h-auto py-2 text-left whitespace-normal aria-pressed:bg-court aria-pressed:text-court-ink dark:aria-pressed:bg-ball dark:aria-pressed:text-ball-ink"
           onClick={() => onScegli(p.da, p.a)}
         >
           {p.nome} <span className="tabular">{`${breve(p.da)}–${breve(p.a)}`}</span>

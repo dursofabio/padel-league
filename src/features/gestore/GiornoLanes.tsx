@@ -158,12 +158,23 @@ export function GiornoLanes({
                   onClick={onOccupazione ? () => onOccupazione(o) : undefined}
                   ariaLabel={onOccupazione ? `${label}: apri i dettagli` : label}
                 >
-                  <span className="flex items-start gap-1 font-semibold">
-                    <a.icon className="mt-0.5 size-4 shrink-0" aria-hidden />
-                    <span className="line-clamp-2">{titolo}</span>
-                  </span>
-                  <span className="tabular block text-sm">{orario}</span>
-                  {o.nota && <span className="block truncate text-sm">{o.nota}</span>}
+                  {/* short blocks (≤ 75'): title and time on one line; the note is in the accessible name and in the details */}
+                  {minutiTra(o.inizio, o.fine) <= 75 ? (
+                    <span className="flex items-center gap-1 font-semibold">
+                      <a.icon className="size-4 shrink-0" aria-hidden />
+                      <span className="truncate">{titolo}</span>
+                      <span className="tabular ml-auto shrink-0 text-sm font-normal">{orario}</span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="flex items-start gap-1 font-semibold">
+                        <a.icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+                        <span className="line-clamp-2">{titolo}</span>
+                      </span>
+                      <span className="tabular block text-sm">{orario}</span>
+                      {o.nota && minutiTra(o.inizio, o.fine) >= 120 && <span className="block truncate text-sm">{o.nota}</span>}
+                    </>
+                  )}
                 </LaneBlock>
               );
             })}
@@ -201,4 +212,9 @@ export function GiornoLanes({
       }}
     />
   );
+}
+
+function minutiTra(inizio: string, fine: string) {
+  const m = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+  return m(fine) - m(inizio);
 }
