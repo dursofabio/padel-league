@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Partita, Periodo } from '../../types';
 import {
+  aggiungiAiGiorniSettimana,
   aggiungiFascia,
   aggiungiFasciaConEsito,
   copiaSuStessoGiorno,
@@ -138,5 +139,23 @@ describe('periodi e giorni', () => {
     expect(s[0]).toEqual([null, null, null, null, '2026-10-30', '2026-10-31', '2026-11-01']);
     expect(s[1][0]).toBe('2026-11-02');
     expect(s[1].slice(1).every((d) => d === null)).toBe(true);
+  });
+});
+
+describe('compilazione veloce', () => {
+  it('aggiunge a tutti i giorni della settimana scelti, fondendo', () => {
+    // 2026-11-14 sab, 15 dom, 16 lun, 21 sab
+    const giorni = ['2026-11-14', '2026-11-15', '2026-11-16', '2026-11-21'];
+    const r = aggiungiAiGiorniSettimana({ '2026-11-14': ['20:00-22:00'] }, giorni, [6, 0], '18:00', '21:00');
+    expect(r.giorni).toEqual(['2026-11-14', '2026-11-15', '2026-11-21']);
+    expect(r.fasce).toEqual({
+      '2026-11-14': ['18:00-22:00'],
+      '2026-11-15': ['18:00-21:00'],
+      '2026-11-21': ['18:00-21:00'],
+    });
+  });
+  it('nessun giorno scelto: nulla cambia', () => {
+    const f = { '2026-11-14': ['20:00-22:00'] };
+    expect(aggiungiAiGiorniSettimana(f, ['2026-11-14'], [], '18:00', '21:00')).toEqual({ fasce: f, giorni: [] });
   });
 });

@@ -8,6 +8,8 @@ import {
   blocchiPari,
   eccezioni,
   occupazioniDaRicorrenze,
+  oreDa,
+  testoEta,
   partiteAnteprima,
   partiteNelPeriodo,
   passiTorneo,
@@ -213,5 +215,19 @@ describe('eccezioni', () => {
     expect(e.inRitardo.map((p) => p.id)).toEqual(['r']);
     expect(e.daConfermare.map((p) => p.id)).toEqual(['d']);
     expect(e.inScadenza.map((p) => p.id)).toEqual(['s']);
+  });
+});
+
+describe('result age', () => {
+  it('computes hours and Italian text', () => {
+    const now = Date.parse('2026-10-30T12:00:00Z');
+    expect(oreDa('2026-10-28T11:00:00Z', now)).toBe(49);
+    expect(oreDa(undefined, now)).toBeNull();
+    expect(oreDa('boh', now)).toBeNull();
+    expect(testoEta(0)).toBe('da meno di un’ora');
+    expect(testoEta(1)).toBe('da 1 ora');
+    expect(testoEta(5)).toBe('da 5 ore');
+    expect(testoEta(30)).toBe('da 1 giorno');
+    expect(testoEta(49)).toBe('da 2 giorni');
   });
 });

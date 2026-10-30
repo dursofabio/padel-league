@@ -172,3 +172,21 @@ export function percentualeGiornata(hhmm: string): number {
   const m = Math.min(Math.max(toMin(hhmm), inizio), fine);
   return ((m - inizio) / (fine - inizio)) * 100;
 }
+
+/**
+ * Compilazione veloce: aggiunge (fondendo) la fascia a tutti i giorni di `giorni` che cadono nei giorni
+ * della settimana scelti (0 = domenica … 6 = sabato). Restituisce anche i giorni toccati.
+ */
+export function aggiungiAiGiorniSettimana(
+  fasce: Fasce,
+  giorni: string[],
+  giorniSettimana: number[],
+  da: string,
+  a: string,
+): { fasce: Fasce; giorni: string[] } {
+  const scelti = new Set(giorniSettimana);
+  const toccati = giorni.filter((g) => scelti.has(weekday(g)));
+  let out = fasce;
+  for (const g of toccati) out = impostaGiorno(out, g, aggiungiFascia(out[g] ?? [], da, a));
+  return { fasce: out, giorni: toccati };
+}

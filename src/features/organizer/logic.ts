@@ -431,3 +431,21 @@ export function eccezioni(partite: Partita[], periodi: Periodo[], oggi: string, 
 export function contaRisultati(partite: Partita[]): number {
   return partite.filter((p) => !!p.risultato?.set?.length).length;
 }
+
+/** ASSUNZIONE H6: an unconfirmed result needs the organizer after 48 hours. */
+export const ORE_PROMEMORIA_RISULTATO = 48;
+
+/** Whole hours elapsed since an ISO instant; null if unknown. */
+export function oreDa(iso: string | null | undefined, now: number = Date.now()): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? null : Math.max(0, Math.floor((now - t) / 3_600_000));
+}
+
+/** "da meno di un'ora", "da 5 ore", "da 1 giorno", "da 3 giorni". */
+export function testoEta(ore: number): string {
+  if (ore < 1) return 'da meno di un’ora';
+  if (ore < 24) return `da ${ore} ${ore === 1 ? 'ora' : 'ore'}`;
+  const g = Math.floor(ore / 24);
+  return `da ${g} ${g === 1 ? 'giorno' : 'giorni'}`;
+}

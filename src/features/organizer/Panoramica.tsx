@@ -7,7 +7,7 @@ import { prossimoPasso } from '../../lib/prossimoPasso';
 import { today } from '../../lib/time';
 import { gironi } from '../../lib/torneo';
 import { Button, ConfirmDialog, cn } from '../../ui';
-import { eccezioni, passiTorneo, statoPrecedente } from './logic';
+import { eccezioni, ORE_PROMEMORIA_RISULTATO, oreDa, passiTorneo, statoPrecedente } from './logic';
 import { Nota } from './parti';
 import type { PropsSezione } from './tipi';
 
@@ -30,10 +30,14 @@ export default function Panoramica({ d }: PropsSezione) {
   const aperte = partite.length - giocate;
   const nGironi = gironi(squadre).length;
 
+  const vecchi = ecc.daConfermare.filter((p) => (oreDa(p.updatedAt) ?? 0) >= ORE_PROMEMORIA_RISULTATO).length;
   const righeEccezioni = [
     ecc.contestate.length && plurale(ecc.contestate.length, 'contestazione da decidere', 'contestazioni da decidere'),
     ecc.inRitardo.length && plurale(ecc.inRitardo.length, 'partita in ritardo', 'partite in ritardo'),
-    ecc.daConfermare.length && plurale(ecc.daConfermare.length, 'risultato da confermare', 'risultati da confermare'),
+    ecc.daConfermare.length &&
+      `${plurale(ecc.daConfermare.length, 'risultato da confermare', 'risultati da confermare')}${
+        vecchi ? ` (${vecchi} da più di 2 giorni)` : ''
+      }`,
     ecc.inScadenza.length &&
       `${plurale(ecc.inScadenza.length, 'partita ancora da programmare', 'partite ancora da programmare')} con il periodo che finisce entro 7 giorni`,
   ].filter(Boolean) as string[];

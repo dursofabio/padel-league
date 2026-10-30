@@ -4,19 +4,17 @@ import { slotGriglia, type Slot } from '../../lib/slots';
 import type { Campo, OccupazioneRiga, Richiesta, TipoOccupazione } from '../../types';
 import { ETICHETTA_TIPO, fineLeggibile, statoSlotGestore } from './logic';
 
-/** Cross-hatch for closures (the global stylesheet only has the diagonal hatch). */
-const CROSS_HATCH =
-  '[background-image:repeating-linear-gradient(45deg,transparent_0_6px,color-mix(in_oklch,currentColor_22%,transparent)_6px_8px),repeating-linear-gradient(-45deg,transparent_0_6px,color-mix(in_oklch,currentColor_22%,transparent)_6px_8px)]';
-
 /** Occupation types differ by pattern + icon + label (glossary in docs/ux/README.md), never by colour alone. */
 export const ASPETTO_TIPO: Record<
   TipoOccupazione,
-  { icon: LucideIcon; tono: 'court' | 'idle' | 'warn' | 'danger'; pattern?: 'hatch'; className?: string }
+  { icon: LucideIcon; tono: 'court' | 'idle' | 'danger'; pattern?: 'hatch' | 'cross'; className?: string }
 > = {
   campionato: { icon: Trophy, tono: 'court' },
+  // solid neutral fill
   esterno: { icon: Users, tono: 'idle', className: 'bg-idle-soft' },
-  lezione: { icon: GraduationCap, tono: 'warn', pattern: 'hatch' },
-  chiusura: { icon: DoorClosed, tono: 'danger', className: CROSS_HATCH },
+  // neutral ground with the diagonal hatch: not amber, which means "3/4" elsewhere
+  lezione: { icon: GraduationCap, tono: 'idle', pattern: 'hatch', className: 'bg-surface text-ink' },
+  chiusura: { icon: DoorClosed, tono: 'danger', pattern: 'cross' },
 };
 
 /**

@@ -1,3 +1,4 @@
+import { AlarmClock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { MatchRow } from '../../components/MatchRow';
 import { Sezione } from '../../components/PageHeader';
@@ -9,8 +10,8 @@ import { labelDate, today } from '../../lib/time';
 import { gironi, nomeSquadra } from '../../lib/torneo';
 import { appUrl } from '../../lib/whatsapp';
 import type { Partita, StatoPartita } from '../../types';
-import { Field, Select } from '../../ui';
-import { eccezioni } from './logic';
+import { Field, Select, cn } from '../../ui';
+import { eccezioni, ORE_PROMEMORIA_RISULTATO, oreDa, testoEta } from './logic';
 import type { PropsSezione } from './tipi';
 
 const STATI: StatoPartita[] = ['da programmare', 'richiesta', 'programmata', 'giocata', 'contestata', 'tavolino'];
@@ -106,8 +107,23 @@ export default function Monitoraggio({ d }: PropsSezione) {
 
       {e.daConfermare.length > 0 && (
         <Sezione titolo={`Risultati da confermare (${e.daConfermare.length})`} id="mon-confermare">
-          <p className="text-ink-muted">Una coppia ha inserito il risultato e l’altra non l’ha ancora confermato.</p>
-          <ul className="court-rule">{e.daConfermare.map((p) => riga(p))}</ul>
+          <p className="text-ink-muted">Una coppia ha inserito il risultato e l’altra non l’ha ancora confermato. Dopo 2 giorni conviene sollecitarla.</p>
+          <ul className="court-rule">
+            {[...e.daConfermare]
+              .sort((a, b) => (a.updatedAt ?? '').localeCompare(b.updatedAt ?? ''))
+              .map((p) => {
+                const ore = oreDa(p.updatedAt);
+                if (ore === null) return riga(p);
+                const vecchio = ore >= ORE_PROMEMORIA_RISULTATO;
+                return riga(
+                  p,
+                  <span className={cn('tabular inline-flex items-center gap-1', vecchio && 'font-semibold text-warn-ink')}>
+                    {vecchio && <AlarmClock className="size-4" aria-hidden />}
+                    inserito {testoEta(ore)}
+                  </span>,
+                );
+              })}
+          </ul>
         </Sezione>
       )}
 
