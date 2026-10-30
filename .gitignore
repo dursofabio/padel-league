@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+scripts/node_modules
+service-account*.json
+*.tsbuildinfo
