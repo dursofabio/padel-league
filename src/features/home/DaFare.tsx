@@ -208,6 +208,10 @@ export function DaFare() {
   ].filter((i) => mostra(i.role));
   const primaId = visibili.find((i) => !fatti.has(i.id) && i.priority <= 2)?.id;
 
+  // desktop column: upcoming matches not already shown in the feed as "Prossima partita"
+  const nelFeed = new Set(items.filter((i) => i.kind === 'prossima-partita').map((i) => i.refs.partitaId));
+  const altrePartite = prossime.filter((p) => !nelFeed.has(p.id));
+
   const nonIscritto = !!d.torneo && ruoli.includes('giocatore') && !mia && mostra('giocatore');
 
   return (
@@ -277,30 +281,21 @@ export function DaFare() {
           )}
         </div>
 
-        {ruoli.includes('giocatore') && mia && tid && (
+        {ruoli.includes('giocatore') && mia && tid && altrePartite.length > 0 && (
           <aside aria-labelledby="prossime" className="hidden content-start gap-1 lg:grid">
             <h2 id="prossime" className="border-b-2 border-line-strong pb-1 text-lg font-bold">
               Prossime partite
             </h2>
-            {(() => {
-              // matches already in the feed ("Prossima partita") are not repeated here
-              const nelFeed = new Set(items.filter((i) => i.kind === 'prossima-partita').map((i) => i.refs.partitaId));
-              const altre = prossime.filter((p) => !nelFeed.has(p.id));
-              return altre.length ? (
-                <ul className="court-rule">
-                  {altre.map((p) => (
-                    <li key={p.id}>
-                      <Link to={`/t/${tid}/partite/${p.id}`} className="-mx-2 grid min-h-14 gap-0.5 rounded-control px-2 py-3 hover:bg-surface-2">
-                        <span className="text-base">{coppieDi(p, ctx)}</span>
-                        {p.programmazione && <span className="tabular text-sm text-ink-muted">{doveQuando(p.programmazione, ctx.campi)}</span>}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="py-3 text-ink-muted">{prossime.length ? 'Le prossime sono già nell’elenco qui accanto.' : 'Nessuna partita programmata.'}</p>
-              );
-            })()}
+            <ul className="court-rule">
+              {altrePartite.map((p) => (
+                <li key={p.id}>
+                  <Link to={`/t/${tid}/partite/${p.id}`} className="-mx-2 grid min-h-14 gap-0.5 rounded-control px-2 py-3 hover:bg-surface-2">
+                    <span className="text-base">{coppieDi(p, ctx)}</span>
+                    {p.programmazione && <span className="tabular text-sm text-ink-muted">{doveQuando(p.programmazione, ctx.campi)}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
             <Link to={`/t/${tid}/partite`} className={linkCls}>
               Vedi le tue partite
             </Link>

@@ -9,7 +9,7 @@ import { cn } from './cn';
  * Minimum height 44px: big targets for mixed-age users on phones.
  */
 export const buttonVariants = cva(
-  'inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-control px-4 text-base font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow] duration-150 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0',
+  'inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-control px-4 text-center text-base font-semibold text-balance transition-[background-color,border-color,color,box-shadow] duration-150 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0',
   {
     variants: {
       variant: {

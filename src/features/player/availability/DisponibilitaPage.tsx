@@ -183,7 +183,11 @@ function Editor({
   const [ritornaFuoco, setRitornaFuoco] = useState<string | null>(null);
   useEffect(() => {
     if (!ritornaFuoco) return;
-    pulsantiAggiungi.current[ritornaFuoco]?.focus();
+    const bersaglio =
+      pulsantiAggiungi.current[ritornaFuoco] ??
+      // riga "Aggiungi orario" aperta: il primo controllo del giorno
+      document.querySelector<HTMLElement>(`[data-giorno-riga="${ritornaFuoco}"] button`);
+    bersaglio?.focus();
     setRitornaFuoco(null);
   }, [ritornaFuoco]);
   const chiudiRiga = (d: string) => {
@@ -421,7 +425,7 @@ function Editor({
                             pulsantiAggiungi.current[d] = el;
                           };
                           return (
-                            <li key={d} className={vuoto && aperto !== d ? 'py-1' : 'grid gap-3 py-3'}>
+                            <li key={d} data-giorno-riga={d} className={vuoto && aperto !== d ? 'py-1' : 'grid gap-3 py-3'}>
                               <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <p className="flex flex-wrap items-baseline gap-x-3">
                                   <span className="tabular text-lg font-bold">{labelDate(d)}</span>
