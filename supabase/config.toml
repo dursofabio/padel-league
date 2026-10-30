@@ -2,7 +2,7 @@
 project_id = "padel-league"
 
 [db]
-major_version = 16
+major_version = 17
 
 [db.seed]
 enabled = true
