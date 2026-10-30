@@ -65,7 +65,7 @@ export function Segmented<T extends string>({
         <RadioGroup.Item
           key={o.value}
           value={o.value}
-          className="min-h-10 rounded-[6px] px-3 text-sm font-semibold text-ink-muted data-[state=checked]:bg-court data-[state=checked]:text-court-ink"
+          className="min-h-11 rounded-[6px] px-3 text-sm font-semibold text-ink-muted data-[state=checked]:bg-court data-[state=checked]:text-court-ink"
         >
           {o.label}
         </RadioGroup.Item>

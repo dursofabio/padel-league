@@ -9,12 +9,15 @@ export function WhatsAppButton({
   telefono,
   children = 'Condividi su WhatsApp',
   size = 'md',
+  variant = 'secondary',
   className,
 }: {
   testo: string;
   telefono?: string | null;
   children?: React.ReactNode;
   size?: 'md' | 'sm';
+  /** 'primary' (lime) only when WhatsApp is the main action of the screen. */
+  variant?: 'secondary' | 'primary';
   className?: string;
 }) {
   return (
@@ -22,7 +25,7 @@ export function WhatsAppButton({
       href={waLink(testo, telefono ?? undefined)}
       target="_blank"
       rel="noreferrer"
-      className={cn(buttonVariants({ variant: 'secondary', size }), className)}
+      className={cn(buttonVariants({ variant, size }), className)}
     >
       <MessageCircle aria-hidden />
       {children}
