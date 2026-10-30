@@ -291,6 +291,7 @@ export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
                     onKey={onKey}
                     onAlterna={() => alterna(g.data)}
                     filtro={filtro}
+                    stretto={rem >= 24}
                     onScegli={(s) => {
                       setAttivo(chiave(s));
                       setSel(s);
@@ -352,6 +353,7 @@ function GiornoLanes({
   onKey,
   onAlterna,
   filtro,
+  stretto,
   onScegli,
 }: {
   giorno: Giorno;
@@ -364,6 +366,7 @@ function GiornoLanes({
   onKey: (e: KeyboardEvent<HTMLButtonElement>, key: string) => void;
   onAlterna: () => void;
   filtro: boolean;
+  stretto: boolean;
   onScegli: (s: StatoSlot) => void;
 }) {
   const id = useId();
@@ -409,59 +412,64 @@ function GiornoLanes({
         {titolo}
         {filtro && (giorno.espanso || giorno.vista === 'utili') && alterna}
       </div>
-      <CourtLanes
-        campi={campi}
-        scala={giorno.scala}
-        stickyTop="0px"
-        renderLane={(c) =>
-          !campoAttivo(c, giorno.data) ? (
-            <p role="listitem" className="absolute inset-x-1 top-2 text-center text-base text-ink-muted">
-              Chiuso
-            </p>
-          ) : (
-            giorno.perCampo[c.id]?.map((s) => {
-              const ui = SLOT_UI[s.colore];
-              const Icona = ui.icona;
-              const k = chiave(s);
-              const selezionato = sel === k;
-              const piatto = s.colore === 'grigio';
-              return (
-                <LaneBlock
-                  key={k}
-                  scala={giorno.scala}
-                  inizio={s.slot.inizio}
-                  fine={s.slot.fine}
-                  tono={ui.tono}
-                  pattern={ui.pattern}
-                  selezionato={selezionato}
-                  onClick={() => onScegli(s)}
-                  ariaLabel={ariaSlot(s, c.nome, ctx.nome)}
-                  className={cn(
-                    'relative flex flex-col items-start justify-center gap-0.5 text-base',
-                    // ≤ 2/4: flat, borderless, so it does not read as a primary target (it still explains itself)
-                    piatto && 'border-transparent bg-transparent text-ink-muted',
-                  )}
-                  buttonProps={{
-                    ref: (el: HTMLButtonElement | null) => {
-                      if (el) refs.set(k, el);
-                      else refs.delete(k);
-                    },
-                    tabIndex: focusKey === k ? 0 : -1,
-                    onKeyDown: (e) => onKey(e, k),
-                  }}
-                >
-                  <span className={cn('tabular leading-tight', piatto ? 'font-semibold' : 'font-bold')}>{s.slot.inizio}</span>
-                  <span className="flex items-center gap-1 leading-tight font-semibold">
-                    <Icona className="size-4 shrink-0" aria-hidden />
-                    {etichettaSlot(s, tot)}
-                  </span>
-                  {selezionato && <Check className="absolute top-1 right-1 size-4" strokeWidth={3} aria-hidden />}
-                </LaneBlock>
-              );
-            })
-          )
-        }
-      />
+      {/* large text (≥ 150%): one court per row, so the lanes keep a readable width */}
+      {(stretto ? campi.map((c) => [c]) : [campi]).map((gruppo) => (
+        <div key={gruppo.map((c) => c.id).join()}>
+          <CourtLanes
+            campi={gruppo}
+            scala={giorno.scala}
+            stickyTop="0px"
+            renderLane={(c) =>
+              !campoAttivo(c, giorno.data) ? (
+                <p role="listitem" className="absolute inset-x-1 top-2 text-center text-base text-ink-muted">
+                  Chiuso
+                </p>
+              ) : (
+                giorno.perCampo[c.id]?.map((s) => {
+                  const ui = SLOT_UI[s.colore];
+                  const Icona = ui.icona;
+                  const k = chiave(s);
+                  const selezionato = sel === k;
+                  const piatto = s.colore === 'grigio';
+                  return (
+                    <LaneBlock
+                      key={k}
+                      scala={giorno.scala}
+                      inizio={s.slot.inizio}
+                      fine={s.slot.fine}
+                      tono={ui.tono}
+                      pattern={ui.pattern}
+                      selezionato={selezionato}
+                      onClick={() => onScegli(s)}
+                      ariaLabel={ariaSlot(s, c.nome, ctx.nome)}
+                      className={cn(
+                        'relative flex flex-col items-start justify-center gap-0.5 px-1.5 text-base',
+                        // ≤ 2/4: flat, borderless, so it does not read as a primary target (it still explains itself)
+                        piatto && 'border-transparent bg-transparent text-ink-muted',
+                      )}
+                      buttonProps={{
+                        ref: (el: HTMLButtonElement | null) => {
+                          if (el) refs.set(k, el);
+                          else refs.delete(k);
+                        },
+                        tabIndex: focusKey === k ? 0 : -1,
+                        onKeyDown: (e) => onKey(e, k),
+                      }}
+                    >
+                      <span className={cn('tabular leading-tight', piatto ? 'font-semibold' : 'font-bold')}>{s.slot.inizio}</span>
+                      <span className="flex items-center gap-1 leading-tight font-semibold">
+                        <Icona className="size-4 shrink-0" aria-hidden />
+                        {etichettaSlot(s, tot)}
+                      </span>
+                      {selezionato && <Check className="absolute top-1 right-1 size-4" strokeWidth={3} aria-hidden />}
+                    </LaneBlock>
+                  );
+                })
+              )
+            }
+          />
+        </div>
+      ))}
     </div>
   );
 }

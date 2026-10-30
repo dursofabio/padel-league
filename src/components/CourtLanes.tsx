@@ -79,7 +79,7 @@ export function CourtLanes({
           {ore.map((m) => (
             <span
               key={m}
-              className="tabular absolute right-1 -translate-y-1/2 text-xs text-ink-muted"
+              className="tabular absolute right-1 -translate-y-1/2 text-sm text-ink-muted"
               style={{ top: (m - scala.da) * scala.px }}
             >
               {fromMin(m)}
