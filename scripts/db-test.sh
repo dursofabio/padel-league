@@ -71,7 +71,7 @@ if [[ -z "${DATABASE_URL:-}" ]]; then
 
   (cd "$TMP" && "${RUN_AS[@]}" "$PG_BIN/initdb" -D "$TMP/data" -U postgres -A trust -E UTF8 --no-locale >/dev/null)
   (cd "$TMP" && "${RUN_AS[@]}" "$PG_CTL" -D "$TMP/data" -w -l "$TMP/postgres.log" \
-    -o "-p $PORT -k $TMP -c listen_addresses=127.0.0.1 -c fsync=off -c max_connections=50" start >/dev/null)
+    -o "-p $PORT -k $TMP -c listen_addresses=127.0.0.1 -c fsync=off -c max_connections=50 -c wal_level=logical" start >/dev/null)
   "$PSQL_BIN" -h 127.0.0.1 -p "$PORT" -U postgres -d postgres -qAt -c "create database padel_test" >/dev/null
   export DATABASE_URL="postgresql://postgres@127.0.0.1:$PORT/padel_test"
 else
@@ -79,7 +79,7 @@ else
 fi
 
 apply() {
-  "$PSQL_BIN" "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -X -f "$1" >/dev/null
+  PGOPTIONS="-c client_min_messages=warning" "$PSQL_BIN" "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -X -f "$1" >/dev/null
 }
 
 echo "→ stub Supabase"

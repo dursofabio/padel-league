@@ -2,12 +2,12 @@
   "name": "padel-league-cron",
   "private": true,
   "type": "module",
-  "description": "Job schedulato (GitHub Actions) che sostituisce le Cloud Functions sul piano Spark",
+  "description": "Promemoria email del campionato (GitHub Actions): legge email_promemoria() da Supabase e invia via SMTP",
   "scripts": {
     "cron": "node cron.mjs"
   },
   "dependencies": {
-    "firebase-admin": "^13.0.0",
+    "@supabase/supabase-js": "^2.118.0",
     "nodemailer": "^6.9.0"
   }
 }

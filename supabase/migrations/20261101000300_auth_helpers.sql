@@ -298,3 +298,5 @@ grant execute on function private.has_role(public.app_role) to authenticated;
 grant execute on function private.is_giocatore_partita(uuid) to authenticated;
 grant execute on function private.is_trusted() to authenticated;
 grant execute on function private.fail(text, text) to authenticated;
+-- column default of tornei.config (admins insert tournaments directly)
+grant execute on function private.config_default() to authenticated;

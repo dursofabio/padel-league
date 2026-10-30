@@ -36,7 +36,17 @@ export class Db {
 
   /** Query as the superuser (fixtures, checks). */
   async q(sql: string, params: unknown[] = []): Promise<Row[]> {
-    return (await this.client.query(sql, params)).rows;
+    const name = `sp${++sp}`;
+    await this.client.query(`savepoint ${name}`);
+    try {
+      const r = await this.client.query(sql, params);
+      await this.client.query(`release savepoint ${name}`);
+      return r.rows;
+    } catch (e) {
+      await this.client.query(`rollback to savepoint ${name}`);
+      await this.client.query(`release savepoint ${name}`);
+      throw e;
+    }
   }
 
   async one(sql: string, params: unknown[] = []): Promise<Row> {
@@ -207,7 +217,11 @@ export async function base(db: Db, config: Record<string, unknown> = { consentiF
   const admin = await creaUtente(db, 'admin', ['admin', 'giocatore']);
   const org = await creaUtente(db, 'org', ['organizzatore', 'giocatore']);
   const gest = await creaUtente(db, 'gest', ['gestore', 'giocatore']);
-  const [a1, a2, b1, b2, x] = await Promise.all(['a1', 'a2', 'b1', 'b2', 'x'].map((n) => creaUtente(db, n)));
+  const a1 = await creaUtente(db, 'a1');
+  const a2 = await creaUtente(db, 'a2');
+  const b1 = await creaUtente(db, 'b1');
+  const b2 = await creaUtente(db, 'b2');
+  const x = await creaUtente(db, 'x');
   const T = await db.val<string>(
     `insert into public.tornei (nome, stato, config) values ('T', 'gironi', private.config_default() || $1::jsonb) returning id`,
     [JSON.stringify(config)],

@@ -1,17 +1,17 @@
-name: Cron campionato
+name: Promemoria email
 
-# Sostituisce le Cloud Functions (piano Spark). Richiede il secret FIREBASE_SERVICE_ACCOUNT.
+# Scadenze, ricorrenze e partite non giocate girano nel database (pg_cron).
+# Qui solo i promemoria email: scripts/cron.mjs legge email_promemoria() con la
+# chiave segreta di Supabase e invia via SMTP.
+# Variabili: vars.SUPABASE_URL, vars.APP_URL, vars.CRON_ENABLED ('true' per il giro giornaliero).
+# Secret: SUPABASE_SECRET_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM.
 on:
   schedule:
-    - cron: '17 * * * *' # ogni ora: scadenze delle richieste e ricorrenze
-    - cron: '30 6 * * *' # ogni giorno: partite non giocate e promemoria email
+    - cron: '30 6 * * *' # ogni giorno (UTC)
   workflow_dispatch:
     inputs:
-      tasks:
-        description: 'Task da eseguire (scadenze,ricorrenze,nonGiocate,email)'
-        default: 'scadenze,ricorrenze'
       dry_run:
-        description: 'Simulazione senza scritture né email'
+        description: 'Simulazione: stampa le email senza inviarle'
         type: boolean
         default: false
 
@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  cron:
+  email:
     runs-on: ubuntu-latest
     if: ${{ vars.CRON_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
     defaults:
@@ -31,15 +31,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - name: Esegui
+      - run: npm ci --no-audit --no-fund
+      - name: Invia i promemoria
         run: node cron.mjs
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          TASKS: ${{ github.event.inputs.tasks || (github.event.schedule == '30 6 * * *' && 'nonGiocate,email') || 'scadenze,ricorrenze' }}
-          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           APP_URL: ${{ vars.APP_URL }}
-          TZ: ${{ vars.TZ || 'Europe/Rome' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}

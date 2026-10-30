@@ -130,4 +130,4 @@ revoke all on function public.email_promemoria() from public, anon, authenticate
 grant execute on function public.email_promemoria() to service_role;
 revoke all on all functions in schema private from public, anon, authenticated;
 grant execute on function private.has_role(public.app_role), private.is_giocatore_partita(uuid),
-  private.is_trusted(), private.fail(text, text) to authenticated;
+  private.is_trusted(), private.fail(text, text), private.config_default() to authenticated;

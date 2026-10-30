@@ -37,7 +37,7 @@ Conventions:
 | `richieste` | `id uuid`, `torneo_id`, `partita_id`, `campo_id`, `data date`, `inizio time`, `fine time`, `fuori_griglia bool`, `controproposta bool`, `stato`, `scadenza timestamptz`, `creato_da uuid`, `gestito_da uuid?`, `nota text?`, `created_at` | no | yes | — (RPC). Unique in `attesa`: `(campo_id, data, inizio)` and `(partita_id)` |
 | `richiesta_giocatori` | `richiesta_id`, `user_id`, `accettata_at timestamptz?` | no | yes | — (RPC) |
 | `disponibilita` | `torneo_id`, `user_id`, `fasce jsonb` (`{"2026-11-14": ["14:00-19:00"]}`), `updated_at`; PK `(torneo_id, user_id)` | no | yes | own row: upsert/delete |
-| `log` | `id bigint`, `chi uuid?`, `cosa text`, `riferimento text`, `quando timestamptz` | no | org | — |
+| `log` | `id bigint`, `chi uuid?`, `cosa text`, `riferimento text`, `quando timestamptz` | no | org, gestore | — |
 
 Role helpers (SQL, schema `private`): `has_role(role)` (admin always true), `is_giocatore_partita(partita_id)`.
 
@@ -69,8 +69,8 @@ All are SECURITY DEFINER; `authenticated` only (`email_promemoria` is `service_r
 | `get_invite` | `p_token text` | `jsonb {squadra_id, torneo_id, nome, creatore_nome, stato, giocatori: int}` or null | authenticated |
 | `join_team` | `p_token text` | `uuid` (squadra id) | authenticated |
 | `my_invite_token` | `p_squadra uuid` | `text` or null | team creator |
-| `generate_calendar` | `p_torneo uuid, p_partite jsonb` (`[{codice, girone, turno, posizione, squadra_a, squadra_b, periodo_id}]`) | `int` | org |
-| `generate_finals` | `p_torneo uuid, p_fase text, p_partite jsonb` (`[{codice, turno, posizione, prossima_codice, lato, squadra_a, squadra_b, periodo_id}]`) | `int` | org |
+| `generate_calendar` | `p_torneo uuid, p_partite jsonb` (`[{codice, girone, turno, posizione, squadra_a, squadra_b, periodo_id}]`) | `int` | org (tournament in `iscrizioni`, else `BAD_STATE`) |
+| `generate_finals` | `p_torneo uuid, p_fase text, p_partite jsonb` (`[{codice, turno, posizione, prossima_codice, lato, squadra_a, squadra_b, periodo_id}]`) | `int` | org (tournament in `gironi`/`fasiFinali`, else `BAD_STATE`) |
 | `sync_bracket` | `p_torneo uuid, p_updates jsonb` (`[{codice, squadra_a, squadra_b}]`) | `int` | org |
 | `set_tournament_state` | `p_torneo uuid, p_stato stato_torneo` | `void` | org. Allowed: any → `concluso`; `concluso` → previous state (`fasiFinali` if `fasi_generate` is not empty, else `gironi` if group matches exist, else `iscrizioni`); `gironi` → `iscrizioni` only without group matches. `iscrizioni`→`gironi` only via `generate_calendar`, `gironi`→`fasiFinali` only via `generate_finals`. Otherwise `BAD_STATE` |
 | `set_roles` | `p_user uuid, p_roles app_role[]` | `void` | admin |
@@ -78,7 +78,7 @@ All are SECURITY DEFINER; `authenticated` only (`email_promemoria` is `service_r
 Server-side rules worth knowing on the client:
 - `create_request` / `counter_propose` compute `fuori_griglia`, the off-grid step, `fine = inizio + durata`, the expiry (`config.scadenzaRichiesteOre`), and the **acceptances**. The creator is accepted, and so is any player whose `fasce` covers the slot.
 - Lazy expiry: before taking a lock, expired requests on the same slot or match become `scaduta`.
-- `confirm_request` never raises on overlap: it returns `esito: 'occupato'` and moves the request to `conflitto`.
+- `confirm_request` never raises on overlap: it returns `esito: 'occupato'` and moves the request to `conflitto` (also when the request is already in `conflitto`).
 - `confirm_result` also cancels any request of that match still in `attesa`.
 
 ## Errors
