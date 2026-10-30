@@ -1,4 +1,7 @@
-import type { Timestamp } from 'firebase/firestore';
+/** Istante assoluto (scadenze, accettazioni): gli adapter convertono le stringhe ISO del database. */
+export interface Instant {
+  toMillis(): number;
+}
 
 export type Role = 'admin' | 'organizzatore' | 'gestore' | 'giocatore';
 
@@ -6,8 +9,9 @@ export interface UserProfile {
   id: string;
   nome: string;
   email: string;
-  telefono?: string;
-  role: Role;
+  telefono?: string | null;
+  /** Ruoli multipli: un gestore può anche giocare. */
+  roles: Role[];
 }
 
 export type Spareggio =
@@ -109,6 +113,8 @@ export interface Programmazione {
 
 export interface Partita {
   id: string;
+  /** Codice leggibile e stabile (es. "gA-01-1", "gold-t1-p0"): collega le partite del tabellone. */
+  codice?: string;
   fase: string; // "gironi" | "gold" | "silver"
   girone?: string | null;
   turno?: number | null;
@@ -151,7 +157,14 @@ export interface Occupazione {
   richiestaId?: string | null;
   torneoId?: string | null;
   ricorrenzaId?: string | null;
-  creatoDa: string;
+  creatoDa?: string | null;
+}
+
+/** Occupazione con il suo ID e la sua posizione (campo, giorno). */
+export interface OccupazioneRiga extends Occupazione {
+  id: string;
+  campoId: string;
+  data: string;
 }
 
 export interface OccupazioniGiorno {
@@ -192,9 +205,9 @@ export interface Richiesta {
   fuoriGriglia: boolean;
   controproposta?: boolean;
   giocatori: string[];
-  accettazioni: Record<string, Timestamp | null>;
+  accettazioni: Record<string, Instant | null>;
   stato: StatoRichiesta;
-  scadenza: Timestamp;
+  scadenza: Instant;
   creatoDa: string;
   nota?: string | null;
 }

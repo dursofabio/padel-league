@@ -1,0 +1,227 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/atkinson-hyperlegible-next';
+
+/* Dark theme: follows the system unless the user has picked a theme ([data-theme]). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * "Righe del campo" (court lines): turf blue for the shell, white court lines as the only dividers,
+ * ball yellow-lime only for the primary action, selection and focus.
+ * Light = court in daylight; dark = court at night under the floodlights.
+ */
+:root {
+  color-scheme: light;
+  --bg: oklch(0.975 0.006 250);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.955 0.01 250);
+  --ink: oklch(0.23 0.035 258);
+  --ink-muted: oklch(0.45 0.03 258);
+  --line: oklch(0.885 0.014 250);
+  --line-strong: oklch(0.78 0.02 250);
+
+  --court: oklch(0.46 0.135 256);
+  --court-deep: oklch(0.38 0.115 258);
+  --court-ink: oklch(0.99 0.004 250);
+  --court-ink-muted: oklch(0.88 0.03 250);
+  --court-line: oklch(1 0 0 / 0.55);
+
+  --ball: oklch(0.91 0.19 120);
+  --ball-strong: oklch(0.86 0.2 122);
+  --ball-ink: oklch(0.24 0.05 140);
+
+  --ok: oklch(0.52 0.13 150);
+  --ok-soft: oklch(0.95 0.045 150);
+  --ok-ink: oklch(0.37 0.1 150);
+  --warn: oklch(0.7 0.15 75);
+  --warn-soft: oklch(0.96 0.06 90);
+  --warn-ink: oklch(0.44 0.1 65);
+  --danger: oklch(0.55 0.19 27);
+  --danger-soft: oklch(0.95 0.035 25);
+  --danger-ink: oklch(0.46 0.17 27);
+  --info: oklch(0.5 0.14 258);
+  --info-soft: oklch(0.945 0.035 258);
+  --info-ink: oklch(0.42 0.13 258);
+  --idle-soft: oklch(0.94 0.008 250);
+  --idle-ink: oklch(0.42 0.02 258);
+
+  --focus: oklch(0.38 0.115 258);
+  --shadow: 0 1px 2px oklch(0.23 0.035 258 / 0.08), 0 8px 24px -8px oklch(0.23 0.035 258 / 0.18);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: oklch(0.17 0.03 260);
+  --surface: oklch(0.215 0.035 260);
+  --surface-2: oklch(0.195 0.032 260);
+  --ink: oklch(0.95 0.01 250);
+  --ink-muted: oklch(0.76 0.025 250);
+  --line: oklch(0.32 0.035 260);
+  --line-strong: oklch(0.42 0.04 258);
+
+  --court: oklch(0.31 0.09 258);
+  --court-deep: oklch(0.25 0.075 260);
+  --court-ink: oklch(0.97 0.006 250);
+  --court-ink-muted: oklch(0.84 0.03 250);
+  --court-line: oklch(1 0 0 / 0.4);
+
+  --ball: oklch(0.9 0.19 120);
+  --ball-strong: oklch(0.94 0.17 118);
+  --ball-ink: oklch(0.22 0.05 140);
+
+  --ok: oklch(0.72 0.14 150);
+  --ok-soft: oklch(0.3 0.06 152);
+  --ok-ink: oklch(0.87 0.1 150);
+  --warn: oklch(0.8 0.14 80);
+  --warn-soft: oklch(0.32 0.06 75);
+  --warn-ink: oklch(0.9 0.1 85);
+  --danger: oklch(0.7 0.16 27);
+  --danger-soft: oklch(0.31 0.07 25);
+  --danger-ink: oklch(0.88 0.08 25);
+  --info: oklch(0.72 0.12 255);
+  --info-soft: oklch(0.3 0.07 258);
+  --info-ink: oklch(0.88 0.06 255);
+  --idle-soft: oklch(0.27 0.025 258);
+  --idle-ink: oklch(0.8 0.02 250);
+
+  --focus: oklch(0.9 0.19 120);
+  --shadow: 0 1px 2px oklch(0 0 0 / 0.4), 0 10px 30px -10px oklch(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-court: var(--court);
+  --color-court-deep: var(--court-deep);
+  --color-court-ink: var(--court-ink);
+  --color-court-ink-muted: var(--court-ink-muted);
+  --color-court-line: var(--court-line);
+  --color-ball: var(--ball);
+  --color-ball-strong: var(--ball-strong);
+  --color-ball-ink: var(--ball-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-ok-ink: var(--ok-ink);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-ink: var(--warn-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-ink: var(--danger-ink);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
+  --color-idle-soft: var(--idle-soft);
+  --color-idle-ink: var(--idle-ink);
+  --color-focus: var(--focus);
+
+  --shadow-raised: var(--shadow);
+  --radius-control: 0.5rem;
+  --radius-panel: 0.875rem;
+
+  /* Product type scale (ratio ~1.18), fixed rem: no fluid sizes in a working UI. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.15rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.35rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.55rem;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.7rem;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.95rem;
+  --text-2xl: 1.875rem;
+  --text-2xl--line-height: 2.3rem;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+  ::selection {
+    background: var(--ball);
+    color: var(--ball-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  input,
+  textarea,
+  select {
+    caret-color: var(--court);
+    accent-color: var(--court);
+  }
+  a {
+    text-underline-offset: 0.2em;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  * {
+    scrollbar-color: var(--line-strong) transparent;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Court line: the one divider of the system. */
+  .court-rule > * + * {
+    border-top: 1px solid var(--line);
+  }
+  /* Hatched pattern: occupied court (never colour alone). */
+  .pattern-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 6px,
+      color-mix(in oklch, currentColor 22%, transparent) 6px 8px
+    );
+  }
+  .pattern-dots {
+    background-image: radial-gradient(color-mix(in oklch, currentColor 30%, transparent) 1px, transparent 1.2px);
+    background-size: 8px 8px;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+}
+@keyframes sheet-left {
+  from { transform: translateX(100%); }
+}
