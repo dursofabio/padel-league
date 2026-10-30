@@ -94,13 +94,14 @@ export default function CalendarioPage() {
             {nomi.length > 1 && (
               <Segmented
                 label="Girone"
-                className="lg:hidden"
+                className="max-w-full flex-wrap lg:hidden"
                 value={attivo}
                 onValueChange={setScelto}
                 options={nomi.map((g) => ({ value: g, label: `Girone ${g}` }))}
               />
             )}
             <Segmented
+              className="max-w-full flex-wrap"
               label="Quali partite"
               value={filtro}
               onValueChange={setFiltro}

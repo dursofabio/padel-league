@@ -86,7 +86,7 @@ export default function TabellonePage() {
           {torneo.stato === 'concluso' && <RigaVincitori torneo={torneo} partite={d.partite} squadraById={d.squadraById} />}
           <Segmented
             label="Vista"
-            className="hidden justify-self-start md:inline-flex"
+            className="hidden max-w-full flex-wrap justify-self-start md:inline-flex"
             value={vista}
             onValueChange={setVista}
             options={[

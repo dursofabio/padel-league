@@ -1,6 +1,8 @@
 import { Ban, DoorClosed, GraduationCap, Hourglass, Plus, Trophy, Users, type LucideIcon } from 'lucide-react';
 import { CourtLanes, LaneBlock, type LanesScala } from '../../components/CourtLanes';
 import { slotGriglia, type Slot } from '../../lib/slots';
+import { toMin } from '../../lib/time';
+import { cn } from '../../ui';
 import type { Campo, OccupazioneRiga, Richiesta, TipoOccupazione } from '../../types';
 import { ETICHETTA_TIPO, fineLeggibile, statoSlotGestore } from './logic';
 
@@ -78,11 +80,13 @@ export function GiornoLanes({
         const inutilizzabili = stati
           .filter(
             (x) =>
-              x.stato === 'occupato' ||
+              (x.stato === 'occupato' && !occ.some((o) => o.inizio === x.s.inizio && o.fine === x.s.fine)) ||
               (x.stato === 'richiesto' && !esatto(x.s)) ||
               (x.stato === 'libero' && impOffGrid.has(x.s.inizio)),
           )
           .map((x) => x.s);
+        // label at the bottom when the slot's start is hidden under an occupation
+        const testaCoperta = (x: Slot) => occ.some((o) => toMin(o.inizio) <= toMin(x.inizio) && toMin(x.inizio) < toMin(o.fine));
         return (
           <>
             {liberi.map((s) =>
@@ -125,7 +129,7 @@ export function GiornoLanes({
                 fine={s.fine}
                 tono="idle"
                 pattern="hatch"
-                className="bg-transparent text-ink-muted"
+                className={cn('bg-transparent text-ink-muted', testaCoperta(s) && 'flex flex-col justify-end')}
                 ariaLabel={`${s.inizio} inutilizzabile, ${campo.nome}: lo slot fino alle ${s.fine} si sovrappone a un’occupazione o a una richiesta fuori griglia`}
               >
                 <span className="flex items-center gap-1 text-sm font-semibold">

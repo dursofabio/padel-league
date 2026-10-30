@@ -60,7 +60,18 @@ function useOnline() {
   );
 }
 
+/** Testo grande (zoom 200%): i pulsanti lunghi vanno a capo invece di allargare la pagina. */
+const RIFLUSSO = 'min-w-0 [&_a]:whitespace-normal [&_button]:whitespace-normal [&_h1]:break-words [&_h1]:hyphens-auto';
+
 export default function DisponibilitaPage() {
+  return (
+    <div className={RIFLUSSO}>
+      <DisponibilitaContenuto />
+    </div>
+  );
+}
+
+function DisponibilitaContenuto() {
   const { tid } = useParams();
   const { user } = useAuth();
   const uid = user?.id;
@@ -285,8 +296,8 @@ function Editor({
     <>
       {header}
 
-      <div className="grid gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="grid gap-5 [&>*]:min-w-0">
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
           {aperti.length <= 3 ? (
             <div className="grid gap-1.5">
               <span className="text-sm font-semibold">Periodo</span>
@@ -294,8 +305,8 @@ function Editor({
                 label="Periodo"
                 value={periodo.id}
                 onValueChange={setPeriodoId}
-                options={aperti.map((p) => ({ value: p.id, label: <span className="tabular">{etichettaPeriodo(p)}</span> }))}
-                className="flex-wrap"
+                options={aperti.map((p) => ({ value: p.id, label: <span className="tabular whitespace-normal">{etichettaPeriodo(p)}</span> }))}
+                className="h-auto max-w-full flex-wrap"
               />
             </div>
           ) : (

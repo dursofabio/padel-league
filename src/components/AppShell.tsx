@@ -1,7 +1,6 @@
 import {
   CalendarDays,
   CalendarRange,
-  ClipboardList,
   Inbox,
   ListTodo,
   LogIn,
@@ -79,8 +78,8 @@ export function AppShell() {
     voci.push({ to: `/t/${tid}/disponibilita`, label: 'Disponibilità', icon: CalendarRange });
   }
   if (gestore) {
-    voci.push({ to: '/campo', label: 'Richieste', icon: Inbox, end: true, badge: daConfermare || undefined });
-    voci.push({ to: '/campo/giorno', label: 'Giornata', icon: ClipboardList });
+    // one entry: Richieste / Giornata / Ricorrenze / Campi are in the court area's own navigation
+    voci.push({ to: '/campo', label: 'Campo', icon: Inbox, badge: daConfermare || undefined });
   }
   if (tid) voci.push({ to: `/t/${tid}`, label: 'Torneo', icon: Trophy, end: true });
   if (tid && hasRole('organizzatore')) voci.push({ to: `/t/${tid}/organizza`, label: 'Organizza', icon: Settings2 });

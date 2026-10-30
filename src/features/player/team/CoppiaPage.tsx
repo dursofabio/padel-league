@@ -37,7 +37,18 @@ function validaNome(nome: string): string | null {
   return null;
 }
 
+/** Testo grande (zoom 200%): i pulsanti lunghi vanno a capo invece di allargare la pagina. */
+const RIFLUSSO = 'min-w-0 [&_a]:whitespace-normal [&_button]:whitespace-normal [&_h1]:break-words [&_h1]:hyphens-auto';
+
 export default function CoppiaPage() {
+  return (
+    <div className={RIFLUSSO}>
+      <CoppiaContenuto />
+    </div>
+  );
+}
+
+function CoppiaContenuto() {
   const { tid } = useParams();
   const { user } = useAuth();
   const td = useTorneoData(tid);
@@ -122,8 +133,8 @@ function LaMiaCoppia({ tid, uid, squadra, nomeTorneo }: { tid: string; uid: stri
   return (
     <>
       <PageHeader titolo="La tua coppia" sottotitolo={`Torneo ${nomeTorneo}`} />
-      <div className="grid gap-6">
-        <section aria-labelledby="coppia-h" className="grid gap-3">
+      <div className="grid gap-6 [&>*]:min-w-0">
+        <section aria-labelledby="coppia-h" className="grid gap-3 [&>*]:min-w-0">
           <div className="flex flex-wrap items-center gap-3">
             <h2 id="coppia-h" className="text-xl font-bold">
               {squadra.nome}
@@ -131,16 +142,16 @@ function LaMiaCoppia({ tid, uid, squadra, nomeTorneo }: { tid: string; uid: stri
             <StatoSquadraBadge stato={squadra.stato} />
           </div>
           <ul className="court-rule max-w-xl">
-            <li className="flex min-h-11 items-center justify-between gap-3 py-2">
+            <li className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 py-2">
               <span className="text-ink-muted">Tu</span>
               <span className="font-semibold">{nome(uid)}</span>
             </li>
-            <li className="flex min-h-11 items-center justify-between gap-3 py-2">
+            <li className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 py-2">
               <span className="text-ink-muted">Compagno</span>
               <span className="font-semibold">{nomeCompagno ?? 'non ancora entrato'}</span>
             </li>
             {squadra.stato === 'approvata' && (
-              <li className="flex min-h-11 items-center justify-between gap-3 py-2">
+              <li className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 py-2">
                 <span className="text-ink-muted">Girone</span>
                 <span className="font-semibold">{squadra.girone ? `Girone ${squadra.girone}` : 'non ancora assegnato'}</span>
               </li>

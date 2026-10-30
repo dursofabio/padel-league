@@ -18,7 +18,18 @@ const MESSAGGI: Record<Blocco, string> = {
   REGISTRATION_CLOSED: 'Le iscrizioni sono chiuse.',
 };
 
+/** Testo grande (zoom 200%): i pulsanti lunghi vanno a capo invece di allargare la pagina. */
+const RIFLUSSO = 'min-w-0 [&_a]:whitespace-normal [&_button]:whitespace-normal [&_h1]:break-words [&_h1]:hyphens-auto';
+
 export default function InvitoPage() {
+  return (
+    <div className={RIFLUSSO}>
+      <InvitoContenuto />
+    </div>
+  );
+}
+
+function InvitoContenuto() {
   const { token } = useParams();
   const { user, loading } = useAuth();
 

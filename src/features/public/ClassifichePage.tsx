@@ -55,7 +55,7 @@ export default function ClassifichePage() {
           {nomi.length > 1 && (
             <Segmented
               label="Girone"
-              className="justify-self-start lg:hidden"
+              className="max-w-full flex-wrap justify-self-start lg:hidden"
               value={attivo}
               onValueChange={setScelto}
               options={nomi.map((g) => ({ value: g, label: `Girone ${g}` }))}

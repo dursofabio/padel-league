@@ -164,6 +164,7 @@ export function DaFare() {
       azioni={
         ruoliFeed.length >= 2 ? (
           <Segmented<Filtro>
+            className="max-w-full flex-wrap"
             label="Mostra"
             value={filtro}
             onValueChange={setFiltro}

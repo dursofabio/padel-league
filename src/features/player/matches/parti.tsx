@@ -48,7 +48,7 @@ export const DaConfermareBadge = () => (
 export const InutilizzabileIcona = Ban;
 
 /** Lets buttons and button-links wrap at large text sizes (200% text on a 390px phone, WCAG 1.4.10). */
-export const AVVOLGI = '[&_a]:whitespace-normal [&_button]:whitespace-normal [&_a]:text-center [&_button]:text-left';
+export const AVVOLGI = '[&_a]:whitespace-normal [&_button]:whitespace-normal';
 
 /** Current time, refreshed every minute (expiry countdowns, past slots). */
 export function useOra(intervallo = 60_000): number {
