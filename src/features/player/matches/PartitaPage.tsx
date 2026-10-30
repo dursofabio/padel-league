@@ -304,7 +304,7 @@ function Motivo({ ctx, candidati }: { ctx: ContestoPartita; candidati: Richiesta
   const now = Date.now();
   const ultima = candidati
     .filter((r) => r.partitaId === ctx.partita.id)
-    .sort((a, b) => b.scadenza.toMillis() - a.scadenza.toMillis())[0];
+    .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '') || b.scadenza.toMillis() - a.scadenza.toMillis())[0];
   if (!ultima || richiestaViva(ultima, now) || ultima.stato === 'confermata') return null;
   const quando = `${labelDate(ultima.data)} alle ${ultima.inizio}`;
   if (ultima.stato === 'scaduta' || ultima.stato === 'attesa')

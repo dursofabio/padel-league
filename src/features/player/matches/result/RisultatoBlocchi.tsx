@@ -7,7 +7,7 @@ import { formatRisultato, isSetDecisivo, statistiche } from '../../../../lib/res
 import type { SetScore } from '../../../../types';
 import { Button, Field, Textarea } from '../../../../ui';
 import type { ContestoPartita } from '../contesto';
-import { controllaRisultato, latoDi, valoriDa, type ValoreSet } from '../logica';
+import { controllaRisultato, latoDi, quando, valoriDa, type ValoreSet } from '../logica';
 import { Avviso } from '../parti';
 import { useAzionePartita } from '../useAzionePartita';
 import { ScoreInput } from './ScoreInput';
@@ -81,6 +81,13 @@ export function PunteggioGrande({ ctx, set }: { ctx: ContestoPartita; set: SetSc
   );
 }
 
+/** "Inserito da Marco Rossi, sab 14/11 alle 19:10" (time = last update of the match, i.e. the insertion while unconfirmed). */
+function inseritoDa(ctx: ContestoPartita): string {
+  const ris = ctx.partita.risultato;
+  const t = ctx.partita.updatedAt ? Date.parse(ctx.partita.updatedAt) : NaN;
+  return `Inserito da ${ctx.nome(ris?.inseritoDa)}${Number.isFinite(t) ? `, ${quando(t)}` : ''}.`;
+}
+
 function avversariDi(ctx: ContestoPartita, uid: string | null | undefined): string[] {
   const lato = latoDi(ctx.partita, uid);
   return lato === 'A' ? ctx.partita.giocatoriB : lato === 'B' ? ctx.partita.giocatoriA : [];
@@ -98,7 +105,7 @@ export function ConfermaRisultato({ ctx }: { ctx: ContestoPartita }) {
   return (
     <div className="grid gap-4">
       <PunteggioGrande ctx={ctx} set={ris.set} />
-      <p className="text-ink-muted">Inserito da {ctx.nome(ris.inseritoDa)}.</p>
+      <p className="text-ink-muted">{inseritoDa(ctx)}</p>
       {!contesta ? (
         <div className="flex flex-wrap gap-2">
           <Button variant="primary" size="lg" loading={conferma.isPending} onClick={() => conferma.esegui(ctx.partita.id)}>
@@ -160,7 +167,7 @@ export function AttesaConferma({ ctx }: { ctx: ContestoPartita }) {
       <Avviso icona={Hourglass} tono="warn">
         Aspettiamo la conferma di {nomiAvv.join(' o ')}.
       </Avviso>
-      <p className="text-ink-muted">Inserito da {ctx.nome(ris.inseritoDa)}.</p>
+      <p className="text-ink-muted">{inseritoDa(ctx)}</p>
       {mioLatoInserito && (
         <div className="flex flex-wrap gap-2">
           {avversari.map((g) => (

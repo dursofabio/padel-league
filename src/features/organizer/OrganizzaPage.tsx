@@ -1,6 +1,6 @@
 import { CalendarDays, CalendarRange, LayoutDashboard, ListChecks, Settings2, Trophy, Users, type LucideIcon } from 'lucide-react';
 import { lazy, Suspense, useMemo, type ComponentType } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../components/states';
 import { useTorneoData } from '../../data/queries';
@@ -46,7 +46,7 @@ export default function OrganizzaPage() {
   }, [d.partite, d.periodi, d.squadre]);
 
   const voce = SEZIONI.find((s) => s.id === sezione)!;
-  const Sezione = COMPONENTI[sezione];
+  const Contenuto = COMPONENTI[sezione];
 
   return (
     <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
@@ -57,7 +57,7 @@ export default function OrganizzaPage() {
             const n = conteggi[s.id];
             return (
               <li key={s.id} className="shrink-0">
-                <NavLink
+                <Link
                   to={`/t/${tid}/organizza/${s.id}`}
                   aria-current={s.id === sezione ? 'page' : undefined}
                   className={cn(
@@ -74,7 +74,7 @@ export default function OrganizzaPage() {
                       <span className="sr-only"> da gestire</span>
                     </span>
                   )}
-                </NavLink>
+                </Link>
               </li>
             );
           })}
@@ -94,7 +94,7 @@ export default function OrganizzaPage() {
           <EmptyState titolo="Torneo non trovato" testo="Controlla il link o torna alla pagina iniziale." />
         ) : (
           <Suspense fallback={<SkeletonRighe righe={5} />}>
-            <Sezione d={{ ...d, torneo: d.torneo }} />
+            <Contenuto d={{ ...d, torneo: d.torneo }} />
           </Suspense>
         )}
       </div>

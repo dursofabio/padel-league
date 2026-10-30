@@ -125,7 +125,6 @@ export default function Squadre({ d }: PropsSezione) {
                   {s.stato === 'da approvare' && (
                     <Button
                       variant={s.id === primaDaApprovare ? 'primary' : 'secondary'}
-                      size="sm"
                       loading={busy(approva, s.id)}
                       onClick={() => approva.mutate({ id: s.id, stato: 'approvata' })}
                     >
@@ -139,7 +138,7 @@ export default function Squadre({ d }: PropsSezione) {
                   )}
                   {calendarioFatto
                     ? s.stato === 'approvata' && (
-                        <Button variant="ghost" size="sm" onClick={() => setRitira(s)}>
+                        <Button variant="ghost" onClick={() => setRitira(s)}>
                           <UserMinus aria-hidden /> Ritira
                         </Button>
                       )

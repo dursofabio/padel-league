@@ -343,7 +343,9 @@ function GiornoLanes({
         scala={scala}
         renderLane={(c) =>
           !campoAttivo(c, giorno.data) ? (
-            <p className="absolute inset-x-1 top-2 text-center text-sm text-ink-muted">Chiuso</p>
+            <p role="listitem" className="absolute inset-x-1 top-2 text-center text-sm text-ink-muted">
+              Chiuso
+            </p>
           ) : (
             giorno.perCampo[c.id]?.map((s) => {
               const ui = SLOT_UI[s.colore];

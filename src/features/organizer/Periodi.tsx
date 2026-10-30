@@ -210,16 +210,20 @@ function SheetPeriodo({ d, periodo, onClose }: { d: DatiTorneo; periodo: Periodo
     },
   });
   const formId = 'form-periodo';
+  const chiudi = () => {
+    reset();
+    onClose();
+  };
 
   return (
     <Sheet
       open={!!periodo}
-      onOpenChange={(o) => !o && onClose()}
+      onOpenChange={(o) => !o && chiudi()}
       title={nuovo ? 'Nuovo periodo' : `Modifica ${esistente?.etichetta ?? 'periodo'}`}
       description="Le partite di questo periodo vanno giocate entro la data di fine."
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={chiudi}>
             Annulla
           </Button>
           <Button type="submit" form={formId} variant="primary" loading={salva.isPending}>

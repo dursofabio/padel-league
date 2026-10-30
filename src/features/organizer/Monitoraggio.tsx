@@ -93,7 +93,6 @@ export default function Monitoraggio({ d }: PropsSezione) {
                   nota={<span className="tabular">periodo finito il {labelDate(fine(p)!.fine)}</span>}
                 />
                 <WhatsAppButton
-                  size="sm"
                   className="justify-self-start"
                   testo={`Ciao, la partita ${nomeSquadra(squadraById, p.squadraA)} contro ${nomeSquadra(squadraById, p.squadraB)} doveva essere giocata entro il ${labelDate(fine(p)!.fine)}. Programmatela appena potete: ${appUrl(href(p))}`}
                 >

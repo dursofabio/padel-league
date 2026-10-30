@@ -88,6 +88,8 @@ export const azioni = {
     if (a.sorteggio !== undefined) patch.sorteggio = a.sorteggio;
     return ok(supabase.from('tornei').update(patch).eq('id', a.id));
   },
+  impostaStatoTorneo: (a: { torneo: string; stato: 'iscrizioni' | 'gironi' | 'fasiFinali' | 'concluso' }) =>
+    rpc('set_tournament_state', { p_torneo: a.torneo, p_stato: a.stato }),
   salvaPeriodo: (a: { torneo: string; periodo: Omit<Periodo, 'id'> & { id?: string } }) => {
     const { id, ...p } = a.periodo;
     const row = { torneo_id: a.torneo, fase: p.fase, turno: p.turno ?? null, inizio: p.inizio, fine: p.fine, etichetta: p.etichetta };

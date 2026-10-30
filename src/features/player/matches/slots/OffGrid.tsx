@@ -55,7 +55,8 @@ export function OffGrid({
   const diGriglia = campo && inizio ? isSlotDiGriglia(campo, data, inizio) : false;
 
   const errori: string[] = [];
-  if (!inizio) errori.push('Non ci sono più orari disponibili in questo giorno: scegline un altro.');
+  if (!campo) errori.push('Non ci sono campi configurati.');
+  else if (!inizio) errori.push('Non ci sono più orari disponibili in questo giorno: scegline un altro.');
   if (verifica?.fuoriOrario) errori.push('Il campo è chiuso a quell’ora.');
   if (verifica?.bloccanti.length) errori.push(`Si sovrappone a: ${verifica.bloccanti.map(descriviOccupazione).join(', ')}.`);
   if (stessoInizio) errori.push('Questo orario è già stato chiesto per un’altra partita.');
