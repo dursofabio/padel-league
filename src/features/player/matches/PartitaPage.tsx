@@ -14,11 +14,11 @@ import { labelDate, today } from '../../../lib/time';
 import { nomeSquadra } from '../../../lib/torneo';
 import { appUrl } from '../../../lib/whatsapp';
 import type { Partita, Periodo, Richiesta, StatoPartita } from '../../../types';
-import { Button, Skeleton } from '../../../ui';
+import { Button, cn, Skeleton } from '../../../ui';
 import { nomeCampo, type ContestoPartita } from './contesto';
 import { Programmata } from './confirmed/Programmata';
 import { fasePartita, inRitardo, latoDi, richiestaViva, type Fase } from './logica';
-import { Avviso, DaConfermareBadge, InRitardoBadge, useOra } from './parti';
+import { AVVOLGI, Avviso, DaConfermareBadge, InRitardoBadge, useOra } from './parti';
 import { AcceptanceTracker } from './request/AcceptanceTracker';
 import { AttesaConferma, ConfermaRisultato, Contestato, Finale, InserisciRisultato } from './result/RisultatoBlocchi';
 import { StrumentiOrganizzatore } from './result/StrumentiOrganizzatore';
@@ -217,7 +217,7 @@ function Schermata({
   const idPrimario = ['S5', 'S6', 'S7', 'S8'].includes(fase) ? 'risultato' : 'programma';
 
   return (
-    <div className="grid gap-6">
+    <div className={cn('grid min-w-0 gap-6', AVVOLGI)}>
       <PageHeader
         titolo={
           <>

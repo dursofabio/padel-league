@@ -39,11 +39,15 @@ import {
   occupazioniInConflitto,
   ordinaPerScadenza,
   richiesteSovrapposte,
+  scadenzaEffettiva,
   scadenzaTesto,
+  inizioMs,
   type EsitoMessaggio,
 } from './logic';
 
 const GIORNI_CONFERMATE = 14;
+/** Same selection treatment as the timeline block (LaneBlock): court-blue outline + ball halo. */
+const SELEZIONE = 'rounded-panel px-2 outline-2 outline-offset-1 outline-court-deep shadow-[0_0_0_5px_var(--ball)] dark:outline-ball';
 const NOTE_RAPIDE = ['Campo occupato', 'Manutenzione', 'Orario non disponibile'];
 
 /** Court manager inbox (/campo): confirm, reject, counter-propose; upcoming confirmed matches with cancel. */
@@ -181,7 +185,7 @@ export default function RichiestePage() {
                 ) : prossime.length ? (
                   <ul className="court-rule">
                     {prossime.map((r) => (
-                      <li key={r.id} className={cn('grid gap-2 py-3', dueSchermi && r.id === selezionataId && 'bg-surface-2 px-2')}>
+                      <li key={r.id} className={cn('grid gap-2 py-3', dueSchermi && r.id === selezionataId && SELEZIONE)}>
                         <Intestazione
                           r={r}
                           nomeCampo={nomeCampo(r.campoId)}
@@ -274,16 +278,20 @@ function Intestazione({
   selezionata: boolean;
   onSeleziona: () => void;
 }) {
+  // one wrapping line: the pieces never split inside, the court name stays with its number
   const testo = (
     <>
-      <CalendarDays className="size-4 shrink-0 text-ink-muted" aria-hidden />
-      <span className="tabular">
-        {labelDate(r.data)} · {r.inizio}–{r.fine}
+      <CalendarDays className="mt-[0.3rem] size-4 shrink-0 text-ink-muted" aria-hidden />
+      <span className="tabular [text-wrap:balance]">
+        <span className="whitespace-nowrap">{labelDate(r.data)}</span> ·{' '}
+        <span className="whitespace-nowrap">
+          {r.inizio}–{r.fine}
+        </span>{' '}
+        · <span className="whitespace-nowrap">{nomeCampo}</span>
       </span>
-      <span>· {nomeCampo}</span>
     </>
   );
-  const cls = 'inline-flex min-h-11 items-center gap-1.5 justify-self-start text-left text-base font-bold';
+  const cls = 'flex min-h-11 items-start gap-1.5 justify-self-start py-2 text-left text-base font-bold';
   return dueSchermi ? (
     <button type="button" className={cn(cls, 'hover:underline')} aria-pressed={selezionata} onClick={onSeleziona}>
       {testo}
@@ -295,9 +303,26 @@ function Intestazione({
   );
 }
 
-function Pill({ tono, icon: Icon, children }: { tono: keyof typeof TONO_CLASSI; icon: typeof Clock3; children: React.ReactNode }) {
+function Pill({
+  tono,
+  icon: Icon,
+  children,
+  intera,
+}: {
+  tono: keyof typeof TONO_CLASSI;
+  icon: typeof Clock3;
+  children: React.ReactNode;
+  /** Never wraps or shrinks (short labels such as the expiry). */
+  intera?: boolean;
+}) {
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-semibold', TONO_CLASSI[tono])}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-semibold',
+        intera && 'shrink-0 whitespace-nowrap',
+        TONO_CLASSI[tono],
+      )}
+    >
       <Icon className="size-4 shrink-0" aria-hidden />
       {children}
     </span>
@@ -338,7 +363,10 @@ function RichiestaRiga({
   onControproponi: () => void;
 }) {
   const acc = accettazioni(r);
-  const scad = scadenzaTesto(r.scadenza.toMillis(), now);
+  const passata = inizioMs(r) <= now;
+  const scad = passata
+    ? { testo: 'Orario già passato', urgente: true, scaduta: true }
+    : scadenzaTesto(scadenzaEffettiva(r), now);
   const conflitti = occupazioniInConflitto(r, occupazioni);
   const sovrapposte = richiesteSovrapposte(r, tutte, now);
   const impatto = r.fuoriGriglia && campo ? slotImpattati(campo, r.data, r.inizio, r.fine) : [];
@@ -348,7 +376,7 @@ function RichiestaRiga({
   const squadre = pg.nomePartita(r.partitaId);
 
   return (
-    <li className={cn('grid gap-2 py-4', selezionata && 'bg-surface-2 px-2 outline-2 -outline-offset-2 outline-ball')}>
+    <li className={cn('grid gap-2 py-4', selezionata && SELEZIONE)}>
       <Intestazione r={r} nomeCampo={nomeCampo} dueSchermi={dueSchermi} selezionata={selezionata} onSeleziona={onSeleziona} />
       <div>
         {squadre && <p className="font-semibold">{squadre}</p>}
@@ -365,7 +393,7 @@ function RichiestaRiga({
             <span className="tabular">4/4</span> hanno accettato
           </Pill>
         )}
-        <Pill tono={scad.urgente ? 'danger' : 'idle'} icon={AlarmClock}>
+        <Pill tono={scad.urgente ? 'danger' : 'idle'} icon={AlarmClock} intera>
           {scad.testo}
         </Pill>
         {r.fuoriGriglia && (
@@ -452,7 +480,7 @@ function PannelloGiornata({
   nomePartita: (id: string | null | undefined) => string | undefined;
   now: number;
 }) {
-  const scala = useMemo(() => scalaDaCampi(campi, 0.75, { da: r.inizio, a: r.fine }), [campi, r.inizio, r.fine]);
+  const scala = useMemo(() => scalaDaCampi(campi, 1, { da: r.inizio, a: r.fine }), [campi, r.inizio, r.fine]);
   const campo = campi.find((c) => c.id === r.campoId);
   const impattati = r.fuoriGriglia && campo ? slotImpattati(campo, r.data, r.inizio, r.fine) : [];
   const ric = r.stato === 'attesa' && !richieste.some((x) => x.id === r.id) ? [...richieste, r] : richieste;
@@ -482,6 +510,14 @@ function PannelloGiornata({
           now={now}
         />
       )}
+      <p className="text-ink-muted">
+        In evidenza:{' '}
+        <span className="font-semibold text-ink">{nomePartita(r.partitaId) ?? 'la richiesta selezionata'}</span>,{' '}
+        <span className="tabular whitespace-nowrap">
+          {r.inizio}–{r.fine}
+        </span>{' '}
+        · <span className="whitespace-nowrap">{campo?.nome ?? r.campoId}</span>
+      </p>
     </>
   );
 }

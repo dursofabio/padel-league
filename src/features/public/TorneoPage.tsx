@@ -7,12 +7,12 @@ import { StandingsTable } from '../../components/StandingsTable';
 import { useCampi, useTorneoData } from '../../data/queries';
 import { risultatoUfficiale } from '../../lib/results';
 import { classificheTorneo, gironi } from '../../lib/torneo';
+import { Skeleton } from '../../ui/misc';
 import type { Partita } from '../../types';
 import {
   AvvisoOffline,
   faseInParole,
   InvitoAccesso,
-  nomeFase,
   oggiRoma,
   RigaLink,
   RigaVincitori,
@@ -52,7 +52,17 @@ export default function TorneoPage() {
   const classifiche = useMemo(() => (d.torneo ? classificheTorneo(d.torneo, d.squadre, d.partite) : {}), [d.torneo, d.squadre, d.partite]);
 
   const stato = StatoTorneoPagina({ isPending: d.isPending, error: d.error, torneo: d.torneo, refetch: d.refetch });
-  if (stato || !d.torneo) return stato;
+  if (stato || !d.torneo)
+    return (
+      <>
+        {d.torneo ? (
+          <PageHeader titolo={d.torneo.nome} sottotitolo={faseInParole(d.torneo, d.periodi, today)} />
+        ) : (
+          d.isPending && <Skeleton className="mb-5 h-8 w-2/3" />
+        )}
+        {stato}
+      </>
+    );
   const torneo = d.torneo;
   const href = user ? (p: Partita) => `/t/${torneo.id}/partite/${p.id}` : undefined;
   const evidenzia = mia ? [mia.id] : undefined;
@@ -143,13 +153,18 @@ export default function TorneoPage() {
                 Calendario
               </RigaLink>
             </li>
-            {(torneo.fasiGenerate ?? []).map((f) => (
-              <li key={f}>
-                <RigaLink to={`/t/${torneo.id}/tabellone/${f}`} dettaglio="Eliminazione diretta">
-                  Tabellone {nomeFase(torneo, f)}
-                </RigaLink>
-              </li>
-            ))}
+            {torneo.stato !== 'iscrizioni' &&
+              torneo.config.fasiFinali.map(({ nome }) => {
+                const f = nome.toLowerCase();
+                const generato = (torneo.fasiGenerate ?? []).includes(f);
+                return (
+                  <li key={f}>
+                    <RigaLink to={`/t/${torneo.id}/tabellone/${f}`} dettaglio={generato ? 'Eliminazione diretta' : 'Anteprima: gli incroci se i gironi finissero oggi'}>
+                      Tabellone {nome}
+                    </RigaLink>
+                  </li>
+                );
+              })}
           </ul>
         </Sezione>
       </div>

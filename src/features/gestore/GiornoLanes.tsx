@@ -37,6 +37,7 @@ export function GiornoLanes({
   oraCorrente,
   now = Date.now(),
   className,
+  stickyTop,
 }: {
   data: string;
   campi: Campo[];
@@ -54,10 +55,13 @@ export function GiornoLanes({
   oraCorrente?: number;
   now?: number;
   className?: string;
+  /** Keeps the court names visible while scrolling (passed to CourtLanes). */
+  stickyTop?: string;
 }) {
   return (
     <CourtLanes
       campi={campi}
+      stickyTop={stickyTop}
       scala={scala}
       oraCorrente={oraCorrente}
       className={className}
@@ -65,11 +69,20 @@ export function GiornoLanes({
         const occ = occupazioni.filter((o) => o.campoId === campo.id && o.data === data);
         const items = Object.fromEntries(occ.map((o) => [o.id, o]));
         const ric = richieste.filter((r) => r.campoId === campo.id && r.data === data);
-        const imp = impattati.filter((s) => s.campoId === campo.id);
-        const impKey = new Set(imp.map((s) => s.inizio));
-        const liberi = slotGriglia(campo, data).filter(
-          (s) => !impKey.has(s.inizio) && statoSlotGestore(s, items, ric, now) === 'libero',
-        );
+        const griglia = slotGriglia(campo, data);
+        const impOffGrid = new Set(impattati.filter((s) => s.campoId === campo.id).map((s) => s.inizio));
+        const stati = griglia.map((s) => ({ s, stato: statoSlotGestore(s, items, ric, now) }));
+        const liberi = stati.filter((x) => x.stato === 'libero' && !impOffGrid.has(x.s.inizio)).map((x) => x.s);
+        // grid slots lost to an occupation (e.g. a lesson 16–17 kills 15:00 and 16:30) or to the selected off-grid request
+        const esatto = (x: Slot) => ric.some((r) => r.inizio === x.inizio && r.fine === x.fine);
+        const inutilizzabili = stati
+          .filter(
+            (x) =>
+              x.stato === 'occupato' ||
+              (x.stato === 'richiesto' && !esatto(x.s)) ||
+              (x.stato === 'libero' && impOffGrid.has(x.s.inizio)),
+          )
+          .map((x) => x.s);
         return (
           <>
             {liberi.map((s) =>
@@ -80,15 +93,15 @@ export function GiornoLanes({
                   inizio={s.inizio}
                   fine={s.fine}
                   tono="idle"
-                  className="border-dashed bg-transparent text-ink-muted hover:bg-surface"
+                  className="border-dashed bg-transparent text-ink-muted hover:bg-surface dark:border-ink-muted dark:bg-idle-soft/50"
                   onClick={() => onSlotLibero(campo, s)}
-                  ariaLabel={`${campo.nome}, ${s.inizio}–${s.fine} libero: segna occupato`}
+                  ariaLabel={`${s.inizio} libero, ${campo.nome}, fino alle ${s.fine}: segna occupato`}
                 >
                   <span className="tabular flex items-center gap-1 font-semibold text-ink">
                     {s.inizio}
                     <Plus className="size-4 text-ink-muted" aria-hidden />
                   </span>
-                  <span className="text-xs">Libero</span>
+                  <span className="text-sm">libero</span>
                 </LaneBlock>
               ) : (
                 <LaneBlock
@@ -97,14 +110,14 @@ export function GiornoLanes({
                   inizio={s.inizio}
                   fine={s.fine}
                   tono="idle"
-                  className="bg-transparent text-ink-muted"
-                  ariaLabel={`${campo.nome}, ${s.inizio}–${s.fine} libero`}
+                  className="bg-transparent text-ink-muted dark:border-ink-muted"
+                  ariaLabel={`${s.inizio} libero, ${campo.nome}, fino alle ${s.fine}`}
                 >
                   <span className="tabular font-semibold">{s.inizio}</span>
                 </LaneBlock>
               ),
             )}
-            {imp.map((s) => (
+            {inutilizzabili.map((s) => (
               <LaneBlock
                 key={`i-${s.inizio}`}
                 scala={scala}
@@ -112,19 +125,21 @@ export function GiornoLanes({
                 fine={s.fine}
                 tono="idle"
                 pattern="hatch"
-                ariaLabel={`${campo.nome}, slot ${s.inizio}–${s.fine} inutilizzabile`}
+                className="bg-transparent text-ink-muted"
+                ariaLabel={`${s.inizio} inutilizzabile, ${campo.nome}: lo slot fino alle ${s.fine} si sovrappone a un’occupazione o a una richiesta fuori griglia`}
               >
-                <span className="flex items-center gap-1 text-xs font-semibold">
-                  <Ban className="size-3.5" aria-hidden />
-                  <span className="tabular">{s.inizio}</span> inutilizzabile
+                <span className="flex items-center gap-1 text-sm font-semibold">
+                  <Ban className="size-4 shrink-0" aria-hidden />
+                  <span className="tabular">{s.inizio}</span>
                 </span>
+                <span className="text-sm">inutilizzabile</span>
               </LaneBlock>
             ))}
             {occ.map((o) => {
               const a = ASPETTO_TIPO[o.tipo];
               const titolo = o.tipo === 'campionato' ? (nomePartita?.(o.partitaId) ?? ETICHETTA_TIPO.campionato) : ETICHETTA_TIPO[o.tipo];
               const orario = `${o.inizio}–${fineLeggibile(o.fine)}`;
-              const label = `${campo.nome}, ${ETICHETTA_TIPO[o.tipo]} ${orario}${o.tipo === 'campionato' ? `, ${titolo}` : ''}${o.nota ? `, ${o.nota}` : ''}`;
+              const label = `${titolo}, ${orario}${o.tipo === 'campionato' ? `, ${ETICHETTA_TIPO.campionato}` : ''}, ${campo.nome}${o.nota ? `, ${o.nota}` : ''}`;
               return (
                 <LaneBlock
                   key={o.id}
@@ -139,19 +154,20 @@ export function GiornoLanes({
                   onClick={onOccupazione ? () => onOccupazione(o) : undefined}
                   ariaLabel={onOccupazione ? `${label}: apri i dettagli` : label}
                 >
-                  <span className="flex items-center gap-1 font-semibold">
-                    <a.icon className="size-4 shrink-0" aria-hidden />
-                    <span className="truncate">{titolo}</span>
+                  <span className="flex items-start gap-1 font-semibold">
+                    <a.icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+                    <span className="line-clamp-2">{titolo}</span>
                   </span>
-                  <span className="tabular block text-xs">{orario}</span>
-                  {o.nota && <span className="block truncate text-xs">{o.nota}</span>}
+                  <span className="tabular block text-sm">{orario}</span>
+                  {o.nota && <span className="block truncate text-sm">{o.nota}</span>}
                 </LaneBlock>
               );
             })}
             {ric.map((r) => {
               const sel = r.id === evidenziata;
-              const titolo = nomePartita?.(r.partitaId) ?? 'Richiesta in attesa';
-              const label = `${campo.nome}, richiesta in attesa ${r.inizio}–${r.fine}, ${titolo}`;
+              const stato = sel ? 'Richiesta selezionata' : 'Richiesta in attesa';
+              const titolo = nomePartita?.(r.partitaId);
+              const label = `${stato}, ${r.inizio}–${r.fine}${titolo ? `, ${titolo}` : ''}, ${campo.nome}`;
               return (
                 <LaneBlock
                   key={r.id}
@@ -165,14 +181,14 @@ export function GiornoLanes({
                   onClick={onRichiesta ? () => onRichiesta(r) : undefined}
                   ariaLabel={onRichiesta ? `${label}: apri` : label}
                 >
-                  <span className="flex items-center gap-1 text-xs font-semibold">
-                    <Hourglass className="size-3.5 shrink-0" aria-hidden />
-                    {sel ? 'Richiesta selezionata' : 'Richiesta in attesa'}
+                  <span className="flex items-center gap-1 text-sm font-semibold">
+                    <Hourglass className="size-4 shrink-0" aria-hidden />
+                    {stato}
                   </span>
-                  <span className="tabular block text-xs">
+                  <span className="tabular block text-sm">
                     {r.inizio}–{r.fine}
                   </span>
-                  <span className="block truncate text-xs">{titolo}</span>
+                  {titolo && <span className="line-clamp-2 text-sm">{titolo}</span>}
                 </LaneBlock>
               );
             })}

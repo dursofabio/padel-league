@@ -153,6 +153,7 @@ export default function Finali({ d }: PropsSezione) {
                     Tabellone pubblico <ArrowRight className="size-4" aria-hidden />
                   </Link>
                 </h3>
+                <div className="[&>[role=region]]:scroll-px-4 md:[&>[role=region]]:scroll-px-0">
                 <Bracket
                   partite={pf}
                   derivate={derivaTabellone(pf, cfg.formatoSet)}
@@ -160,6 +161,7 @@ export default function Finali({ d }: PropsSezione) {
                   campi={campi.data ?? []}
                   hrefPartita={(p) => `/t/${torneo.id}/partite/${p.id}`}
                 />
+                </div>
               </section>
             );
           })}
@@ -175,7 +177,7 @@ export default function Finali({ d }: PropsSezione) {
               <div key={g} className="grid gap-3">
                 <h3 className="font-bold">Girone {g}</h3>
                 <StandingsTable girone={g} righe={righe} squadraById={squadraById} fasi={cfg.fasiFinali} nGironi={nGironi} />
-                {(blocchi[g] ?? []).map((b, bi) => {
+                {conclusi && (blocchi[g] ?? []).map((b, bi) => {
                   const ordine = righe.map((r) => r.squadraId).filter((id) => b.includes(id));
                   const pos = righe.findIndex((r) => r.squadraId === ordine[0]) + 1;
                   return (
@@ -230,7 +232,10 @@ export default function Finali({ d }: PropsSezione) {
             <p className="sr-only" aria-live="polite">
               {annuncio}
             </p>
-            {conSorteggio && Object.values(blocchi).some((b) => b.length) && (
+            {!conclusi && (
+              <p className="text-ink-muted">Classifiche provvisorie. Gli eventuali pari merito si risolvono qui quando i gironi sono conclusi.</p>
+            )}
+            {conclusi && conSorteggio && Object.values(blocchi).some((b) => b.length) && (
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="secondary" loading={salvaOrdine.isPending} disabled={!nonSalvato && irrisolti === 0} onClick={salva}>
                   Salva ordine
@@ -260,7 +265,11 @@ export default function Finali({ d }: PropsSezione) {
                   {fase.squadre.length < fase.posti && (
                     <Nota tono="info">Posti non coperti: le teste di serie migliori passano direttamente al turno dopo (bye).</Nota>
                   )}
-                  <Bracket partite={partiteAnteprima(fase.nome.toLowerCase(), righe)} derivate={new Map()} squadraById={squadraById} campi={[]} />
+                  <h3 className="font-bold">Anteprima del tabellone</h3>
+                  {/* scroll-padding keeps the page gutter when the rounds snap (shared Bracket uses snap-start) */}
+                  <div className="[&>[role=region]]:scroll-px-4 md:[&>[role=region]]:scroll-px-0">
+                    <Bracket anteprima partite={partiteAnteprima(fase.nome.toLowerCase(), righe)} derivate={new Map()} squadraById={squadraById} campi={[]} />
+                  </div>
                 </>
               )}
             </Sezione>

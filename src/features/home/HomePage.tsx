@@ -1,4 +1,5 @@
 import { LogIn } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader } from '../../components/PageHeader';
@@ -6,19 +7,30 @@ import { EmptyState, QueryState, SkeletonRighe } from '../../components/states';
 import { useTornei } from '../../data/queries';
 import { buttonVariants } from '../../ui/button';
 import { RigaLink, STATO_TORNEO } from '../public/comune';
-import { DaFare } from './DaFare';
+
+// The feed (attention logic, mutations, rows) is only downloaded by logged-in users.
+const DaFare = lazy(() => import('./DaFare').then((m) => ({ default: m.DaFare })));
+
+function Caricamento() {
+  return (
+    <>
+      <PageHeader titolo="Da fare" />
+      <SkeletonRighe righe={3} />
+    </>
+  );
+}
 
 /** "/": the "Da fare" feed when logged in; the tournaments to follow when logged out. */
 export default function HomePage() {
   const { user, loading } = useAuth();
-  if (loading)
-    return (
-      <>
-        <PageHeader titolo="Da fare" />
-        <SkeletonRighe righe={3} />
-      </>
-    );
-  return user ? <DaFare /> : <Pubblica />;
+  if (loading) return <Caricamento />;
+  return user ? (
+    <Suspense fallback={<Caricamento />}>
+      <DaFare />
+    </Suspense>
+  ) : (
+    <Pubblica />
+  );
 }
 
 function Pubblica() {

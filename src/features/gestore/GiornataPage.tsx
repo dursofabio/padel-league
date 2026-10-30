@@ -1,5 +1,5 @@
 import * as Menu from '@radix-ui/react-dropdown-menu';
-import { ChevronLeft, ChevronRight, DoorClosed, EllipsisVertical, ExternalLink, Info, Plus, Trash2 } from 'lucide-react';
+import { Ban, ChevronLeft, ChevronRight, DoorClosed, EllipsisVertical, ExternalLink, Info, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { scalaDaCampi } from '../../components/CourtLanes';
@@ -196,25 +196,13 @@ export default function GiornataPage() {
             role="region"
             aria-label="Linea del tempo dei campi, scorri per vedere tutte le ore"
           >
-            {/* court names stay visible while scrolling: overlays the lanes' own header row */}
-            <div
-              aria-hidden
-              className="sticky top-0 z-20 -mb-8 grid h-8 gap-x-1.5"
-              style={{ gridTemplateColumns: `2.75rem repeat(${lista.length}, minmax(0, 1fr))` }}
-            >
-              <span className="bg-bg" />
-              {lista.map((c) => (
-                <span key={c.id} className="truncate rounded-t-control bg-court px-2 py-1.5 text-center text-sm font-bold text-court-ink">
-                  {c.nome}
-                </span>
-              ))}
-            </div>
             <GiornoLanes
               data={data}
               campi={lista}
               scala={scala}
               occupazioni={occ.righe}
               richieste={inAttesa}
+              stickyTop="0px"
               nomePartita={pg.nomePartita}
               now={now}
               oraCorrente={eOggi ? oraMin : undefined}
@@ -279,7 +267,7 @@ function Legenda() {
     { tipo: 'chiusura', testo: 'Chiuso' },
   ];
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted" aria-label="Legenda">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-ink-muted" aria-label="Legenda">
       {voci.map((v) => {
         const Icon = ASPETTO_TIPO[v.tipo].icon;
         return (
@@ -293,6 +281,9 @@ function Legenda() {
       </li>
       <li className="inline-flex items-center gap-1">
         <Plus className="size-4" aria-hidden /> Slot libero
+      </li>
+      <li className="inline-flex items-center gap-1">
+        <Ban className="size-4" aria-hidden /> Inutilizzabile
       </li>
     </ul>
   );

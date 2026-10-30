@@ -8,7 +8,7 @@ import { messaggioErrore } from '../../data/errors';
 import { azioni, useAzione } from '../../data/mutations';
 import { useProfili } from '../../data/queries';
 import type { Role, UserProfile } from '../../types';
-import { Checkbox, Field, Input, Label } from '../../ui';
+import { Checkbox, Field, Input, cn } from '../../ui';
 import { cercaUtenti, conRuolo, NOMI_RUOLO, RUOLI } from './logic';
 
 export default function UtentiPage() {
@@ -89,14 +89,21 @@ export default function UtentiPage() {
                           {u.telefono ? <span className="tabular"> · {u.telefono}</span> : ' · nessun telefono'}
                         </p>
                       </div>
-                      <fieldset className="flex flex-wrap gap-x-5 gap-y-1" disabled={occupato}>
+                      <fieldset className="flex flex-wrap gap-x-4 gap-y-0" disabled={occupato}>
                         <legend className="sr-only">Ruoli di {u.nome || u.email}</legend>
                         {RUOLI.map((r) => {
                           const id = `ruolo-${u.id}-${r}`;
                           const bloccato = r === 'giocatore' || (io && r === 'admin');
                           const motivo = r === 'giocatore' ? 'sempre attivo' : io && r === 'admin' ? 'non puoi toglierlo a te' : null;
                           return (
-                            <div key={r} className="flex min-h-11 items-center gap-2">
+                            <label
+                              key={r}
+                              htmlFor={id}
+                              className={cn(
+                                '-mx-2 flex min-h-11 items-center gap-2 rounded-control px-2 text-base',
+                                bloccato ? 'cursor-default' : 'cursor-pointer hover:bg-surface-2',
+                              )}
+                            >
                               <Checkbox
                                 id={id}
                                 checked={r === 'giocatore' || u.roles.includes(r)}
@@ -104,15 +111,13 @@ export default function UtentiPage() {
                                 aria-describedby={motivo ? `${id}-motivo` : undefined}
                                 onCheckedChange={(v) => cambia(u, r, v === true)}
                               />
-                              <Label htmlFor={id} className="text-base font-normal">
-                                {NOMI_RUOLO[r]}
-                              </Label>
+                              <span>{NOMI_RUOLO[r]}</span>
                               {motivo && (
                                 <span id={`${id}-motivo`} className="text-sm text-ink-muted">
                                   ({motivo})
                                 </span>
                               )}
-                            </div>
+                            </label>
                           );
                         })}
                       </fieldset>

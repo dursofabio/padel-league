@@ -67,7 +67,14 @@ export default function CalendarioPage() {
   }, [attivo, perGirone]);
 
   const stato = StatoTorneoPagina({ isPending: d.isPending, error: d.error, torneo: d.torneo, refetch: d.refetch });
-  if (stato || !d.torneo) return stato;
+  // the heading renders before the data (it is the first meaningful paint)
+  if (stato || !d.torneo)
+    return (
+      <>
+        <PageHeader titolo="Calendario" sottotitolo={d.torneo?.nome} indietro={{ to: `/t/${tid}`, label: 'Torneo' }} />
+        {stato}
+      </>
+    );
   const torneo = d.torneo;
 
   const visibile = (p: Partita) =>
@@ -124,7 +131,11 @@ export default function CalendarioPage() {
                     <section key={x.turno} id={`giornata-${g}-${x.turno}`} aria-labelledby={`giornata-${g}-${x.turno}-h`} className="grid scroll-mt-20 gap-1">
                       <h3 id={`giornata-${g}-${x.turno}-h`} className="flex flex-wrap items-baseline gap-x-2 border-b-2 border-line-strong pb-1 text-base font-bold">
                         Giornata {x.turno}
-                        {x.periodo && <span className="tabular text-sm font-normal text-ink-muted">entro {labelDate(x.periodo.fine)}</span>}
+                        {x.periodo && (
+                          <span className="tabular text-sm font-normal text-ink-muted">
+                            <span className="sr-only">, </span>entro {labelDate(x.periodo.fine)}
+                          </span>
+                        )}
                       </h3>
                       <ul className="court-rule">
                         {x.partite.map((p) => (

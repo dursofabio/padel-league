@@ -8,7 +8,6 @@ import { derivaTabellone } from '../../lib/bracket';
 import { labelDate } from '../../lib/time';
 import { nomeSquadra } from '../../lib/torneo';
 import type { Partita, Periodo, Squadra, StatoTorneo, Torneo } from '../../types';
-import { Skeleton } from '../../ui/misc';
 
 export const STATO_TORNEO: Record<StatoTorneo, string> = {
   iscrizioni: 'Iscrizioni aperte',
@@ -132,15 +131,7 @@ export function StatoTorneoPagina({
   refetch: () => void;
   skeleton?: ReactNode;
 }): ReactNode {
-  if (isPending)
-    return (
-      skeleton ?? (
-        <div className="grid gap-6">
-          <Skeleton className="h-8 w-2/3" />
-          <SkeletonRighe righe={5} />
-        </div>
-      )
-    );
+  if (isPending) return skeleton ?? <SkeletonRighe righe={5} />;
   const code = (error as { code?: string } | null)?.code;
   if (!torneo && (code === 'PGRST116' || code === '22P02' || !error))
     return (

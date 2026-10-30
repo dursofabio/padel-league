@@ -19,7 +19,7 @@ import type { Partita, Richiesta } from '../../types';
 import { Button, buttonVariants } from '../../ui/button';
 import { Segmented } from '../../ui/misc';
 import { AvvisoOffline, useAdesso, useOnline } from '../public/comune';
-import type { Contesto } from './contenuto';
+import { coppieDi, doveQuando, type Contesto } from './contenuto';
 import { RigaAttenzione } from './RigaAttenzione';
 
 type Filtro = 'tutto' | AttentionRole;
@@ -281,17 +281,25 @@ export function DaFare() {
             <h2 id="prossime" className="border-b-2 border-line-strong pb-1 text-lg font-bold">
               Prossime partite
             </h2>
-            {prossime.length ? (
-              <ul className="court-rule">
-                {prossime.map((p) => (
-                  <li key={p.id}>
-                    <MatchRow p={p} squadraById={d.squadraById} campi={campi.data ?? []} href={`/t/${tid}/partite/${p.id}`} evidenzia={[mia.id]} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-3 text-ink-muted">Nessuna partita programmata.</p>
-            )}
+            {(() => {
+              // matches already in the feed ("Prossima partita") are not repeated here
+              const nelFeed = new Set(items.filter((i) => i.kind === 'prossima-partita').map((i) => i.refs.partitaId));
+              const altre = prossime.filter((p) => !nelFeed.has(p.id));
+              return altre.length ? (
+                <ul className="court-rule">
+                  {altre.map((p) => (
+                    <li key={p.id}>
+                      <Link to={`/t/${tid}/partite/${p.id}`} className="-mx-2 grid min-h-14 gap-0.5 rounded-control px-2 py-3 hover:bg-surface-2">
+                        <span className="text-base">{coppieDi(p, ctx)}</span>
+                        {p.programmazione && <span className="tabular text-sm text-ink-muted">{doveQuando(p.programmazione, ctx.campi)}</span>}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="py-3 text-ink-muted">{prossime.length ? 'Le prossime sono già nell’elenco qui accanto.' : 'Nessuna partita programmata.'}</p>
+              );
+            })()}
             <Link to={`/t/${tid}/partite`} className={linkCls}>
               Vedi le tue partite
             </Link>
@@ -334,7 +342,7 @@ function Vuoto({
         />
       )}
       {vede('giocatore') && prossima && (
-        <section aria-labelledby="prossima" className="grid gap-1 border-t border-line pt-4">
+        <section aria-labelledby="prossima" className="grid gap-1 border-t border-line pt-4 lg:hidden">
           <h2 id="prossima" className="text-lg font-bold">
             La tua prossima partita
           </h2>

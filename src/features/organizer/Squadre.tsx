@@ -259,7 +259,7 @@ function ComponiGironi({ d, onFine, nIniziale }: { d: DatiTorneo; onFine: () => 
             .map(([id]) => id);
           return (
             <section key={g} aria-labelledby={`anteprima-${g}`}>
-              <h3 id={`anteprima-${g}`} className="flex items-center gap-2 border-b-2 border-court pb-1 font-bold dark:border-ball">
+              <h3 id={`anteprima-${g}`} className="flex items-center gap-2 border-b-2 border-court pb-1 font-bold dark:border-line-strong">
                 <Users className="size-5" aria-hidden /> Girone {g} <span className="tabular font-normal text-ink-muted">· {ids.length} coppie</span>
               </h3>
               <ul className="court-rule">

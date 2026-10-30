@@ -42,12 +42,16 @@ export function LineaTempo({ data, fasce, campi }: { data: string; fasce: string
           />
         ))}
       </div>
-      <div className="tabular hidden justify-between text-xs text-ink-muted md:flex">
-        <span>08</span>
-        <span>12</span>
-        <span>16</span>
-        <span>20</span>
-        <span>24</span>
+      <div className="tabular relative h-5 text-sm text-ink-muted">
+        {['08', '14', '20', '24'].map((h, i, all) => (
+          <span
+            key={h}
+            className={cn('absolute', i === 0 ? '' : i === all.length - 1 ? '-translate-x-full' : '-translate-x-1/2')}
+            style={{ left: `${percentualeGiornata(`${h}:00`)}%` }}
+          >
+            {h}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -83,5 +87,32 @@ export function ColonnaTempo({ data, fasce, campi }: { data: string; fasce: stri
         />
       ))}
     </div>
+  );
+}
+
+/** Legenda delle tacche: dice quale campo inizia una partita a quell'ora. */
+export function LegendaTacche({ campi, verticale }: { campi: Campo[]; verticale?: boolean }) {
+  if (!campi.length) return null;
+  const [c1, c2] = campi;
+  return (
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-muted">
+      <span className="inline-flex items-center gap-2">
+        <span aria-hidden className="inline-block h-2 w-6 rounded-full bg-court" /> il tuo orario
+      </span>
+      <span className="inline-flex items-center gap-2">
+        <span aria-hidden className={cn('relative inline-block h-4 w-6 rounded-[3px] bg-surface-2')}>
+          <span className={cn('absolute bg-ink-muted', verticale ? 'top-1/2 left-0 h-px w-1/3' : 'top-0 left-1/2 h-1/2 w-px')} />
+        </span>
+        inizio partita {c1.nome} {verticale ? '(tacca a sinistra)' : '(tacca in alto)'}
+      </span>
+      {c2 && (
+        <span className="inline-flex items-center gap-2">
+          <span aria-hidden className="relative inline-block h-4 w-6 rounded-[3px] bg-surface-2">
+            <span className={cn('absolute bg-ink-muted', verticale ? 'top-1/2 right-0 h-px w-1/3' : 'top-1/2 left-1/2 h-1/2 w-px')} />
+          </span>
+          inizio partita {c2.nome} {verticale ? '(tacca a destra)' : '(tacca in basso)'}
+        </span>
+      )}
+    </p>
   );
 }

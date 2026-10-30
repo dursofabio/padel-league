@@ -10,10 +10,10 @@ import { azioni } from '../../../../data/mutations';
 import { fasciaCopre, isSlotDiGriglia, occupazioniId, slotGriglia, slotImpattati, verificaFuoriGriglia } from '../../../../lib/slots';
 import { addMin, labelDate, overlaps, toMin, today } from '../../../../lib/time';
 import type { Campo, Fasce, Occupazione, Richiesta } from '../../../../types';
-import { Button, Field, Segmented, Select, Sheet } from '../../../../ui';
+import { Button, cn, Field, Segmented, Select, Sheet } from '../../../../ui';
 import type { ContestoPartita } from '../contesto';
 import { descriviOccupazione, elencoNomi, opzioniInizio } from '../logica';
-import { Avviso, useOra } from '../parti';
+import { AVVOLGI, Avviso, useOra } from '../parti';
 import { useAzionePartita } from '../useAzionePartita';
 
 export function OffGrid({
@@ -82,6 +82,7 @@ export function OffGrid({
           variant="primary"
           size="lg"
           block
+          className="whitespace-normal"
           disabled={errori.length > 0}
           loading={invia.isPending}
           onClick={() => invia.esegui({ partita: ctx.partita.id, campo: campo.id, data, inizio }, { onSuccess: onClose })}
@@ -90,7 +91,7 @@ export function OffGrid({
         </Button>
       }
     >
-      <div className="grid gap-5">
+      <div className={cn('grid gap-5', AVVOLGI)}>
         <div className="grid gap-1.5">
           <span className="text-sm font-semibold">Campo</span>
           <Segmented label="Campo" value={campoId} onValueChange={setCampoId} options={campi.map((c) => ({ value: c.id, label: c.nome }))} />
@@ -153,24 +154,24 @@ export function OffGrid({
                   {slots.map((s) =>
                     impatto.includes(s.inizio) ? (
                       <LaneBlock key={s.inizio} scala={scala} inizio={s.inizio} fine={s.fine} tono="idle" pattern="hatch" ariaLabel={`${c.nome} ${s.inizio}, inutilizzabile`}>
-                        <span className="tabular flex items-center gap-1 text-xs font-semibold">
+                        <span className="tabular flex items-center gap-1 text-sm font-semibold">
                           <Ban className="size-3.5" aria-hidden /> {s.inizio} inutilizzabile
                         </span>
                       </LaneBlock>
                     ) : (
                       <LaneBlock key={s.inizio} scala={scala} inizio={s.inizio} fine={s.fine} tono="idle" ariaLabel={`${c.nome} ${s.inizio}, slot di griglia`}>
-                        <span className="tabular text-xs">{s.inizio}</span>
+                        <span className="tabular text-sm">{s.inizio}</span>
                       </LaneBlock>
                     ),
                   )}
                   {occs.map((o, i) => (
                     <LaneBlock key={`o${i}`} scala={scala} inizio={o.inizio} fine={o.fine} tono="danger" pattern="hatch" sfalsato ariaLabel={descriviOccupazione(o)}>
-                      <span className="text-xs font-semibold">{descriviOccupazione(o)}</span>
+                      <span className="text-sm font-semibold">{descriviOccupazione(o)}</span>
                     </LaneBlock>
                   ))}
                   {c.id === campo.id && fine && (
                     <LaneBlock scala={scala} inizio={inizio} fine={fine} tono="info" sfalsato className="z-10 border-2" ariaLabel={`Proposta ${inizio}–${fine}`}>
-                      <span className="tabular flex items-center gap-1 text-xs font-bold">
+                      <span className="tabular flex items-center gap-1 text-sm font-bold">
                         <Send className="size-3.5" aria-hidden /> Proposta {inizio}–{fine}
                       </span>
                     </LaneBlock>

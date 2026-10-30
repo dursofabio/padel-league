@@ -237,7 +237,7 @@ function Invito({ squadra, nomeTorneo }: { squadra: Squadra; nomeTorneo: string 
           </Field>
           <div className="flex flex-wrap gap-2">
             <WhatsAppButton
-              className={cn(buttonVariants({ variant: 'primary' }), 'border-transparent dark:border-transparent dark:text-ball-ink')}
+              variant="primary"
               testo={`Ciao! Ti ho iscritto con me al ${nomeTorneo} come coppia «${squadra.nome}». Entra qui → ${link}`}
             >
               Invia su WhatsApp

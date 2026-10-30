@@ -77,12 +77,12 @@ describe('labels', () => {
 
   it('builds the full aria-label of a slot', () => {
     const s: StatoSlot = { slot, colore: 'giallo', liberi: ['u1', 'u3', 'u4'], mancanti: ['u2'], occupazioni: [] };
-    expect(ariaSlot(s, 'Campo 2', nome)).toBe('Sabato 14 novembre, Campo 2, 15:30–17:00, 3 su 4 liberi, manca Luca');
+    expect(ariaSlot(s, 'Campo 2', nome)).toBe('15:30 3/4, Campo 2, Sabato 14 novembre, fino alle 17:00, manca Luca');
     expect(etichettaSlot(s, 4)).toBe('3/4');
     const g: StatoSlot = { ...s, colore: 'grigio', liberi: ['u1', 'u4'], mancanti: ['u2', 'u3'] };
-    expect(ariaSlot(g, 'Campo 2', nome)).toMatch(/2 su 4 liberi, mancano Luca e Marta$/);
+    expect(ariaSlot(g, 'Campo 2', nome)).toBe('15:30 2/4, Campo 2, Sabato 14 novembre, fino alle 17:00, mancano Luca e Marta');
     const v: StatoSlot = { ...s, colore: 'verde', liberi: ['u1', 'u2', 'u3', 'u4'], mancanti: [] };
-    expect(ariaSlot(v, 'Campo 2', nome)).toMatch(/4 su 4 liberi$/);
+    expect(ariaSlot(v, 'Campo 2', nome)).toMatch(/^15:30 4\/4, .*tutti liberi$/);
   });
 
   it('describes occupied and requested slots', () => {
@@ -93,9 +93,9 @@ describe('labels', () => {
       mancanti: [],
       occupazioni: [{ tipo: 'lezione', inizio: '15:00', fine: '16:30' }],
     };
-    expect(ariaSlot(r, 'Campo 2', nome)).toMatch(/occupato: lezione 15:00–16:30$/);
+    expect(ariaSlot(r, 'Campo 2', nome)).toMatch(/^15:30 Occupato, Campo 2, .*, lezione 15:00–16:30$/);
     expect(etichettaSlot(r, 4)).toBe('Occupato');
-    expect(ariaSlot({ ...r, colore: 'blu', occupazioni: [] }, 'Campo 2', nome)).toMatch(/già richiesto/);
+    expect(ariaSlot({ ...r, colore: 'blu', occupazioni: [] }, 'Campo 2', nome)).toMatch(/^15:30 Richiesto, .*già chiesto/);
   });
 });
 
@@ -238,5 +238,26 @@ describe('erroreDaHint', () => {
     expect(erroreDaHint({ hint: 'BAD_STEP' }, 15)).toBe('Scegli un orario ogni 15 minuti.');
     expect(erroreDaHint({ hint: 'OVERLAP', message: 'Il campo è occupato: lezione 15:00–16:30' })).toBe('Il campo è occupato: lezione 15:00–16:30');
     expect(erroreDaHint({ hint: 'NOT_FOUND' })).toBeNull();
+  });
+});
+
+describe('expiry capped at the slot start (critique M1)', () => {
+  it('a request is not live once its slot has started', async () => {
+    const { scadenzaEffettiva, richiestaViva, slotUtile } = await import('../logica');
+    const r = { stato: 'attesa' as const, scadenza: { toMillis: () => Date.parse('2026-11-16T10:00:00') }, data: '2026-11-14', inizio: '15:00' };
+    expect(scadenzaEffettiva(r)).toBe(Date.parse('2026-11-14T15:00:00'));
+    expect(richiestaViva(r, Date.parse('2026-11-14T14:59:00'))).toBe(true);
+    expect(richiestaViva(r, Date.parse('2026-11-14T15:00:00'))).toBe(false);
+    expect(slotUtile({ colore: 'giallo' })).toBe(true);
+    expect(slotUtile({ colore: 'grigio' })).toBe(false);
+  });
+});
+
+describe('scalaRitagliata', () => {
+  it('crops the lanes to whole hours around the shown slots', async () => {
+    const { scalaRitagliata } = await import('../logica');
+    const base = { da: 13 * 60, a: 23 * 60, px: 0.8 };
+    expect(scalaRitagliata([{ inizio: '18:30', fine: '20:00' }, { inizio: '19:00', fine: '20:30' }], base)).toEqual({ da: 18 * 60, a: 21 * 60, px: 0.8 });
+    expect(scalaRitagliata([], base)).toBe(base);
   });
 });

@@ -106,7 +106,8 @@ const GIORNO = 24 * ORA;
 
 // ------------------------------------------------------------------ Europe/Rome time (deterministic, via Intl)
 
-const fmtRoma = new Intl.DateTimeFormat('en-US', {
+let fmtRoma: Intl.DateTimeFormat | null = null;
+const opzioniRoma: Intl.DateTimeFormatOptions = {
   timeZone: 'Europe/Rome',
   hourCycle: 'h23',
   year: 'numeric',
@@ -115,9 +116,10 @@ const fmtRoma = new Intl.DateTimeFormat('en-US', {
   hour: '2-digit',
   minute: '2-digit',
   second: '2-digit',
-});
+};
 
 function partiRoma(ms: number) {
+  fmtRoma ??= new Intl.DateTimeFormat('en-US', opzioniRoma);
   const parts = fmtRoma.formatToParts(new Date(ms));
   const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
   return { y: get('year'), m: get('month'), d: get('day'), h: get('hour') % 24, mi: get('minute'), s: get('second') };

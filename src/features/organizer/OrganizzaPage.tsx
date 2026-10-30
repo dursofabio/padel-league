@@ -1,5 +1,5 @@
 import { CalendarDays, CalendarRange, LayoutDashboard, ListChecks, Settings2, Trophy, Users, type LucideIcon } from 'lucide-react';
-import { lazy, Suspense, useMemo, type ComponentType } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, type ComponentType } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../components/states';
@@ -45,19 +45,26 @@ export default function OrganizzaPage() {
     } as Partial<Record<SezioneId, number>>;
   }, [d.partite, d.periodi, d.squadre]);
 
+  // on narrow screens the tab strip scrolls: keep the current section in view
+  const attiva = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    attiva.current?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' });
+  }, [sezione]);
+
   const voce = SEZIONI.find((s) => s.id === sezione)!;
   const Contenuto = COMPONENTI[sezione];
 
   return (
     <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
       <nav aria-label="Sezioni di Organizza" className="-mx-4 mb-5 border-b border-line md:-mx-6 lg:mx-0 lg:mb-0 lg:border-b-0">
-        <ul className="flex gap-1 overflow-x-auto px-4 md:px-6 lg:sticky lg:top-8 lg:grid lg:gap-0.5 lg:overflow-visible lg:px-0">
+        <ul className="flex gap-1 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] md:px-6 lg:[mask-image:none] lg:sticky lg:top-8 lg:grid lg:gap-0.5 lg:overflow-visible lg:px-0">
           {SEZIONI.map((s) => {
             const Icon = ICONE[s.id];
             const n = conteggi[s.id];
             return (
               <li key={s.id} className="shrink-0">
                 <Link
+                  ref={s.id === sezione ? attiva : undefined}
                   to={`/t/${tid}/organizza/${s.id}`}
                   aria-current={s.id === sezione ? 'page' : undefined}
                   className={cn(

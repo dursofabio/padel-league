@@ -11,7 +11,7 @@ import { labelDate } from '../../../../lib/time';
 import type { Richiesta } from '../../../../types';
 import { Button, cn, ConfirmDialog } from '../../../../ui';
 import { nomeCampo, type ContestoPartita } from '../contesto';
-import { accettate, elencoNomi, quando, traQuanto } from '../logica';
+import { accettate, elencoNomi, quando, scadenzaEffettiva, traQuanto } from '../logica';
 import { Avviso, ControPropostaBadge, FuoriGrigliaBadge, useOra } from '../parti';
 import { useAzionePartita } from '../useAzionePartita';
 
@@ -29,7 +29,8 @@ export function AcceptanceTracker({ ctx, richiesta }: { ctx: ContestoPartita; ri
   const giocatore = !!ctx.mioLato;
   const campo = nomeCampo(ctx.campi, richiesta.campoId);
   const orario = `${labelDate(richiesta.data)} alle ${richiesta.inizio}`;
-  const scad = richiesta.scadenza.toMillis();
+  // the earlier of the server expiry and the slot start (critique M1)
+  const scad = scadenzaEffettiva(richiesta);
   const tra = traQuanto(scad, now);
   const urgente = scad - now < 2 * 3_600_000;
 

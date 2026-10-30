@@ -30,7 +30,7 @@ export function Bracket({
       role="region"
       aria-label="Tabellone: scorri orizzontalmente tra i turni"
       tabIndex={0}
-      className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0"
+      className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:scroll-px-0 md:px-0"
     >
       {Array.from({ length: turni }, (_, i) => i + 1).map((turno) => {
         const lista = partite.filter((p) => p.turno === turno).sort((a, b) => (a.posizione ?? 0) - (b.posizione ?? 0));

@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import { useRef, type KeyboardEvent } from 'react';
 import { etichettaFascia, settimane } from '../../../lib/fasce';
 import { addDays, labelDate } from '../../../lib/time';
@@ -70,10 +71,10 @@ export function SettimanaStrip({
                   type="button"
                   data-giorno={d}
                   onClick={() => onApri(d)}
-                  aria-label={`${labelDate(d)}${d === oggi ? ', oggi' : ''}: ${descr}. Modifica`}
+                  aria-label={`${labelDate(d)}${d === oggi ? ', oggi' : ''}: ${descr}. Aggiungi o modifica`}
                   className={cn(
                     'group grid content-start gap-2 rounded-control text-left',
-                    selezionato === d && 'outline-2 outline-offset-4 outline-ball',
+                    selezionato === d && 'outline-2 outline-offset-4 outline-court dark:outline-ball',
                   )}
                 >
                   <span className="flex min-h-10 flex-col justify-end">
@@ -81,6 +82,12 @@ export function SettimanaStrip({
                     {d === oggi && <span className="text-xs font-semibold text-court dark:text-info-ink">oggi</span>}
                   </span>
                   <ColonnaTempo data={d} fasce={lista} campi={campi} />
+                  <span
+                    aria-hidden
+                    className="inline-flex min-h-11 items-center justify-center gap-1 rounded-control border border-court text-sm font-semibold text-court group-hover:bg-info-soft dark:border-line-strong dark:text-ink"
+                  >
+                    <Plus className="size-4" /> Aggiungi
+                  </span>
                 </button>
               );
             })}

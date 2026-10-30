@@ -103,8 +103,17 @@ export function limiteAnnullamento(prog: Pick<Programmazione, 'data' | 'inizio'>
 
 export type Fase = 'S0' | 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7' | 'S8';
 
-export function richiestaViva(r: Pick<Richiesta, 'stato' | 'scadenza'> | null | undefined, now: number): boolean {
-  return !!r && r.stato === 'attesa' && r.scadenza.toMillis() > now;
+/** A request is useless once its slot has started: the effective expiry is the earlier of the two (critique M1). */
+export function scadenzaEffettiva(r: Pick<Richiesta, 'scadenza'> & Partial<Pick<Richiesta, 'data' | 'inizio'>>): number {
+  const scad = r.scadenza.toMillis();
+  return r.data && r.inizio ? Math.min(scad, istante(r.data, r.inizio)) : scad;
+}
+
+export function richiestaViva(
+  r: (Pick<Richiesta, 'stato' | 'scadenza'> & Partial<Pick<Richiesta, 'data' | 'inizio'>>) | null | undefined,
+  now: number,
+): boolean {
+  return !!r && r.stato === 'attesa' && scadenzaEffettiva(r) > now;
 }
 
 export function accettate(r: Pick<Richiesta, 'giocatori' | 'accettazioni'>): number {
@@ -206,19 +215,26 @@ export function descriviOccupazione(o: { tipo: keyof typeof TIPO_OCCUPAZIONE; in
   return `${TIPO_OCCUPAZIONE[o.tipo].toLowerCase()} ${o.inizio}–${o.fine}`;
 }
 
-/** Full Italian label of a slot block: "Sabato 14 novembre, Campo 2, 15:30–17:00, 3 su 4 liberi, manca Luca". */
+/** Slot that can be requested from the grid (decision P2: 4/4 and 3/4). */
+export function slotUtile(s: Pick<StatoSlot, 'colore'>): boolean {
+  return s.colore === 'verde' || s.colore === 'giallo';
+}
+
+/**
+ * Accessible name of a slot block. It STARTS with the visible text ("15:30 3/4") for voice control
+ * (WCAG 2.5.3), then the details: "15:30 3/4, Campo 2, Sabato 14 novembre, fino alle 17:00, manca Luca".
+ */
 export function ariaSlot(s: StatoSlot, campoNome: string, nome: (uid: string) => string): string {
-  const base = `${dataLunga(s.slot.data)}, ${campoNome}, ${s.slot.inizio}–${s.slot.fine}`;
+  const tot = s.liberi.length + s.mancanti.length;
+  const base = `${s.slot.inizio} ${etichettaSlot(s, tot)}, ${campoNome}, ${dataLunga(s.slot.data)}, fino alle ${s.slot.fine}`;
   if (s.colore === 'rosso') {
     const occ = s.occupazioni.map(descriviOccupazione).join(', ');
-    return `${base}, occupato${occ ? `: ${occ}` : ''}`;
+    return occ ? `${base}, ${occ}` : base;
   }
-  if (s.colore === 'blu') return `${base}, già richiesto da un'altra partita`;
-  const tot = s.liberi.length + s.mancanti.length;
-  const liberi = `${s.liberi.length} su ${tot} liberi`;
-  if (!s.mancanti.length) return `${base}, ${liberi}`;
+  if (s.colore === 'blu') return `${base}, già chiesto per un'altra partita`;
+  if (!s.mancanti.length) return `${base}, tutti liberi`;
   const nomi = elencoNomi(s.mancanti.map(nome));
-  return `${base}, ${liberi}, ${s.mancanti.length === 1 ? 'manca' : 'mancano'} ${nomi}`;
+  return `${base}, ${s.mancanti.length === 1 ? 'manca' : 'mancano'} ${nomi}`;
 }
 
 /** Off-grid start times (ASSUNZIONE P6): 08:00–22:30 in `passo` steps, future only. */
@@ -399,4 +415,15 @@ export function erroreDaHint(e: unknown, passo = 30): string | null {
   if (err.code === '23505') return ERRORI_PARTITA.SLOT_TAKEN;
   if (err.hint && ERRORI_PARTITA[err.hint]) return ERRORI_PARTITA[err.hint];
   return null;
+}
+
+/** Lanes scale cropped to the visible slots of a day (whole hours), never wider than the base scale. */
+export function scalaRitagliata(
+  slots: { inizio: string; fine: string }[],
+  base: { da: number; a: number; px: number },
+): { da: number; a: number; px: number } {
+  if (!slots.length) return base;
+  const da = Math.min(...slots.map((s) => toMin(s.inizio)));
+  const a = Math.max(...slots.map((s) => toMin(s.fine)));
+  return { da: Math.max(base.da, Math.floor(da / 60) * 60), a: Math.min(base.a, Math.ceil(a / 60) * 60), px: base.px };
 }

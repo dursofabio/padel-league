@@ -16,6 +16,7 @@ import {
   messaggioMaterializza,
   minutoIniziale,
   motivoBloccoConferma,
+  scadenzaEffettiva,
   nuovoIdCampo,
   occupazioniInConflitto,
   orari,
@@ -81,6 +82,19 @@ describe('scadenza', () => {
     const a = req({ id: 'a', scadenza: ts(3) });
     const b = req({ id: 'b', scadenza: ts(1) });
     expect(ordinaPerScadenza([a, b]).map((r) => r.id)).toEqual(['b', 'a']);
+  });
+});
+
+describe('scadenza effettiva', () => {
+  it('non supera l’inizio dello slot', () => {
+    const r = req({ data: '2026-11-10', inizio: '14:00', scadenza: ts(Date.parse('2026-11-12T10:00:00')) });
+    expect(scadenzaEffettiva(r)).toBe(new Date(2026, 10, 10, 14, 0).getTime());
+    const presto = req({ data: '2026-11-20', scadenza: ts(5) });
+    expect(scadenzaEffettiva(presto)).toBe(5);
+  });
+  it('blocca la conferma di un orario già passato', () => {
+    const r = req({ data: '2026-11-09' });
+    expect(motivoBloccoConferma(r, [], (u) => u, NOW)).toMatch(/già passato/);
   });
 });
 

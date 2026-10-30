@@ -61,7 +61,7 @@ export default function Configurazione({ d }: PropsSezione) {
       </Sezione>
 
       <Sezione titolo="Punteggio" id="cfg-punteggio">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid items-start gap-4 sm:grid-cols-3">
           <Field label="Punti per la vittoria" error={errors.puntiVittoria?.message}>
             {(p) => <Input {...p} {...register('puntiVittoria', numero)} type="number" inputMode="numeric" min={0} max={10} />}
           </Field>
@@ -69,7 +69,7 @@ export default function Configurazione({ d }: PropsSezione) {
             {(p) => <Input {...p} {...register('puntiSconfitta', numero)} type="number" inputMode="numeric" min={0} max={10} />}
           </Field>
           <Field
-            label="Bonus sconfitta al set decisivo"
+            label="Bonus al set decisivo"
             hint="Punti in più a chi perde arrivando al set decisivo."
             error={errors.puntiSconfittaSetDecisivo?.message}
           >
@@ -198,7 +198,7 @@ export default function Configurazione({ d }: PropsSezione) {
             />
           </div>
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             label="Scadenza delle richieste (ore)"
             hint="Se non accettano tutti entro questo tempo, la richiesta scade."
@@ -216,21 +216,19 @@ export default function Configurazione({ d }: PropsSezione) {
         </div>
       </Sezione>
 
+      {isDirty && (
       <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex flex-wrap items-center justify-between gap-3 rounded-panel border border-line bg-surface px-4 py-3 shadow-raised lg:bottom-4">
-        <p className="text-sm text-ink-muted" aria-live="polite">
-          {isDirty ? 'Hai modifiche non salvate.' : 'Nessuna modifica da salvare.'}
-        </p>
+        <p className="text-sm font-semibold">Hai modifiche non salvate.</p>
         <div className="flex flex-wrap gap-2">
-          {isDirty && (
-            <Button type="button" variant="ghost" onClick={() => reset(formDaTorneo(torneo.nome, torneo.config))}>
-              Annulla modifiche
-            </Button>
-          )}
-          <Button type="submit" variant="primary" loading={salva.isPending} disabled={!isDirty}>
+          <Button type="button" variant="ghost" onClick={() => reset(formDaTorneo(torneo.nome, torneo.config))}>
+            Annulla modifiche
+          </Button>
+          <Button type="submit" variant="primary" loading={salva.isPending}>
             Salva configurazione
           </Button>
         </div>
       </div>
+      )}
     </form>
   );
 }

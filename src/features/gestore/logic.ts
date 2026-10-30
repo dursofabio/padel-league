@@ -44,11 +44,20 @@ export function scadenzaTesto(scadenzaMs: number, now: number): Scadenza {
   return { testo: `scade tra ${Math.floor(ore / 24)} g`, urgente, scaduta: false };
 }
 
-/** Inbox order (G1): soonest expiry first, then date and time. */
+/** Start of the requested slot (local club time) in ms. */
+export function inizioMs(r: Pick<Richiesta, 'data' | 'inizio'>): number {
+  return parseDate(r.data).getTime() + toMin(r.inizio) * 60_000;
+}
+
+/** A request can never be useful after its own start: the effective deadline is the earlier of the two. */
+export function scadenzaEffettiva(r: Pick<Richiesta, 'scadenza' | 'data' | 'inizio'>): number {
+  return Math.min(r.scadenza.toMillis(), inizioMs(r));
+}
+
+/** Inbox order (G1): soonest (effective) expiry first, then date and time. */
 export function ordinaPerScadenza<T extends Pick<Richiesta, 'scadenza' | 'data' | 'inizio'>>(rs: T[]): T[] {
   return [...rs].sort(
-    (a, b) =>
-      a.scadenza.toMillis() - b.scadenza.toMillis() || a.data.localeCompare(b.data) || a.inizio.localeCompare(b.inizio),
+    (a, b) => scadenzaEffettiva(a) - scadenzaEffettiva(b) || a.data.localeCompare(b.data) || a.inizio.localeCompare(b.inizio),
   );
 }
 
@@ -98,6 +107,7 @@ export function motivoBloccoConferma(
   nome: (uid: string) => string,
   now = Date.now(),
 ): string | null {
+  if (inizioMs(r) <= now) return 'L’orario richiesto è già passato: rifiutala o proponi un altro orario.';
   if (r.scadenza.toMillis() <= now) return 'La richiesta è scaduta: non si può più confermare.';
   const a = accettazioni(r);
   if (a.mancanti.length || a.date < 4) {

@@ -52,7 +52,15 @@ export default function Calendario({ d }: PropsSezione) {
             {esito ? `${esito} partite create.` : `Calendario generato: ${pg.length} partite.`} I gironi ora sono bloccati.
           </Nota>
         </div>
-        {linkCalendario}
+        <div className="flex flex-wrap gap-x-6">
+          {linkCalendario}
+          <Link
+            to={`/t/${torneo.id}/organizza/monitoraggio`}
+            className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-court underline dark:text-info-ink"
+          >
+            Segui l’andamento in Monitoraggio <ArrowRight className="size-4" aria-hidden />
+          </Link>
+        </div>
       </Sezione>
     );
 

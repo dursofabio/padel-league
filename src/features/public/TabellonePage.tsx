@@ -6,10 +6,10 @@ import { Bracket } from '../../components/Bracket';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/states';
 import { useCampi, useTorneoData } from '../../data/queries';
-import { derivaTabellone, nomeTurno } from '../../lib/bracket';
+import { derivaTabellone, generaTabellone, nomeTurno, qualifica } from '../../lib/bracket';
 import { formatRisultato, risultatoUfficiale } from '../../lib/results';
-import { nomeSquadra } from '../../lib/torneo';
-import type { Partita, Squadra } from '../../types';
+import { classificheTorneo, nomeSquadra } from '../../lib/torneo';
+import type { Partita, Squadra, Torneo } from '../../types';
 import { cn } from '../../ui/cn';
 import { Segmented } from '../../ui/misc';
 import { AvvisoOffline, InvitoAccesso, nomeFase, RigaVincitori, StatoTorneoPagina, useMiaSquadra, useOnline } from './comune';
@@ -29,9 +29,20 @@ export default function TabellonePage() {
 
   const partite = useMemo(() => d.partite.filter((p) => p.fase === chiave), [d.partite, chiave]);
   const derivate = useMemo(() => (d.torneo ? derivaTabellone(partite, d.torneo.config.formatoSet) : new Map()), [partite, d.torneo]);
+  // Not generated yet: provisional crossings "if the groups ended today", computed only when needed.
+  const anteprima = useMemo(
+    () => (d.torneo && partite.length === 0 ? bracketProvvisorio(d.torneo, d.squadre, d.partite, chiave) : []),
+    [d.torneo, d.squadre, d.partite, partite.length, chiave],
+  );
 
   const stato = StatoTorneoPagina({ isPending: d.isPending, error: d.error, torneo: d.torneo, refetch: d.refetch });
-  if (stato || !d.torneo) return stato;
+  if (stato || !d.torneo)
+    return (
+      <>
+        <PageHeader titolo="Tabellone" sottotitolo={d.torneo?.nome} indietro={{ to: `/t/${tid}`, label: 'Torneo' }} />
+        {stato}
+      </>
+    );
   const torneo = d.torneo;
   const fasi = torneo.config.fasiFinali.map((f) => f.nome.toLowerCase());
   const titolo = `Tabellone ${nomeFase(torneo, chiave)}`;
@@ -60,7 +71,16 @@ export default function TabellonePage() {
       )}
 
       {partite.length === 0 ? (
-        <EmptyState titolo="Il tabellone si crea alla fine dei gironi." testo="Quando l’organizzatore genera le fasi finali, qui trovi gli incroci e i risultati." />
+        anteprima.length ? (
+          <div className="grid gap-4">
+            <p className="max-w-prose text-ink-muted">
+              Il tabellone si crea alla fine dei gironi. Questa è un’anteprima: gli incroci se i gironi finissero oggi.
+            </p>
+            <Bracket anteprima partite={anteprima} derivate={new Map()} squadraById={d.squadraById} campi={[]} evidenzia={mia ? [mia.id] : undefined} />
+          </div>
+        ) : (
+          <EmptyState titolo="Il tabellone si crea alla fine dei gironi." testo="Quando l’organizzatore genera le fasi finali, qui trovi gli incroci e i risultati." />
+        )
       ) : (
         <div className="grid gap-5">
           {torneo.stato === 'concluso' && <RigaVincitori torneo={torneo} partite={d.partite} squadraById={d.squadraById} />}
@@ -159,4 +179,22 @@ function Elenco({
       ))}
     </ol>
   );
+}
+
+/** Provisional bracket of a phase from today's standings (never saved). */
+function bracketProvvisorio(torneo: Torneo, squadre: Squadra[], partite: Partita[], fase: string): Partita[] {
+  if (!partite.some((p) => p.fase === 'gironi')) return [];
+  const cfg = torneo.config;
+  const q = qualifica(classificheTorneo(torneo, squadre, partite), cfg.fasiFinali, cfg.criterioQualificazione, torneo.sorteggio ?? {});
+  const f = q.fasi.find((x) => x.nome.toLowerCase() === fase);
+  if (!f || f.squadre.length < 2) return [];
+  const gironeDi = new Map(f.squadre.map((s) => [s.squadraId, s.girone]));
+  return generaTabellone(fase, f.squadre.map((s) => s.squadraId), (id) => gironeDi.get(id)).map((t) => ({
+    ...t,
+    fase,
+    giocatoriA: [],
+    giocatoriB: [],
+    giocatori: [],
+    stato: 'da programmare' as const,
+  }));
 }

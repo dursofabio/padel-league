@@ -5,10 +5,10 @@ import { WhatsAppButton } from '../../../../components/WhatsAppButton';
 import { azioni } from '../../../../data/mutations';
 import type { StatoSlot } from '../../../../lib/slots';
 import { labelDate } from '../../../../lib/time';
-import { Button, Field, Sheet, Textarea } from '../../../../ui';
+import { Button, cn, Field, Sheet, Textarea } from '../../../../ui';
 import { nomeCampo, type ContestoPartita } from '../contesto';
 import { descriviOccupazione, elencoNomi, etichettaSlot } from '../logica';
-import { Avviso, Pill, SLOT_UI } from '../parti';
+import { AVVOLGI, Avviso, Pill, SLOT_UI } from '../parti';
 import { hintDi, useAzionePartita } from '../useAzionePartita';
 
 const RIAPRI = ['SLOT_TAKEN', 'MATCH_HAS_REQUEST', 'OVERLAP', 'EXPIRED', 'IN_PAST', 'COURT_CLOSED'];
@@ -58,7 +58,7 @@ export function SlotSheet({
       }
       footer={
         richiedibile ? (
-          <Button variant="primary" size="lg" block loading={invia.isPending} onClick={inviaRichiesta}>
+          <Button variant="primary" size="lg" block className="whitespace-normal" loading={invia.isPending} onClick={inviaRichiesta}>
             <Send aria-hidden /> Invia richiesta al campo
           </Button>
         ) : (
@@ -68,7 +68,7 @@ export function SlotSheet({
         )
       }
     >
-      <div className="grid gap-5">
+      <div className={cn('grid gap-5', AVVOLGI)}>
         <Pill icona={ui.icona} tono={ui.tono} className="justify-self-start">
           {colore === 'verde' ? 'Liberi tutti e 4' : etichettaSlot(stato, partita.giocatori.length)}
         </Pill>

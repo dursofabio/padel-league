@@ -12,9 +12,9 @@ import { useAuth } from '../../../auth/AuthProvider';
 import { useCampi, useRichiesteGiocatore, useTorneoData } from '../../../data/queries';
 import { labelDate, today } from '../../../lib/time';
 import type { Partita, Richiesta } from '../../../types';
-import { Button } from '../../../ui';
+import { Button, cn } from '../../../ui';
 import { GRUPPI, gruppoPartita, inRitardo, istante, traQuanto, type GruppoPartita, type MotivoTurno } from './logica';
-import { InRitardoBadge, Pill, useOra } from './parti';
+import { AVVOLGI, InRitardoBadge, Pill, useOra } from './parti';
 
 interface Voce {
   p: Partita;
@@ -108,7 +108,7 @@ export default function PartitePage() {
   return (
     <>
       {header}
-      <div className="grid gap-8">
+      <div className={cn('grid gap-8', AVVOLGI)}>
         {GRUPPI.map(({ id, titolo }) => {
           const lista = gruppi.get(id);
           if (!lista?.length) return null;
