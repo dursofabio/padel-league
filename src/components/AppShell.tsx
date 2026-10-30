@@ -176,7 +176,7 @@ export function AppShell() {
         mobileOffset={{ bottom: '5.5rem' }}
         richColors
         closeButton
-        toastOptions={{ className: 'font-sans !text-base', style: { fontSize: '1rem' } }}
+        toastOptions={{ className: 'font-sans !text-base', style: { fontSize: 'var(--text-base)' } }}
       />
     </div>
   );

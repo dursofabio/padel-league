@@ -94,7 +94,7 @@ export function CourtLanes({
             className="relative rounded-b-control border-x border-b border-line bg-surface-2"
             style={{
               height: altezza,
-              // court lines: one white line per hour, a lighter one every half hour
+              // court lines: one line every 30 minutes, start times sit on the lines
               backgroundImage: `repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px ${30 * scala.px}px)`,
               backgroundPosition: `0 0`,
             }}

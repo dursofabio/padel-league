@@ -57,8 +57,8 @@ export const STATO_SLOT: Record<ColoreSlot, Voce> = {
 };
 
 export const TIPO_OCCUPAZIONE: Record<TipoOccupazione, string> = {
-  esterno: 'Prenotazione esterna',
+  esterno: 'Esterno',
   lezione: 'Lezione',
-  chiusura: 'Chiusura',
+  chiusura: 'Chiuso',
   campionato: 'Partita del campionato',
 };
