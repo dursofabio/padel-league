@@ -133,6 +133,8 @@ export interface Partita {
   richiestaId?: string | null;
   programmazione?: Programmazione | null;
   risultato?: Risultato | null;
+  /** Ultima modifica (ISO): serve a segnalare i risultati non confermati da troppo tempo. */
+  updatedAt?: string;
 }
 
 export interface Campo {
@@ -212,6 +214,8 @@ export interface Richiesta {
   scadenza: Instant;
   creatoDa: string;
   nota?: string | null;
+  /** Creazione (ISO). */
+  createdAt?: string;
 }
 
 /**

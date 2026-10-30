@@ -99,6 +99,7 @@ export function toPartite(rows: Views<'partite_v'>[]): Partita[] {
             nota: r.nota_risultato,
           }
         : null,
+    updatedAt: r.updated_at,
   }));
 }
 
@@ -177,6 +178,7 @@ export function toRichieste(rows: Tables<'richieste'>[], giocatori: Tables<'rich
       scadenza: instant(r.scadenza),
       creatoDa: r.creato_da,
       nota: r.nota,
+      createdAt: r.created_at,
     };
   });
 }

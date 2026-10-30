@@ -76,8 +76,7 @@ export default function GiornataPage() {
   useLayoutEffect(() => {
     if (!pronto || !scroller.current) return;
     scroller.current.scrollTop = Math.max(0, (minutoIniziale(eOggi, oraMin) - scala.da) * scala.px);
-    // only when the day changes or data first arrives
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // only when the day changes or the data first arrives
   }, [pronto, data]);
 
   useEffect(() => setEsito(null), [data]);
@@ -192,10 +191,24 @@ export default function GiornataPage() {
           <Legenda />
           <div
             ref={scroller}
-            className="max-h-[70dvh] overflow-y-auto overscroll-contain rounded-panel [&_.rounded-t-control]:sticky [&_.rounded-t-control]:top-0 [&_.rounded-t-control]:z-20"
+            className="max-h-[70dvh] overflow-y-auto overscroll-contain rounded-panel"
             tabIndex={0}
+            role="region"
             aria-label="Linea del tempo dei campi, scorri per vedere tutte le ore"
           >
+            {/* court names stay visible while scrolling: overlays the lanes' own header row */}
+            <div
+              aria-hidden
+              className="sticky top-0 z-20 -mb-8 grid h-8 gap-x-1.5"
+              style={{ gridTemplateColumns: `2.75rem repeat(${lista.length}, minmax(0, 1fr))` }}
+            >
+              <span className="bg-bg" />
+              {lista.map((c) => (
+                <span key={c.id} className="truncate rounded-t-control bg-court px-2 py-1.5 text-center text-sm font-bold text-court-ink">
+                  {c.nome}
+                </span>
+              ))}
+            </div>
             <GiornoLanes
               data={data}
               campi={lista}
@@ -365,7 +378,7 @@ function FormOccupazione({
         )}
       </Field>
       <div className="grid gap-1.5">
-        <span className="text-sm font-semibold" id="tipo-occ">
+        <span className="text-sm font-semibold" aria-hidden>
           Tipo
         </span>
         <Segmented label="Tipo di occupazione" value={b.tipo} onValueChange={(v) => set('tipo', v)} options={TIPI} />
@@ -426,12 +439,7 @@ function DettaglioOccupazione({
     successo: 'Partita annullata: il campo è di nuovo libero.',
     onSuccess: () => (setConferma(false), setNota(''), onOpenChange(false)),
   });
-  if (!o)
-    return (
-      <Sheet open={false} onOpenChange={onOpenChange} title="Occupazione">
-        {null}
-      </Sheet>
-    );
+  if (!o) return null;
   const a = ASPETTO_TIPO[o.tipo];
   const orario = `${o.inizio}–${fineLeggibile(o.fine)}`;
   const campionato = o.tipo === 'campionato';
