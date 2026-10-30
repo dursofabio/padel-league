@@ -27,14 +27,5 @@
   },
   "include": [
     "src"
-  ],
-  "exclude": [
-    "src/pages",
-    "src/hooks",
-    "src/services",
-    "src/firebase.ts",
-    "src/components/Layout.tsx",
-    "src/components/PartitaRiga.tsx",
-    "src/components/ui.tsx"
   ]
 }
