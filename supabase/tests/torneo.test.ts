@@ -170,6 +170,13 @@ describe('job pianificati', () => {
       expect(await db.val('select private.job_non_giocate()')).toBe(0);
     }));
 
+  it('service_role aggiorna i ruoli (seed, admin lato server)', () =>
+    tx(async (db) => {
+      const b = await base(db);
+      await db.as('service_role').q(`update public.profiles set roles = '{gestore,giocatore}' where id = $1`, [b.a1]);
+      expect(await db.val(`select roles::text from public.profiles where id = $1`, [b.a1])).toBe('{gestore,giocatore}');
+    }));
+
   it('email_promemoria solo per service_role', () =>
     tx(async (db) => {
       const b = await base(db);
