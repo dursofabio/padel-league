@@ -160,10 +160,13 @@ export function GiornoLanes({
                 >
                   {/* short blocks (≤ 75'): title and time on one line; the note is in the accessible name and in the details */}
                   {minutiTra(o.inizio, o.fine) <= 75 ? (
-                    <span className="flex items-center gap-1 font-semibold">
-                      <a.icon className="size-4 shrink-0" aria-hidden />
-                      <span className="truncate">{titolo}</span>
-                      <span className="tabular ml-auto shrink-0 text-sm font-normal">{orario}</span>
+                    <span className="@container block">
+                      <span className="flex items-center gap-1 font-semibold">
+                        <a.icon className="size-4 shrink-0" aria-hidden />
+                        <span className="leading-tight">{titolo}</span>
+                        {/* narrow lane: the time is already on the axis; the title is never cut */}
+                        <span className="tabular ml-auto hidden shrink-0 text-sm font-normal @[10rem]:inline">{orario}</span>
+                      </span>
                     </span>
                   ) : (
                     <>

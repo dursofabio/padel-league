@@ -93,3 +93,28 @@ This is not a material finding for an Operate surface. Earned familiarity is the
 ## keep
 
 Keep the two court lanes with the 30' stagger, start times on the lines and hatched lost slots, together with the collapsed "only good slots" phone grid and the 4/4 → manager-confirm request block. These carry the product, so the fixes above must not flatten them into cards or lists.
+
+---
+
+# Verdict pass (after fix commit b6c7766)
+
+Scored against the 48 recaptures at the same paths. Regressions were judged on the same captures. I checked source only where noted.
+
+## verdict
+
+| # | Fix | Score | Evidence in the recaptures |
+|---|---|---|---|
+| 1 | No side stripe on the active sidebar item | resolved | The stripe is gone. The active item is now a fill with a 1px court-line ring and a lime icon (`giocatore-dafare-1440-light`, `org-configurazione-1440-dark`, `gestore-richieste-1440-dark`). In dark, the active fill is clearly distinct from the sidebar. |
+| 2 | 5-item tab bar breaks "Disponibilità" mid-word | resolved | The label is now "Orari" on one line: `gestore-giornata-390-light`, `org-panoramica-390-dark`, `gestore-richieste-820-light`. No other label wraps. |
+| 3 | Dark selection states invisible or inverted | resolved | In `org-configurazione-1440-dark`, both switches are a lime track with a dark thumb, so ON is unambiguous, and "30 minuti" is lime. In `giocatore-disponibilita-1440-dark`, the selected Periodo, "Vista settimana" and "Sera 18–23" are lime, matching OWN-WORLD. |
+| 4 | Manager timeline must never show cut text | partial | 1440: the lesson block now reads "Lezione · 16:00–17:00" on one line, uncut (`gestore-richieste-1440-dark`). 820, the manager's tablet: the title is truncated to "Lezi…" beside the time (`gestore-richieste-820-light`). The cut is now an ellipsis instead of a sliced glyph, but the finding asked for no visible text to be cut, and that still fails on the manager's main device. |
+
+**Regressions from this batch:** none beyond the 820 truncation in row 4.
+
+**Non-material notes:** the mobile tab now says "Orari" while the sidebar and the page title still say "Disponibilità". That is acceptable because the icon is the same, but align the naming in the documentation. In dark, "Aggiungi a tutto il periodo" is a navy button, still not lime.
+
+## remaining
+
+- **Fix 4, 820 px, manager timeline** (`src/features/gestore/GiornoLanes.tsx`). When the lane is too narrow for "title + time" on one line, do not truncate. Either let the 60' block take two lines (title on the first, time on the second; a 60' block is about 60 px tall and fits two lines at the current leading), or drop the time and show icon plus title. The block's start and end are already readable on the hour gutter. Re-check at 820 and 390.
+
+disposition: fix
