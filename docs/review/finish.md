@@ -118,3 +118,26 @@ Scored against the 48 recaptures at the same paths. Regressions were judged on t
 - **Fix 4, 820 px, manager timeline** (`src/features/gestore/GiornoLanes.tsx`). When the lane is too narrow for "title + time" on one line, do not truncate. Either let the 60' block take two lines (title on the first, time on the second; a 60' block is about 60 px tall and fits two lines at the current leading), or drop the time and show icon plus title. The block's start and end are already readable on the hour gutter. Re-check at 820 and 390.
 
 disposition: fix
+
+---
+
+# Verdict pass 2 (fix #4 only, commit 15c4cfd)
+
+## verdict
+
+| # | Fix | Score | Evidence |
+|---|---|---|---|
+| 4 | Manager timeline must never show cut text | resolved | **820** (`gestore-richieste-820-light`): the lesson block reads "Lezione 16:00–17:00" in full, with no ellipsis and no clipped glyph. **1440** (`gestore-richieste-1440-light/dark`): "Lezione" and "16:00–17:00" sit on one line, uncut. **390** (`gestore-giornata-390-*`): the lanes and free-slot blocks are intact, but no occupation is captured that day, so the narrow case is not shown on screen. **Source** (`src/features/gestore/GiornoLanes.tsx:162-169`): for blocks of 75' or less, the title has no truncate or clamp. The time is hidden below a 10rem container width, so a narrow block shows icon plus the full title, and the hour axis gives the time. |
+
+**Regressions:** none.
+
+**Other points:**
+- The dark "Aggiungi a tutto il periodo" court-variant button is accepted as a deliberate secondary action, so lime stays reserved for one primary action per screen.
+- Seed housekeeping is noted. The stray seed file was deleted, and `roll.json` is local, gitignored state.
+- This ship covers the four material fixes from this review (all now resolved) and the prior critique and audit items scored above. S7, the 219 KB initial JS, stays a recorded deviation against the 180 KB budget. It is not a blocker.
+
+## remaining
+
+clear
+
+disposition: ship
