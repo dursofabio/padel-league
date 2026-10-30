@@ -107,6 +107,27 @@ describe('squadre e inviti', () => {
 });
 
 describe('richieste', () => {
+  it('la scadenza non supera mai l’inizio dello slot', () =>
+    tx(async (db) => {
+      const b = await base(db);
+      const id = await db.as(b.a1).rpc<string>('create_request', { p_partita: b.P, p_campo: 'c1', p_data: DATA, p_inizio: '18:00' });
+      // slot moved to tomorrow at 10:00: the deadline (now + 48h) must be capped at that start
+      await db.q(
+        `update public.richieste set data = ((now() at time zone 'Europe/Rome')::date + 1), inizio = '10:00' where id = $1`,
+        [id],
+      );
+      const ok = await db.val<boolean>(
+        `select scadenza <= ((data + inizio) at time zone 'Europe/Rome') from public.richieste where id = $1`,
+        [id],
+      );
+      expect(ok).toBe(true);
+      // slot already started: the request is expired and job_scadenze frees the match
+      await db.q(`update public.richieste set data = ((now() at time zone 'Europe/Rome')::date - 1) where id = $1`, [id]);
+      await db.val('select private.job_scadenze()');
+      expect(await db.val(`select stato::text from public.richieste where id = $1`, [id])).toBe('scaduta');
+      expect(await partita(db, b.P)).toMatchObject({ stato: 'da programmare' });
+    }));
+
   it('solo uno dei 4 giocatori crea la richiesta, con lock sullo slot', () =>
     tx(async (db) => {
       const b = await base(db);
