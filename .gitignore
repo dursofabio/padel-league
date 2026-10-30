@@ -6,3 +6,5 @@ dist
 scripts/node_modules
 service-account*.json
 *.tsbuildinfo
+.claude/skills/impeccable/scripts/bin/
+.impeccable/cache/
