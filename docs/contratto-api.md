@@ -24,7 +24,7 @@ Conventions:
 |---|---|---|---|---|
 | `profiles` | `id uuid` (= auth.users.id), `nome text`, `email text`, `telefono text`, `roles app_role[]` (≥ `{giocatore}`), `created_at` | no | yes | own row: `nome`, `telefono` |
 | `giocatori_pubblici` (view) | `id`, `nome` | yes | yes | — |
-| `tornei` | `id uuid`, `nome`, `stato`, `config jsonb` (shape = `TorneoConfig` in `src/types.ts`, camelCase keys), `sorteggio jsonb` (`{squadraId: n}`), `fasi_generate text[]`, `created_at` | yes | yes | org: `nome`, `config`, `sorteggio`; admin: insert/delete |
+| `tornei` | `id uuid`, `nome`, `stato`, `config jsonb` (shape = `TorneoConfig` in `src/types.ts`, camelCase keys; includes `annullamentoGiocatoreOre`, default 24), `sorteggio jsonb` (`{squadraId: n}`), `fasi_generate text[]`, `created_at` | yes | yes | org: `nome`, `config`, `sorteggio`; admin: insert/delete |
 | `periodi` | `id uuid`, `torneo_id`, `fase text`, `turno int?`, `inizio date`, `fine date`, `etichetta text` | yes | yes | org: CRUD |
 | `squadre` | `id uuid`, `torneo_id`, `nome`, `girone text?`, `stato`, `creato_da uuid`, `created_at` | yes | yes | org: `girone`, `stato`, `nome`, delete; creator: `nome` until approved, delete while `in attesa partner` |
 | `squadra_giocatori` | `squadra_id`, `torneo_id`, `user_id`, `ordine smallint (1,2)` | yes | yes | — (RPC) |
@@ -53,6 +53,7 @@ All are SECURITY DEFINER; `authenticated` only (`email_promemoria` is `service_r
 | `confirm_request` | `p_richiesta uuid` | `jsonb {esito: 'ok'\|'occupato'\|'scaduta', conflitti: int}` | gestore |
 | `reject_request` | `p_richiesta uuid, p_nota text default null` | `void` | gestore |
 | `cancel_confirmed` | `p_richiesta uuid, p_nota text default null` | `void` | gestore |
+| `player_cancel_confirmed` | `p_richiesta uuid, p_nota text default null` | `void` | a player of the match, until `config.annullamentoGiocatoreOre` hours before the start (otherwise hint `TOO_LATE`). Frees the court (deletes the occupation), request → `annullata`, match → `da programmare` |
 | `counter_propose` | `p_richiesta uuid, p_campo text, p_data date, p_inizio time, p_nota text default null` | `uuid` (new request) | gestore |
 | `add_occupation` | `p_campo text, p_data date, p_inizio time, p_fine time, p_tipo tipo_occupazione, p_nota text default null` | `jsonb {id, conflitti}` | gestore (`tipo` ≠ `campionato`) |
 | `remove_occupation` | `p_id uuid` | `void` | gestore (not `campionato`) |
@@ -71,6 +72,7 @@ All are SECURITY DEFINER; `authenticated` only (`email_promemoria` is `service_r
 | `generate_calendar` | `p_torneo uuid, p_partite jsonb` (`[{codice, girone, turno, posizione, squadra_a, squadra_b, periodo_id}]`) | `int` | org |
 | `generate_finals` | `p_torneo uuid, p_fase text, p_partite jsonb` (`[{codice, turno, posizione, prossima_codice, lato, squadra_a, squadra_b, periodo_id}]`) | `int` | org |
 | `sync_bracket` | `p_torneo uuid, p_updates jsonb` (`[{codice, squadra_a, squadra_b}]`) | `int` | org |
+| `set_tournament_state` | `p_torneo uuid, p_stato stato_torneo` | `void` | org. Allowed: any → `concluso`; `concluso` → previous state (`fasiFinali` if `fasi_generate` is not empty, else `gironi` if group matches exist, else `iscrizioni`); `gironi` → `iscrizioni` only without group matches. `iscrizioni`→`gironi` only via `generate_calendar`, `gironi`→`fasiFinali` only via `generate_finals`. Otherwise `BAD_STATE` |
 | `set_roles` | `p_user uuid, p_roles app_role[]` | `void` | admin |
 
 Server-side rules worth knowing on the client:
@@ -96,6 +98,7 @@ RPCs raise `P0001` with an Italian `message` and a code in `hint`. The client ma
 | `OFF_GRID_DISABLED` / `BAD_STEP` / `COURT_CLOSED` / `IN_PAST` | off-grid / time checks |
 | `INVALID_SCORE` | sets not valid (`message` explains) |
 | `ALREADY_CONFIRMED` | result already confirmed |
+| `TOO_LATE` | player cancellation too close to the start |
 | `TEAM_FULL` / `ALREADY_IN_TEAM` / `BAD_TOKEN` / `REGISTRATION_CLOSED` | teams |
 | `CALENDAR_EXISTS` / `BAD_CALENDAR` / `PHASE_EXISTS` / `BAD_BRACKET` | generation |
 

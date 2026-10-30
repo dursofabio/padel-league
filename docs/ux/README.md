@@ -155,3 +155,12 @@ Verbatim from the briefs, grouped by file. IDs are referenced across briefs.
 - **ASSUNZIONE O9**: The phone number is optional; WhatsApp links fall back to "choose a contact" when it is missing.
 - **ASSUNZIONE O10**: Organizer screens are usable on mobile but optimised for desktop; nothing is blocked by screen size.
 
+
+## Decisions confirmed by the user (they override the assumptions above)
+
+- **P2 confirmed**: 3/4 slots can be requested; the missing player accepts explicitly; the manager confirms only at 4/4.
+- **P4 changed**: players **can** cancel a confirmed match from the app until `config.annullamentoGiocatoreOre` hours before the start (default 24), RPC `player_cancel_confirmed`. Past the deadline the button is replaced by "Scrivi al gestore" (WhatsApp) with the explanation; server error `TOO_LATE`. The cancellation needs an AlertDialog ("Annullare la partita? Il campo torna libero per tutti").
+- **H3 confirmed**: after the period ends the match stays bookable and shows "In ritardo" until the organizer decides.
+- **O5 changed**: the whole configuration, set format included, stays editable during the season. If results already exist, the configuration screen warns: "Ci sono già N risultati: cambiare il formato dei set può renderne alcuni non validi; correggili da Monitoraggio."
+- **O1 resolved**: new RPC `set_tournament_state` (close registrations is not needed: `generate_calendar` moves to `gironi`; "Concludi torneo" and "Riapri" from Panoramica).
+- All other assumptions (H1–H8 except H3, D1–D6, P1, P3, P5–P7, R1–R6, G1–G8, PB1–PB5, O2–O4, O6–O10) are accepted as written.

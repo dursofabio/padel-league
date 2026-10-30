@@ -47,6 +47,8 @@ export interface TorneoConfig {
   consentiFuoriGriglia: boolean;
   passoFuoriGriglia: 15 | 30;
   scadenzaRichiesteOre: number;
+  /** Ore prima dell'inizio entro cui un giocatore può annullare una partita confermata. */
+  annullamentoGiocatoreOre: number;
 }
 
 export type StatoTorneo = 'iscrizioni' | 'gironi' | 'fasiFinali' | 'concluso';

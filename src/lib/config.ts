@@ -15,6 +15,7 @@ export const CONFIG_DEFAULT: TorneoConfig = {
   consentiFuoriGriglia: true,
   passoFuoriGriglia: 30,
   scadenzaRichiesteOre: 48,
+  annullamentoGiocatoreOre: 24,
 };
 
 /** Completa una configurazione salvata (anche parziale) con i default. */

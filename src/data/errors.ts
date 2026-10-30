@@ -14,6 +14,7 @@ const PER_HINT: Record<string, string> = {
   IN_PAST: 'L’orario è già passato.',
   INVALID_SCORE: 'Il punteggio non è valido.',
   ALREADY_CONFIRMED: 'Il risultato è già stato confermato.',
+  TOO_LATE: 'È troppo tardi per annullare dall’app: scrivi al gestore del campo.',
   TEAM_FULL: 'La coppia è già completa.',
   ALREADY_IN_TEAM: 'Fai già parte di una coppia in questo torneo.',
   BAD_TOKEN: 'Il link d’invito non è valido o è scaduto.',

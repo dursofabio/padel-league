@@ -28,6 +28,8 @@ export const azioni = {
   rifiutaRichiesta: (a: { richiesta: string; nota?: string }) => rpc('reject_request', { p_richiesta: a.richiesta, p_nota: a.nota ?? null }),
   annullaConfermata: (a: { richiesta: string; nota?: string }) =>
     rpc('cancel_confirmed', { p_richiesta: a.richiesta, p_nota: a.nota ?? null }),
+  annullaPartitaGiocatore: (a: { richiesta: string; nota?: string }) =>
+    rpc('player_cancel_confirmed', { p_richiesta: a.richiesta, p_nota: a.nota ?? null }),
   controproponi: (a: { richiesta: string; campo: string; data: string; inizio: string; nota?: string }) =>
     rpc('counter_propose', { p_richiesta: a.richiesta, p_campo: a.campo, p_data: a.data, p_inizio: a.inizio, p_nota: a.nota ?? null }),
 

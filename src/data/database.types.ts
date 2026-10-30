@@ -79,6 +79,7 @@ export type Database = {
       confirm_request: Fn<{ p_richiesta: string }, Json>;
       reject_request: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
       cancel_confirmed: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
+      player_cancel_confirmed: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
       counter_propose: Fn<{ p_richiesta: string; p_campo: string; p_data: string; p_inizio: string; p_nota?: string | null }, string>;
       add_occupation: Fn<{ p_campo: string; p_data: string; p_inizio: string; p_fine: string; p_tipo: TipoOccupazione; p_nota?: string | null }, Json>;
       remove_occupation: Fn<{ p_id: string }, undefined>;
@@ -97,6 +98,7 @@ export type Database = {
       generate_calendar: Fn<{ p_torneo: string; p_partite: Json }, number>;
       generate_finals: Fn<{ p_torneo: string; p_fase: string; p_partite: Json }, number>;
       sync_bracket: Fn<{ p_torneo: string; p_updates: Json }, number>;
+      set_tournament_state: Fn<{ p_torneo: string; p_stato: StatoTorneo }, undefined>;
       set_roles: Fn<{ p_user: string; p_roles: AppRole[] }, undefined>;
     };
     Enums: {

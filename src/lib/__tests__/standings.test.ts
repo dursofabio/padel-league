@@ -6,7 +6,7 @@ const config: TorneoConfig = {
   puntiVittoria: 3, puntiSconfitta: 0, puntiSconfittaSetDecisivo: 1,
   formatoSet: { setPerVincere: 2, superTieBreak: true },
   spareggi: ['punti', 'scontroDiretto', 'diffSet', 'diffGame', 'sorteggio'],
-  criterioQualificazione: 'perPosizione', fasiFinali: [], consentiFuoriGriglia: true, passoFuoriGriglia: 30, scadenzaRichiesteOre: 48,
+  criterioQualificazione: 'perPosizione', fasiFinali: [], consentiFuoriGriglia: true, passoFuoriGriglia: 30, scadenzaRichiesteOre: 48, annullamentoGiocatoreOre: 24,
 };
 let n = 0;
 const P = (a: string, b: string, set: [number, number][], stato: Partita['stato'] = 'giocata'): Partita => ({
