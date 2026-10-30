@@ -42,7 +42,10 @@ export function CourtLanes({
   caption,
   className,
   oraCorrente,
+  stickyTop,
 }: {
+  /** Court names stay visible while scrolling (CSS top offset, e.g. '0px' or '3.5rem'). */
+  stickyTop?: string;
   campi: Campo[];
   scala: LanesScala;
   /** Blocks (absolutely positioned with `posizione`) of one court's lane. */
@@ -64,7 +67,11 @@ export function CourtLanes({
       >
         <div aria-hidden />
         {campi.map((c) => (
-          <div key={c.id} className="rounded-t-control bg-court px-2 py-1.5 text-center text-sm font-bold text-court-ink">
+          <div
+            key={c.id}
+            className={cn('rounded-t-control bg-court px-2 py-1.5 text-center text-sm font-bold text-court-ink', stickyTop && 'sticky z-20')}
+            style={stickyTop ? { top: stickyTop } : undefined}
+          >
             {c.nome}
           </div>
         ))}
@@ -123,19 +130,23 @@ export function LaneBlock({
   ariaLabel,
   className,
   sfalsato,
+  buttonProps,
 }: {
   scala: LanesScala;
   inizio: string;
   fine: string;
   tono: 'ok' | 'warn' | 'danger' | 'info' | 'idle' | 'court';
-  pattern?: 'hatch' | 'dots';
+  pattern?: 'hatch' | 'dots' | 'cross';
   selezionato?: boolean;
   children: ReactNode;
   onClick?: () => void;
+  /** Must begin with the visible text (voice control): e.g. "14:00, Campo 2, tutti e 4 liberi". */
   ariaLabel?: string;
   className?: string;
   /** Narrower block (e.g. an occupation on top of a grid slot). */
   sfalsato?: boolean;
+  /** Extra props for the inner button (ref, tabIndex, onKeyDown, data-*). */
+  buttonProps?: React.ButtonHTMLAttributes<HTMLButtonElement> & { ref?: React.Ref<HTMLButtonElement> };
 }) {
   const toni = {
     ok: 'bg-ok-soft text-ok-ink border-ok',
@@ -146,23 +157,27 @@ export function LaneBlock({
     court: 'bg-court text-court-ink border-court-deep',
   } as const;
   const cls = cn(
-    'absolute overflow-hidden rounded-[6px] border px-2 py-1 text-left text-sm leading-tight',
-    sfalsato ? 'right-1 left-3' : 'inset-x-1',
+    'block h-full w-full overflow-hidden rounded-[6px] border px-2 py-1 text-left text-sm leading-tight',
     toni[tono],
     pattern === 'hatch' && 'pattern-hatch',
     pattern === 'dots' && 'pattern-dots',
-    selezionato && 'z-10 outline-3 outline-offset-1 outline-ball ring-2 ring-court-deep',
+    pattern === 'cross' && 'pattern-cross',
+    // selection: court-blue outline (contrast) with the ball halo (identity)
+    selezionato && 'relative z-10 outline-2 outline-offset-1 outline-court-deep shadow-[0_0_0_5px_var(--ball)] dark:outline-ball',
     onClick && 'cursor-pointer transition-[filter] duration-150 hover:brightness-[0.97] dark:hover:brightness-110',
     className,
   );
-  const style = posizione(scala, inizio, fine);
-  return onClick ? (
-    <button type="button" role="listitem" className={cls} style={style} onClick={onClick} aria-label={ariaLabel} aria-pressed={selezionato}>
-      {children}
-    </button>
-  ) : (
-    <div role="listitem" className={cls} style={style} aria-label={ariaLabel}>
-      {children}
+  return (
+    <div role="listitem" className={cn('absolute', sfalsato ? 'right-1 left-3' : 'inset-x-1', selezionato && 'z-10')} style={posizione(scala, inizio, fine)}>
+      {onClick ? (
+        <button type="button" className={cls} onClick={onClick} aria-label={ariaLabel} aria-pressed={selezionato} {...buttonProps}>
+          {children}
+        </button>
+      ) : (
+        <div className={cls} aria-label={ariaLabel}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }

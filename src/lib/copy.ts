@@ -31,7 +31,7 @@ export interface Voce {
 }
 
 export const STATO_PARTITA: Record<StatoPartita, Voce> = {
-  'da programmare': { label: 'Da programmare', icona: 'calendar-clock', tono: 'warn' },
+  'da programmare': { label: 'Da programmare', icona: 'calendar-clock', tono: 'idle' },
   richiesta: { label: 'Richiesta inviata', icona: 'send', tono: 'info' },
   programmata: { label: 'Programmata', icona: 'calendar-check', tono: 'ok' },
   giocata: { label: 'Giocata', icona: 'trophy', tono: 'idle' },

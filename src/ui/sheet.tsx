@@ -1,6 +1,6 @@
 import * as D from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { cn } from './cn';
 
 /**
@@ -24,12 +24,25 @@ export function Sheet({
   footer?: ReactNode;
   trigger?: ReactNode;
 }) {
+  // Focus goes back to whoever opened the sheet even without a Trigger (controlled sheets),
+  // otherwise it falls on <body> and keyboard/screen-reader users lose their place.
+  const opener = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (open) opener.current = document.activeElement as HTMLElement | null;
+  }, [open]);
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <D.Trigger asChild>{trigger}</D.Trigger>}
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-40 bg-[oklch(0.2_0.04_258/0.45)] data-[state=open]:animate-[fade-in_150ms_ease-out]" />
         <D.Content
+          onCloseAutoFocus={(e) => {
+            const el = opener.current;
+            if (!trigger && el && el.isConnected) {
+              e.preventDefault();
+              el.focus();
+            }
+          }}
           className={cn(
             'fixed z-50 flex max-h-[92dvh] flex-col bg-surface text-ink shadow-raised outline-none',
             'inset-x-0 bottom-0 rounded-t-panel data-[state=open]:animate-[sheet-up_220ms_cubic-bezier(0.16,1,0.3,1)]',

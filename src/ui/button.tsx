@@ -52,7 +52,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           children
         ) : (
           <>
-            {loading && <LoaderCircle className="animate-spin" aria-hidden />}
+            {loading && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden />}
             {children}
           </>
         )}

@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { FaseFinaleConfig } from '../types';
 import type { RigaClassifica } from '../lib/standings';
 import { nomeSquadra } from '../lib/torneo';
@@ -71,11 +72,19 @@ export function StandingsTable({
               const zonaPrima = i > 0 ? zonaQualificazione(fasi, righe[i - 1].posizione, nGironi) : zona;
               const mia = evidenzia === r.squadraId;
               return (
+                <Fragment key={r.squadraId}>
+                {zona !== zonaPrima && i > 0 && (
+                  <tr aria-hidden>
+                    <td colSpan={8} className="border-t-2 border-court py-1 text-xs font-semibold text-ink-muted dark:border-line-strong">
+                      {zonaPrima ? `${zonaPrima} sopra questa linea` : ''}
+                      {zonaPrima && zona ? ' · ' : ''}
+                      {zona ? `${zona} sotto` : 'Sotto questa linea: fuori dalle fasi finali'}
+                    </td>
+                  </tr>
+                )}
                 <tr
-                  key={r.squadraId}
                   className={cn(
                     'border-b border-line',
-                    zona !== zonaPrima && 'border-t-2 border-t-court dark:border-t-ball',
                     mia && 'bg-info-soft',
                   )}
                 >
@@ -103,6 +112,7 @@ export function StandingsTable({
                   <td className="py-2.5 pr-3 text-right">{segno(r.setVinti - r.setPersi)}</td>
                   <td className="hidden py-2.5 text-right md:table-cell">{segno(r.gameVinti - r.gamePersi)}</td>
                 </tr>
+                </Fragment>
               );
             })}
           </tbody>

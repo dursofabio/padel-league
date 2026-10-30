@@ -26,12 +26,19 @@ export default defineConfig({
         theme_color: '#1f56a8',
         icons: [{ src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
       },
-      // offline shell only: data always comes from Supabase
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,woff2}'], navigateFallback: 'index.html' },
+      // offline shell only: data always comes from Supabase. Only the initial chunks are precached;
+      // the role areas (organizer, court manager…) are cached on first visit, not downloaded by everyone.
+      workbox: {
+        globPatterns: ['index.html', 'icon.svg', 'assets/index-*.{js,css}', 'assets/react-*.js', 'assets/supabase-*.js', 'assets/*.woff2'],
+        navigateFallback: 'index.html',
+        runtimeCaching: [
+          { urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style', handler: 'StaleWhileRevalidate', options: { cacheName: 'chunk' } },
+        ],
+      },
     }),
   ],
   build: {
-    rollupOptions: { output: { manualChunks: { react: ['react', 'react-dom', 'react-router-dom'], supabase: ['@supabase/supabase-js'] } } },
+    rollupOptions: { output: { manualChunks: { react: ['react', 'react-dom', 'react-dom/client', 'react-router-dom'], supabase: ['@supabase/supabase-js'] } } },
   },
   test: { environment: 'node' },
 } as never);

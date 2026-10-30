@@ -12,7 +12,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useTorneoCorrente } from '../app/torneo-corrente';
@@ -57,6 +57,21 @@ export function AppShell() {
   );
   useRealtime(!!user, onEvento);
 
+  // Title per page (WCAG 2.4.2) and announcement of the new page: pages load lazily, so wait for the h1.
+  const [pagina, setPagina] = useState('');
+  useEffect(() => {
+    let tentativi = 0;
+    const t = setInterval(() => {
+      const h1 = document.querySelector('main h1')?.textContent?.trim();
+      if (h1 || ++tentativi > 30) {
+        clearInterval(t);
+        document.title = h1 ? `${h1} · Padel League` : 'Padel League';
+        if (h1) setPagina(h1);
+      }
+    }, 100);
+    return () => clearInterval(t);
+  }, [loc.pathname]);
+
   const voci: Voce[] = [];
   if (user) voci.push({ to: '/', label: 'Da fare', icon: ListTodo, end: true, badge: daAccettare || undefined });
   if (user && tid && hasRole('giocatore')) {
@@ -99,7 +114,7 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-col">
         {/* Top bar (mobile/tablet) */}
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 bg-court px-4 text-court-ink lg:hidden">
+        <header className="z-30 flex items-center justify-between gap-3 bg-court px-4 text-court-ink md:sticky md:top-0 lg:hidden">
           <Brand torneo={torneo?.nome} compatto />
           <ProfiloLink nome={profile?.nome} loggato={!!user} variante="topbar" />
         </header>
@@ -149,7 +164,17 @@ export function AppShell() {
       <p aria-live="polite" className="sr-only">
         {annuncio}
       </p>
-      <Toaster position="top-center" richColors closeButton toastOptions={{ className: 'font-sans text-base' }} />
+      <p aria-live="polite" className="sr-only">
+        {pagina && `Pagina: ${pagina}`}
+      </p>
+      <Toaster
+        position="bottom-center"
+        offset={{ bottom: '1.5rem' }}
+        mobileOffset={{ bottom: '5.5rem' }}
+        richColors
+        closeButton
+        toastOptions={{ className: 'font-sans !text-base', style: { fontSize: '1rem' } }}
+      />
     </div>
   );
 }
@@ -198,7 +223,7 @@ function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
               <Icon className="size-6" aria-hidden />
               {v.badge ? <Contatore n={v.badge} /> : null}
             </span>
-            <span className="truncate">{v.label}</span>
+            <span className="max-w-full text-center leading-tight break-words">{v.label}</span>
           </>
         )}
       </NavLink>
@@ -247,9 +272,9 @@ function ProfiloLink({ nome, loggato, variante }: { nome?: string; loggato: bool
     <Link
       to="/profilo"
       className={cn('flex min-h-11 items-center gap-2.5 rounded-control', variante === 'sidebar' && 'px-2 hover:bg-court')}
-      aria-label={`Profilo di ${nome ?? ''}`}
     >
-      <span className="grid size-9 place-items-center rounded-full bg-court-ink text-sm font-bold text-court-deep">{iniziali}</span>
+      {variante === 'topbar' && <span className="sr-only">Profilo di {nome}</span>}
+      <span aria-hidden className="grid size-11 place-items-center rounded-full bg-court-ink text-sm font-bold text-court-deep">{iniziali}</span>
       {variante === 'sidebar' && <span className="truncate font-semibold">{nome}</span>}
     </Link>
   );

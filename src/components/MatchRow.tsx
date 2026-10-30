@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatRisultato, risultatoUfficiale } from '../lib/results';
 import { labelDate } from '../lib/time';
@@ -16,7 +16,13 @@ export function MatchRow({
   override,
   evidenzia,
   nota,
+  senzaStato,
+  vincitore,
 }: {
+  /** Preview (e.g. bracket not generated yet): no status badge. */
+  senzaStato?: boolean;
+  /** Winning pair (knockout): bold with a check icon. */
+  vincitore?: string | null;
   p: Partita;
   squadraById: Map<string, Squadra>;
   campi: Campo[];
@@ -31,7 +37,10 @@ export function MatchRow({
   const campo = prog ? (campi.find((c) => c.id === prog.campoId)?.nome ?? prog.campoId) : null;
   const ris = risultatoUfficiale(p) ? formatRisultato(p.risultato!.set) : null;
   const nome = (id: string | null) => (
-    <span className={cn(id && evidenzia?.includes(id) && 'font-bold')}>{nomeSquadra(squadraById, id)}</span>
+    <span className={cn(id && (evidenzia?.includes(id) || vincitore === id) && 'font-bold')}>
+      {id && vincitore === id && <Check className="mr-0.5 inline size-4 text-ok" aria-label="vincitore" />}
+      {nomeSquadra(squadraById, id)}
+    </span>
   );
   const body = (
     <>
@@ -47,7 +56,7 @@ export function MatchRow({
               {labelDate(prog.data)} · {prog.inizio} · {campo}
             </span>
           ) : null}
-          <StatoPartitaBadge stato={p.stato} />
+          {!senzaStato && <StatoPartitaBadge stato={p.stato} />}
           {nota}
         </span>
       </span>

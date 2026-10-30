@@ -7,7 +7,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from './cn';
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn('animate-pulse rounded-control bg-surface-2', className)} />;
+  return <div aria-hidden className={cn('animate-pulse rounded-control bg-surface-2 motion-reduce:animate-none', className)} />;
 }
 
 export function Checkbox({ className, ...p }: CheckboxPrimitive.CheckboxProps) {
