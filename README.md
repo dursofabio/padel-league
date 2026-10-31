@@ -33,7 +33,7 @@ src/
   data/         Supabase client, row → domain adapters, queries, actions (RPC), realtime, Italian errors
   ui/           primitives (buttons, fields, sheets, dialogs…)
   components/   shell, court lanes, standings, bracket, shared states
-  features/     screens by area: home, public, player, gestore, organizer, admin, profile, invite
+  features/     screens by area: home, public, player, manager, organizer, admin, profile, invite
 supabase/
   migrations/   schema, RLS, RPC, jobs, realtime
   tests/        database tests (Vitest + pg) on Postgres 16 or DATABASE_URL
@@ -46,7 +46,7 @@ docs/           API contract, UX briefs, reviews
 ### 1. Supabase project
 
 1. Create a project on [supabase.com](https://supabase.com) (Free plan, EU region).
-2. **Database → Extensions:** enable **pg_cron** *before* the migrations. If you enable it later, re-run `supabase/migrations/20261101001000_cron.sql` and check with `select * from cron.job` (3 jobs).
+2. **Database → Extensions:** enable **pg_cron** *before* the migrations. If you enable it later, re-run `supabase/migrations/20261031001000_cron.sql` and check with `select * from cron.job` (3 jobs).
 3. Apply the migrations:
    ```bash
    npx supabase login
@@ -55,13 +55,13 @@ docs/           API contract, UX briefs, reviews
    ```
    Then load the courts from `supabase/seed.sql` (SQL Editor), or create them from the "Campi" screen.
 
-   **Without a local checkout:** use the `.github/workflows/migrations.yml` workflow. Set the variable `SUPABASE_PROJECT_REF` and the secrets `SUPABASE_ACCESS_TOKEN` (Supabase account → Access Tokens) and `SUPABASE_DB_PASSWORD`, then run *Actions → Migrazioni database → Run workflow* (tick the option to load the sample courts). It also runs on every push to `main` that changes a migration.
+   **Without a local checkout:** use the `.github/workflows/migrations.yml` workflow. Set the variable `SUPABASE_PROJECT_REF` and the secrets `SUPABASE_ACCESS_TOKEN` (Supabase account → Access Tokens) and `SUPABASE_DB_PASSWORD`, then run *Actions → Database migrations → Run workflow* (tick the option to load the sample courts). It also runs on every push to `main` that changes a migration.
 4. **Authentication**
    - **URL Configuration:** set Site URL to `https://<user>.github.io/padel-league/` and add the redirect URL `https://<user>.github.io/padel-league/**`. The app uses the PKCE flow, so login links come back as `?code=` and don't clash with hash routing.
    - **Google (optional):** create an OAuth client in Google Cloud with redirect URI `https://<ref>.supabase.co/auth/v1/callback`, enter its ID and secret in Supabase, then set the Actions variable `VITE_GOOGLE_LOGIN=true` so the "Continua con Google" button appears. Without it the app offers email and password only.
    - **SMTP:** set up a custom SMTP server. Without it, Supabase's built-in email reaches only the project team, so sign-up confirmations and password resets won't arrive for other users.
 5. **First admin:** sign up in the app, then run in the SQL Editor:
-   `update public.profiles set roles = '{admin,giocatore}' where email = '<your-email>';`
+   `update public.profiles set roles = '{admin,player}' where email = '<your-email>';`
    From then on, roles are assigned from **Utenti** in the app.
 
 ### 2. GitHub Pages
@@ -72,7 +72,7 @@ docs/           API contract, UX briefs, reviews
 
 ### 3. Reminder emails (optional)
 
-`.github/workflows/cron.yml` runs `scripts/cron.mjs` once a day. It calls `email_promemoria()` with the server key and sends the emails via SMTP.
+`.github/workflows/cron.yml` runs `scripts/cron.mjs` once a day. It calls `reminder_emails()` with the server key and sends the emails via SMTP.
 
 | Setting | Values |
 |---|---|
@@ -89,30 +89,64 @@ Request expiry, recurrence materialisation and unplayed-match reports run in **p
 
 ## Local development
 
-Requirements: Docker Desktop (running), Node.js 22, Git. Same commands on Mac, Windows and Linux:
+Code is in English; the UI is in Italian. The mapping between the two is in [`docs/glossary.md`](docs/glossary.md). Guidance for AI agents (and humans): `CLAUDE.md`, skills in `.claude/skills/`, role agents in `.claude/agents/`.
+
+### With Docker only (recommended)
+
+Requirements: Docker Desktop (or Docker Engine with Compose v2). No Node.js needed on the host.
 
 ```bash
-npm install
-npm run locale
+docker compose up
 ```
 
-`npm run locale` starts Supabase in Docker with the migrations, writes `.env.local`, loads the demo data the first time and opens the app on http://localhost:5173 (also reachable from a phone on the same Wi-Fi at `http://<computer-ip>:5173`). Emails sent by the local auth land in the mail catcher at http://127.0.0.1:54324.
+The first start builds the dev image, installs the dependencies into a Docker volume, applies the migrations and the sample courts, loads the demo tournament and serves the app with hot reload.
+
+| URL | What |
+|---|---|
+| http://localhost:5173 | the app |
+| http://localhost:54321 | Supabase API (auth, rest, realtime) through an nginx gateway |
+| http://localhost:54324 | mail catcher (sign-up and password-reset emails) |
+| http://localhost:54323 | Supabase Studio, only with `docker compose --profile studio up` |
+| `postgresql://postgres:postgres@localhost:54322/postgres` | the database |
 
 | Command | What it does |
 |---|---|
-| `npm run locale -- --demo` | start and reload the demo tournament from scratch |
-| `npm run locale:stop` | stop the containers (data are kept) |
-| `npm run locale:reset` | wipe the local database, re-apply migrations and courts |
+| `docker compose up -d` / `logs -f app` | start in the background / follow the app log |
+| `docker compose up migrate` | apply new migrations to the running database |
+| `SEED_DEMO=force docker compose up seed` | reload the demo tournament from scratch |
+| `docker compose run --rm db-test` | database test suite on a throwaway Postgres |
+| `docker compose run --rm app npm test` | frontend tests (also `npm run typecheck`, `npm run build`) |
+| `docker compose down` | stop (data are kept); `down -v` wipes the database and `node_modules` |
+
+The stack (`compose.yaml`, `docker/`) mirrors hosted Supabase with the same images as the CLI: Postgres with pg_cron, GoTrue, PostgREST and Realtime. The keys in `compose.yaml` are local-only and public. Sign-ups are confirmed automatically, as with `supabase start`. To use the app from a phone on the same Wi-Fi, start with `SUPABASE_PUBLIC_URL=http://<computer-ip>:54321 APP_PUBLIC_URL=http://<computer-ip>:5173 docker compose up` and open `http://<computer-ip>:5173`.
+
+### With Node.js and the Supabase CLI
+
+Requirements: Docker Desktop (running), Node.js 22.12+, Git.
+
+```bash
+npm install
+npm run local
+```
+
+`npm run local` starts Supabase in Docker through the CLI, writes `.env.local`, loads the demo data the first time and starts Vite on http://localhost:5173. Mail catcher at http://127.0.0.1:54324. It uses the same ports as the Compose stack: run one at a time.
+
+| Command | What it does |
+|---|---|
+| `npm run local -- --demo` | start and reload the demo tournament from scratch |
+| `npm run local:stop` | stop the containers (data are kept) |
+| `npm run local:reset` | wipe the local database, re-apply migrations and courts |
 
 Where the default image registry is not reachable, set `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`.
 
-The demo creates the users `admin@`, `org@`, `gestore@` and `p1@`…`p40@` `demo.it` (password `password` locally, `DEMO_PASSWORD` elsewhere), a tournament with 20 pairs in 2 groups of 10 and 3 periods, two weeks of varied availability and a lesson. On the hosted project use *Actions → Dati di prova* (secret `DEMO_PASSWORD`); the `rimuovi` option deletes the demo users and every tournament they play in. Reminder emails are never sent to `@demo.it` addresses. The `/#/_kit` page (development only) shows the design system.
+The demo creates the users `admin@`, `org@`, `gestore@` and `p1@`…`p40@` `demo.it` (password `password` locally, `DEMO_PASSWORD` elsewhere), a tournament with 20 pairs in 2 groups of 10 and 3 periods, two weeks of varied availability and a lesson. On the hosted project use *Actions → Demo data* (secret `DEMO_PASSWORD`); the `remove` action deletes the demo users and every tournament they play in. Reminder emails are never sent to `@demo.it` addresses. The `/#/_kit` page (development only) shows the design system.
 
 Tests:
 
 ```bash
 npm test          # pure logic and frontend helpers (Vitest)
 npm run test:db   # migrations, RLS, RPC, constraints and jobs on a throwaway local Postgres (or DATABASE_URL)
+docker compose run --rm db-test   # same, without a local Postgres
 npm run typecheck
 ```
 
