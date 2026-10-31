@@ -36,7 +36,7 @@ import { SlotSheet } from './SlotSheet';
 
 const NAV_KEYS: NavKey[] = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'];
 const slotKey = (s: SlotState) => `${s.slot.date}|${s.slot.courtId}|${s.slot.start}`;
-const LINK = 'inline-flex min-h-11 items-center text-base font-semibold text-court underline dark:text-info-ink';
+const LINK = 'inline-flex min-h-11 items-center text-base font-semibold text-ink underline';
 
 type DayView = 'closed' | 'none' | 'collapsed' | 'useful' | 'all';
 
@@ -180,14 +180,14 @@ export function SlotGrid({ ctx }: { ctx: MatchContext }) {
       )}
 
       <nav aria-label="Settimane" className="flex items-center justify-between gap-2">
-        <Button variant="ghost" size="icon" aria-label="Settimana precedente" disabled={!f.hasPrevious} onClick={() => setWeek(f.week - 1)}>
+        <Button variant="secondary" size="icon" aria-label="Settimana precedente" disabled={!f.hasPrevious} onClick={() => setWeek(f.week - 1)}>
           <ChevronLeft aria-hidden />
         </Button>
         <p className="tabular flex flex-wrap items-center justify-center gap-x-2 text-center text-base font-semibold" aria-live="polite">
           <CalendarRange className="size-5 text-ink-muted" aria-hidden />
           {labelDate(f.from)} – {labelDate(f.to)}
         </p>
-        <Button variant="ghost" size="icon" aria-label="Settimana successiva" disabled={!f.hasNext} onClick={() => setWeek(f.week + 1)}>
+        <Button variant="secondary" size="icon" aria-label="Settimana successiva" disabled={!f.hasNext} onClick={() => setWeek(f.week + 1)}>
           <ChevronRight aria-hidden />
         </Button>
       </nav>
@@ -241,66 +241,65 @@ export function SlotGrid({ ctx }: { ctx: MatchContext }) {
                 </div>
               </div>
             )}
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              {useful > 0 && (
-                <p className="flex flex-wrap items-center gap-x-2">
-                  <span>{filtered ? 'Mostro solo gli orari buoni (4/4 e 3/4).' : 'Mostro tutti gli orari.'}</span>
-                  <Button variant="link" className="min-h-11 text-base" onClick={() => setShowAll(filtered)}>
-                    {filtered ? 'Mostra tutti' : 'Mostra solo quelli buoni'}
-                  </Button>
-                </p>
-              )}
-              {useful === 0 && (
-                <Button variant="secondary" className="whitespace-normal" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? 'Nascondi la griglia' : 'Mostra la griglia completa'}
-                </Button>
-              )}
-              {isPlayer && (greens > 0 || withoutAvailability.length === 0) && (
-                <WhatsAppButton
-                  className="whitespace-normal"
-                  text={
-                    greens > 0
-                      ? `Abbiamo ${greens} ${greens === 1 ? 'orario che va' : 'orari che vanno'} bene a tutti e 4, scegliamo? → ${ctx.link}`
-                      : `Non abbiamo ancora un orario in comune per ${ctx.title}: segnate le disponibilità qui → ${availabilityLink}`
-                  }
-                />
-              )}
-              {isPlayer && !withoutAvailability.includes(ctx.uid ?? '') && (
-                <Link to={`/t/${tid}/disponibilita`} className={LINK}>
-                  Modifica le tue disponibilità
-                </Link>
-              )}
-            </div>
           </div>
 
           {gridVisible && (
-            <>
-              <Legend />
-              <div className="grid items-start gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
-                {days.map((d) => (
-                  <DayLanes
-                    key={d.date}
-                    day={d}
-                    today={todayDate}
-                    ctx={ctx}
-                    courts={courts}
-                    focusKey={focusKey}
-                    sel={sel ? slotKey(sel) : null}
-                    refs={refs.current}
-                    onKey={onKey}
-                    onToggle={() => toggle(d.date)}
-                    filtered={filtered}
-                    narrow={rem >= 24}
-                    onPick={(s) => {
-                      setActive(slotKey(s));
-                      setSel(s);
-                    }}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="grid items-start gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
+              {days.map((d) => (
+                <DayLanes
+                  key={d.date}
+                  day={d}
+                  today={todayDate}
+                  ctx={ctx}
+                  courts={courts}
+                  focusKey={focusKey}
+                  sel={sel ? slotKey(sel) : null}
+                  refs={refs.current}
+                  onKey={onKey}
+                  onToggle={() => toggle(d.date)}
+                  filtered={filtered}
+                  narrow={rem >= 24}
+                  onPick={(s) => {
+                    setActive(slotKey(s));
+                    setSel(s);
+                  }}
+                />
+              ))}
+            </div>
           )}
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {useful > 0 && (
+              <p className="flex flex-wrap items-center gap-x-2">
+                <span>{filtered ? 'Mostro solo gli orari buoni (4/4 e 3/4).' : 'Mostro tutti gli orari.'}</span>
+                <Button variant="link" className="min-h-11 text-base" onClick={() => setShowAll(filtered)}>
+                  {filtered ? 'Mostra tutti' : 'Mostra solo quelli buoni'}
+                </Button>
+              </p>
+            )}
+            {useful === 0 && (
+              <Button variant="secondary" className="whitespace-normal" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+                {showAll ? 'Nascondi la griglia' : 'Mostra la griglia completa'}
+              </Button>
+            )}
+            {isPlayer && (greens > 0 || withoutAvailability.length === 0) && (
+              <WhatsAppButton
+                className="whitespace-normal"
+                text={
+                  greens > 0
+                    ? `Abbiamo ${greens} ${greens === 1 ? 'orario che va' : 'orari che vanno'} bene a tutti e 4, scegliamo? → ${ctx.link}`
+                    : `Non abbiamo ancora un orario in comune per ${ctx.title}: segnate le disponibilità qui → ${availabilityLink}`
+                }
+              />
+            )}
+            {isPlayer && !withoutAvailability.includes(ctx.uid ?? '') && (
+              <Link to={`/t/${tid}/disponibilita`} className={LINK}>
+                Modifica le tue disponibilità
+              </Link>
+            )}
+          </div>
+
+          {gridVisible && <Legend />}
 
           {allowOffGrid && isPlayer && (
             <Button variant="link" className="min-h-11 justify-self-start text-base whitespace-normal" onClick={() => setOffGrid({ open: true })}>
@@ -383,9 +382,9 @@ function DayLanes({
   );
   const toggle = (
     <Button
-      variant="ghost"
+      variant="secondary"
       size="sm"
-      className="text-base whitespace-normal text-court dark:text-info-ink"
+      className="shrink-0 text-base whitespace-normal"
       aria-expanded={day.expanded}
       aria-label={day.expanded ? `Nascondi gli altri orari di ${dayLabel}` : `Mostra tutti gli orari di ${dayLabel}`}
       onClick={onToggle}
@@ -396,10 +395,12 @@ function DayLanes({
 
   if (day.view === 'closed' || day.view === 'none' || day.view === 'collapsed')
     return (
-      <div role="group" aria-labelledby={id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-2">
-        {title}
-        <span className="text-ink-muted">
-          {day.view === 'closed' ? 'Campi chiusi' : day.view === 'none' ? 'Nessun orario ancora disponibile' : 'Nessun orario buono'}
+      <div role="group" aria-labelledby={id} className="flex items-center justify-between gap-3 border-t border-line pt-2">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          {title}
+          <span className="text-ink-muted">
+            {day.view === 'closed' ? 'Campi chiusi' : day.view === 'none' ? 'Nessun orario ancora disponibile' : 'Nessun orario buono'}
+          </span>
         </span>
         {day.view === 'collapsed' && toggle}
         {day.view === 'none' && day.expanded && toggle}
@@ -486,7 +487,7 @@ const LEGEND_TONES = {
 function Legend() {
   return (
     <details open>
-      <summary className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-base font-semibold text-court dark:text-info-ink">Legenda</summary>
+      <summary className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-base font-semibold text-ink">Legenda</summary>
       <ul className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
         {(Object.keys(SLOT_UI) as (keyof typeof SLOT_UI)[]).map((k) => {
           const ui = SLOT_UI[k];

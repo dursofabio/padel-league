@@ -53,7 +53,7 @@ export function Badge({ entry, className, children }: { entry: StatusEntry; clas
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-full border border-current px-2.5 py-0.5 text-sm font-bold whitespace-nowrap',
         TONE_CLASSES[entry.tone],
         className,
       )}

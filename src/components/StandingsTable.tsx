@@ -74,37 +74,33 @@ export function StandingsTable({
                 <Fragment key={r.teamId}>
                 {zone !== prevZone && i > 0 && (
                   <tr aria-hidden>
-                    <td colSpan={8} className="border-t-2 border-court py-1 text-xs font-semibold text-ink-muted dark:border-line-strong">
+                    <td colSpan={8} className="border-t-4 border-line-strong py-1.5 text-sm font-bold">
                       {prevZone ? `${prevZone} sopra questa linea` : ''}
                       {prevZone ? ' · ' : ''}
                       {zone ? `${zone} sotto` : prevZone ? 'sotto: fuori dalle fasi finali' : 'Sotto questa linea: fuori dalle fasi finali'}
                     </td>
                   </tr>
                 )}
-                <tr
-                  className={cn(
-                    'border-b border-line',
-                    mine && 'bg-info-soft',
-                  )}
-                >
-                  <td className="py-2.5 pr-2 text-right font-bold">
-                    {r.position}
+                <tr className={cn('border-b border-line', mine && 'border-edge bg-ball text-ball-ink')}>
+                  <td className="py-2.5 pr-2 text-right">
+                    <span className="poster text-poster-sm">{r.position}</span>
                     {r.tied && (
-                      <span className="text-warn-ink" title="Pari merito da risolvere">
+                      <span className={cn('font-bold', mine ? 'text-ball-ink' : 'text-warn-ink')} title="Pari merito da risolvere">
                         *
                       </span>
                     )}
                   </td>
                   <th scope="row" className="py-2.5 pr-3 text-left font-normal">
                     <span className={cn(mine && 'font-bold')}>{teamName(teamById, r.teamId)}</span>
+                    {mine && <span className="text-sm font-bold"> (tu)</span>}
                     {zone && zone !== prevZone && <span className="sr-only">, inizio zona {zone}</span>}
                     {zone && zone !== prevZone && (
-                      <span className="ml-2 rounded-full border border-line-strong px-1.5 text-xs font-semibold text-ink-muted">
+                      <span className="ml-2 rounded-full border-2 border-current px-2 text-xs font-bold">
                         {zone}
                       </span>
                     )}
                   </th>
-                  <td className="py-2.5 pr-3 text-right font-bold">{r.points}</td>
+                  <td className="poster py-2.5 pr-3 text-right text-poster-sm">{r.points}</td>
                   <td className="py-2.5 pr-3 text-right">{r.played}</td>
                   <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.won}</td>
                   <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.lost}</td>

@@ -39,7 +39,7 @@ export default function Schedule({ d }: SectionProps) {
   }, [courts.data, rec.data, groupPers, plan.matches]);
 
   const scheduleLink = (
-    <Link to={`/t/${tournament.id}/calendario`} className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-court underline dark:text-info-ink">
+    <Link to={`/t/${tournament.id}/calendario`} className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline">
       Vedi il calendario pubblico <ArrowRight className="size-4" aria-hidden />
     </Link>
   );
@@ -56,7 +56,7 @@ export default function Schedule({ d }: SectionProps) {
           {scheduleLink}
           <Link
             to={`/t/${tournament.id}/organizza/monitoraggio`}
-            className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-court underline dark:text-info-ink"
+            className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline"
           >
             Segui l’andamento in Monitoraggio <ArrowRight className="size-4" aria-hidden />
           </Link>

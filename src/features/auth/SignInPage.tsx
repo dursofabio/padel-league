@@ -66,7 +66,7 @@ export default function SignInPage() {
   return (
     <div className="mx-auto grid max-w-md gap-6 py-4">
       <div className="grid gap-2">
-        <h1 className="text-2xl font-bold">{mode === 'signUp' ? 'Crea il tuo account' : mode === 'reset' ? 'Nuova password' : 'Accedi'}</h1>
+        <h1 className="poster text-poster">{mode === 'signUp' ? 'Crea il tuo account' : mode === 'reset' ? 'Nuova password' : 'Accedi'}</h1>
         <p className="text-ink-muted">Serve per segnare le disponibilità, richiedere il campo e confermare i risultati.</p>
       </div>
       {mode !== 'reset' && (

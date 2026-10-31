@@ -38,13 +38,13 @@ export function WindowChips({ windows, onRemove }: { windows: string[]; onRemove
   return (
     <ul className="flex flex-wrap gap-2">
       {windows.map((w) => (
-        <li key={w} className="inline-flex min-h-11 items-center rounded-full bg-court pl-4 text-court-ink dark:bg-info-soft dark:text-info-ink dark:ring-1 dark:ring-info">
+        <li key={w} className="inline-flex min-h-11 items-center rounded-full border-2 border-edge bg-clay pl-4 font-semibold text-clay-ink">
           <span className="tabular font-semibold">{windowLabel(w)}</span>
           <button
             type="button"
             onClick={() => onRemove(w)}
             aria-label={`${windowLabel(w)}, rimuovi`}
-            className="grid size-11 place-items-center rounded-full hover:bg-court-deep"
+            className="grid size-11 place-items-center rounded-full hover:bg-clay-strong"
           >
             <X className="size-5" aria-hidden />
           </button>

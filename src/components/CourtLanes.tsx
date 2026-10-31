@@ -79,7 +79,8 @@ export function CourtLanes({
           {hours.map((m) => (
             <span
               key={m}
-              className="tabular absolute right-1 -translate-y-1/2 text-sm text-ink-muted"
+              // the first label sits below its line, so the lane's top edge never clips it
+              className={cn('tabular absolute right-1 text-sm text-ink-muted', m === scale.from ? 'translate-y-0' : '-translate-y-1/2')}
               style={{ top: (m - scale.from) * scale.px }}
             >
               {fromMin(m)}
@@ -162,7 +163,7 @@ export function LaneBlock({
     pattern === 'hatch' && 'pattern-hatch',
     pattern === 'dots' && 'pattern-dots',
     pattern === 'cross' && 'pattern-cross',
-    // selection: court-blue outline (contrast) with the ball halo (identity)
+    // selection: ink outline (contrast) with the ball halo (identity)
     selected && 'relative z-10 outline-2 outline-offset-1 outline-court-deep shadow-[0_0_0_5px_var(--ball)] dark:outline-ball',
     onClick && 'cursor-pointer transition-[filter] duration-150 hover:brightness-[0.97] dark:hover:brightness-110',
     className,

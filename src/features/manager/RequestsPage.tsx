@@ -46,7 +46,7 @@ import {
 } from './logic';
 
 const CONFIRMED_DAYS = 14;
-/** Same selection treatment as the timeline block (LaneBlock): court-blue outline + ball halo. */
+/** Same selection treatment as the timeline block (LaneBlock): ink outline + ball halo. */
 const SELECTED_STYLE = 'rounded-panel px-2 outline-2 outline-offset-1 outline-court-deep shadow-[0_0_0_5px_var(--ball)] dark:outline-ball';
 const QUICK_NOTES = ['Campo occupato', 'Manutenzione', 'Orario non disponibile'];
 
@@ -490,7 +490,7 @@ function DayPanel({
     <>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold">Giornata di {labelDate(r.date)}</h2>
-        <Link to={`/campo/giorno/${r.date}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-court underline dark:text-info-ink">
+        <Link to={`/campo/giorno/${r.date}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline">
           Apri la giornata
         </Link>
       </div>

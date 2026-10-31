@@ -28,7 +28,7 @@ createRoot(document.getElementById('root')!).render(
       </QueryClientProvider>
     ) : (
       <main className="mx-auto grid max-w-prose gap-3 p-6">
-        <h1 className="text-2xl font-bold">Configurazione mancante</h1>
+        <h1 className="poster text-poster">Configurazione mancante</h1>
         <p>
           Imposta <code>VITE_SUPABASE_URL</code> e <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> (vedi <code>.env.example</code> e il
           README) e ricompila l’app.

@@ -137,7 +137,7 @@ function MyTeam({ tid, uid, team, tournamentName }: { tid: string; uid: string; 
       <div className="grid gap-6 [&>*]:min-w-0">
         <section aria-labelledby="team-h" className="grid gap-3 [&>*]:min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 id="team-h" className="text-xl font-bold">
+            <h2 id="team-h" className="poster text-poster-sm">
               {team.name}
             </h2>
             <TeamStatusBadge status={team.status} />

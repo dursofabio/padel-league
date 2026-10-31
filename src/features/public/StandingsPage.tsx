@@ -5,6 +5,7 @@ import { OfflineNotice, SignInPrompt, TournamentPageState, useMyTeam, useOnline 
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/states';
 import { StandingsTable } from '../../components/StandingsTable';
+import { StandingTile } from '../../components/StandingTile';
 import { useTournamentData } from '../../data/queries';
 import type { StandingsRow } from '../../lib/standings';
 import { tournamentStandings } from '../../lib/tournament';
@@ -60,6 +61,16 @@ export default function StandingsPage() {
         <EmptyState title="I gironi non sono ancora stati composti." text="Le classifiche compaiono appena l’organizzatore crea i gironi e il calendario." />
       ) : (
         <div className="grid gap-6">
+          {myTeam?.group && standings[myTeam.group] && (
+            <StandingTile
+              className="max-w-xl"
+              group={myTeam.group}
+              rows={standings[myTeam.group]}
+              teamId={myTeam.id}
+              phases={tournament.config.finals}
+              groupCount={groupNames.length}
+            />
+          )}
           {groupNames.length > 1 && (
             <Segmented
               label="Girone"
@@ -72,7 +83,7 @@ export default function StandingsPage() {
           <div className="grid gap-10 lg:grid-cols-2">
             {groupNames.map((g) => (
               <section key={g} aria-labelledby={`girone-${g}`} className={g === active ? 'grid content-start gap-3' : 'hidden content-start gap-3 lg:grid'}>
-                <h2 id={`girone-${g}`} className="text-lg font-bold">
+                <h2 id={`girone-${g}`} className="poster text-poster-sm">
                   Girone {g}
                 </h2>
                 <StandingsTable

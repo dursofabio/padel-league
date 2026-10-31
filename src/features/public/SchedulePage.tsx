@@ -132,7 +132,7 @@ export default function SchedulePage() {
                 .filter((x) => x.matches.length);
               return (
                 <section key={g} aria-labelledby={`cal-${g}`} className={g === active ? 'grid content-start gap-6' : 'hidden content-start gap-6 lg:grid'}>
-                  <h2 id={`cal-${g}`} className="text-lg font-bold">
+                  <h2 id={`cal-${g}`} className="poster text-poster-sm">
                     Girone {g}
                   </h2>
                   {matchdays.length === 0 && <p className="text-ink-muted">Nessuna partita con questi filtri.</p>}

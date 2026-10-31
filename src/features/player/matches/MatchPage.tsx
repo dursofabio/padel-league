@@ -180,7 +180,7 @@ function Screen({
     S0: () => (
       <div className="grid gap-3">
         <p>La griglia si apre quando entrambe le coppie sono note.</p>
-        <Link to={`/t/${tid}/tabellone/${match.phase}`} className="inline-flex min-h-11 items-center gap-1.5 justify-self-start font-semibold text-court underline dark:text-info-ink">
+        <Link to={`/t/${tid}/tabellone/${match.phase}`} className="inline-flex min-h-11 items-center gap-1.5 justify-self-start font-semibold text-ink underline">
           Vedi il tabellone <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
@@ -221,7 +221,7 @@ function Screen({
       <PageHeader
         title={
           <>
-            {ctx.nameA} <span className="font-normal text-ink-muted">contro</span> {ctx.nameB}
+            {ctx.nameA} <span className="font-sans text-xl font-semibold text-ink-muted normal-case">contro</span> {ctx.nameB}
           </>
         }
         subtitle={
@@ -242,7 +242,7 @@ function Screen({
       <div className={tools && stage === 'S7' ? 'grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]' : 'grid gap-8'}>
         {tools && stage === 'S7' && toolsSection}
         <section aria-labelledby={`${primaryId}-titolo`} id={primaryId} className="grid scroll-mt-24 gap-4">
-          <h2 id={`${primaryId}-titolo`} className="text-xl font-bold">
+          <h2 id={`${primaryId}-titolo`} className="poster text-poster-sm">
             {TITLES[stage]}
           </h2>
           {loading ? <SkeletonRows rows={3} /> : blocks[stage]()}

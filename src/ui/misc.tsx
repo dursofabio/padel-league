@@ -59,13 +59,13 @@ export function Segmented<T extends string>({
       aria-label={label}
       value={value}
       onValueChange={(v) => onValueChange(v as T)}
-      className={cn('inline-flex rounded-control border border-line-strong bg-surface p-0.5', className)}
+      className={cn('inline-flex gap-1 rounded-[1.75rem] border-2 border-line-strong bg-surface p-1', className)}
     >
       {options.map((o) => (
         <RadioGroup.Item
           key={o.value}
           value={o.value}
-          className="min-h-11 rounded-[6px] px-3 text-sm font-semibold text-ink-muted data-[state=checked]:bg-court data-[state=checked]:text-court-ink dark:data-[state=checked]:bg-ball dark:data-[state=checked]:text-ball-ink"
+          className="min-h-11 rounded-full px-4 text-sm font-bold text-ink-muted hover:text-ink data-[state=checked]:bg-ball data-[state=checked]:text-ball-ink"
         >
           {o.label}
         </RadioGroup.Item>
@@ -76,13 +76,13 @@ export function Segmented<T extends string>({
 
 export const Tabs = TabsPrimitive.Root;
 export function TabsList({ className, ...p }: ComponentProps<typeof TabsPrimitive.List>) {
-  return <TabsPrimitive.List className={cn('flex gap-1 overflow-x-auto border-b border-line', className)} {...p} />;
+  return <TabsPrimitive.List className={cn('flex gap-1 overflow-x-auto border-b-2 border-line-strong', className)} {...p} />;
 }
 export function TabsTrigger({ className, ...p }: ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        '-mb-px min-h-11 border-b-2 border-transparent px-3 text-base font-semibold whitespace-nowrap text-ink-muted hover:text-ink data-[state=active]:border-court data-[state=active]:text-ink dark:data-[state=active]:border-ball',
+        '-mb-px min-h-11 border-b-4 border-transparent px-3 text-base font-bold whitespace-nowrap text-ink-muted hover:text-ink data-[state=active]:border-line-strong data-[state=active]:text-ink',
         className,
       )}
       {...p}

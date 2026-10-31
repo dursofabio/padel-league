@@ -79,12 +79,12 @@ export function WeekStrip({
                 >
                   <span className="flex min-h-10 flex-col justify-end">
                     <span className="tabular text-sm font-bold group-hover:underline">{labelDate(d)}</span>
-                    {d === today && <span className="text-xs font-semibold text-court dark:text-info-ink">oggi</span>}
+                    {d === today && <span className="text-xs font-semibold text-ink">oggi</span>}
                   </span>
                   <TimeColumn date={d} windows={list} courts={courts} />
                   <span
                     aria-hidden
-                    className="inline-flex min-h-11 items-center justify-center gap-1 rounded-control border border-court text-sm font-semibold text-court group-hover:bg-info-soft dark:border-line-strong dark:text-ink"
+                    className="inline-flex min-h-11 items-center justify-center gap-1 rounded-control border-2 border-line-strong text-sm font-semibold text-ink group-hover:bg-surface-2"
                   >
                     <Plus className="size-4" /> Aggiungi
                   </span>

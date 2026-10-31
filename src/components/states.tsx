@@ -32,7 +32,7 @@ export function EmptyState({ title, text, action }: { title: string; text?: Reac
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const offline = typeof navigator !== 'undefined' && !navigator.onLine;
   return (
-    <div role="alert" className="grid justify-items-start gap-3 rounded-panel bg-danger-soft p-4 text-danger-ink">
+    <div role="alert" className="grid justify-items-start gap-3 rounded-panel border-2 border-danger bg-danger-soft p-4 text-danger-ink">
       <p className="flex items-center gap-2 font-semibold">
         {offline && <WifiOff className="size-5" aria-hidden />}
         {offline ? 'Sei offline: i dati non sono aggiornati.' : errorMessage(error)}

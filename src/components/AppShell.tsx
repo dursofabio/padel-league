@@ -33,7 +33,8 @@ interface NavEntry {
 }
 
 /**
- * Shell of the "court lines" world: top bar and sidebar in turf blue, white court lines as dividers.
+ * Shell of the "Manifesto" world: a paper top bar with the wordmark, the ink-black bar for navigation
+ * (tab bar on mobile, sidebar on desktop) with lime for the active item.
  * Mobile: tab bar at the bottom (at most 5 items, the rest in "Altro"). Desktop: sidebar.
  * The items are the union of the user's roles.
  */
@@ -97,7 +98,7 @@ export function AppShell() {
       </a>
 
       {/* Sidebar (desktop) */}
-      <aside className="sticky top-0 hidden h-dvh flex-col bg-court-deep text-court-ink lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col bg-bar text-bar-ink lg:flex">
         <Brand tournament={tournament?.name} />
         <nav aria-label="Principale" className="flex-1 overflow-y-auto px-3 py-2">
           <ul className="grid gap-0.5">
@@ -108,14 +109,14 @@ export function AppShell() {
             ))}
           </ul>
         </nav>
-        <div className="border-t border-court-line px-3 py-3">
+        <div className="border-t border-bar-line px-3 py-3">
           <ProfileLink name={profile?.name} signedIn={!!user} variant="sidebar" />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-col">
         {/* Top bar (mobile/tablet) */}
-        <header className="z-30 flex items-center justify-between gap-3 bg-court px-4 text-court-ink md:sticky md:top-0 lg:hidden">
+        <header className="z-30 flex items-center justify-between gap-3 border-b-2 border-line-strong bg-bg px-4 text-ink md:sticky md:top-0 lg:hidden">
           <Brand tournament={tournament?.name} compact />
           <div className="shrink-0">
             <ProfileLink name={profile?.name} signedIn={!!user} variant="topbar" />
@@ -128,7 +129,7 @@ export function AppShell() {
 
         {/* Tab bar (mobile/tablet) */}
         {entries.length > 1 && (
-          <nav aria-label="Principale" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface lg:hidden">
+          <nav aria-label="Principale" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-bar-line bg-bar text-bar-ink lg:hidden">
             <ul className="mx-auto grid max-w-xl" style={{ gridTemplateColumns: `repeat(${inBar.length + (inMore.length ? 1 : 0)}, minmax(0,1fr))` }}>
               {inBar.map((v) => (
                 <li key={v.to}>
@@ -139,7 +140,7 @@ export function AppShell() {
                 <li>
                   <button
                     onClick={() => setMoreOpen(true)}
-                    className="flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold text-ink-muted"
+                    className="flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold text-bar-ink-muted"
                   >
                     <Menu className="size-6" aria-hidden />
                     Altro
@@ -156,7 +157,7 @@ export function AppShell() {
           {[...inMore, { to: '/profilo', label: 'Profilo', icon: UserRound }].map((v) => (
             <li key={v.to}>
               <NavLink to={v.to} onClick={() => setMoreOpen(false)} className="flex min-h-12 items-center gap-3 text-base font-semibold">
-                <v.icon className="size-5 text-court dark:text-info-ink" aria-hidden />
+                <v.icon className="size-5 text-ink" aria-hidden />
                 {v.label}
               </NavLink>
             </li>
@@ -184,24 +185,27 @@ export function AppShell() {
 
 function Brand({ tournament, compact }: { tournament?: string; compact?: boolean }) {
   return (
-    <Link to="/" className={cn('flex min-h-14 min-w-0 items-center gap-2.5', !compact && 'px-5 py-4')}>
+    <Link to="/" className={cn('flex min-h-14 min-w-0 items-center gap-2.5', !compact && 'px-5 pt-6 pb-4')}>
       <CourtMark />
-      <span className="grid min-w-0 leading-tight">
-        <span className="text-base font-bold">Padel League</span>
-        {tournament && <span className="truncate text-sm text-court-ink-muted">{tournament}</span>}
+      <span className="grid min-w-0 gap-0.5">
+        <span className={cn('poster', compact ? 'text-xl' : 'text-2xl')}>Padel League</span>
+        {tournament && (
+          <span className={cn('truncate text-sm leading-tight font-semibold', compact ? 'text-ink-muted' : 'text-bar-ink-muted')}>{tournament}</span>
+        )}
       </span>
     </Link>
   );
 }
 
-/** Mark: a padel court seen from above (net and service lines), in white lines. */
+/** Mark: a padel court seen from above (net and service lines) on a lime tile. */
 function CourtMark() {
   return (
-    <svg viewBox="0 0 20 32" className="h-8 w-5 shrink-0" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="1" y="1" width="18" height="30" rx="1.5" />
-      <path d="M1 16h18M10 8.5v15M1 8.5h18M1 23.5h18" />
-      <circle cx="15" cy="12" r="1.6" fill="var(--ball)" stroke="none" />
-    </svg>
+    <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-control border-2 border-edge bg-ball text-ball-ink">
+      <svg viewBox="0 0 20 32" className="h-7 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="1" y="1" width="18" height="30" rx="1.5" />
+        <path d="M1 16h18M10 8.5v15M1 8.5h18M1 23.5h18" />
+      </svg>
+    </span>
   );
 }
 
@@ -214,15 +218,14 @@ function NavItem({ v, variant }: { v: NavEntry; variant: 'tab' | 'sidebar' }) {
         end={v.end}
         className={({ isActive }) =>
           cn(
-            'relative flex min-h-16 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold',
-            isActive ? 'text-court dark:text-ball' : 'text-ink-muted',
+            'relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-xs font-semibold',
+            isActive ? 'text-ball' : 'text-bar-ink-muted hover:text-bar-ink',
           )
         }
       >
         {({ isActive }) => (
           <>
-            {isActive && <span aria-hidden className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-court dark:bg-ball" />}
-            <span className="relative">
+            <span className={cn('relative grid h-8 w-12 place-items-center rounded-full', isActive && 'bg-ball text-ball-ink')}>
               <Icon className="size-6" aria-hidden />
               {v.badge ? <Counter n={v.badge} /> : null}
             </span>
@@ -238,22 +241,20 @@ function NavItem({ v, variant }: { v: NavEntry; variant: 'tab' | 'sidebar' }) {
       className={({ isActive }) =>
         cn(
           'flex min-h-11 items-center gap-3 rounded-control px-3 text-base font-semibold',
-          isActive
-            ? 'bg-court text-court-ink ring-1 ring-court-line dark:bg-[oklch(0.4_0.1_256)] [&>svg]:text-ball'
-            : 'text-court-ink-muted hover:bg-court hover:text-court-ink',
+          isActive ? 'bg-ball text-ball-ink' : 'text-bar-ink-muted hover:bg-bar-line hover:text-bar-ink',
         )
       }
     >
       <Icon className="size-5" aria-hidden />
       <span className="flex-1">{v.label}</span>
-      {v.badge ? <span className="tabular rounded-full bg-ball px-2 text-sm text-ball-ink">{v.badge}</span> : null}
+      {v.badge ? <span className="tabular rounded-full bg-danger px-2 text-sm font-bold text-white">{v.badge}</span> : null}
     </NavLink>
   );
 }
 
 function Counter({ n }: { n: number }) {
   return (
-    <span className="tabular absolute -top-1.5 -right-2.5 min-w-5 rounded-full bg-danger px-1 text-center text-xs leading-5 text-white">
+    <span className="tabular absolute -top-1.5 -right-1 min-w-5 rounded-full bg-danger px-1 text-center text-xs leading-5 font-bold text-white ring-2 ring-bar">
       {n}
       <span className="sr-only"> da gestire</span>
     </span>
@@ -276,10 +277,18 @@ function ProfileLink({ name, signedIn, variant }: { name?: string; signedIn: boo
   return (
     <Link
       to="/profilo"
-      className={cn('flex min-h-11 items-center gap-2.5 rounded-control', variant === 'sidebar' && 'px-2 hover:bg-court')}
+      className={cn('flex min-h-11 items-center gap-2.5 rounded-control', variant === 'sidebar' && 'px-2 hover:bg-bar-line')}
     >
       {variant === 'topbar' && <span className="sr-only">Profilo di {name}</span>}
-      <span aria-hidden className="grid size-11 place-items-center rounded-full bg-court-ink text-sm font-bold text-court-deep">{initials}</span>
+      <span
+        aria-hidden
+        className={cn(
+          'grid size-11 place-items-center rounded-full text-sm font-bold',
+          variant === 'topbar' ? 'bg-court text-court-ink' : 'bg-bar-ink text-bar',
+        )}
+      >
+        {initials}
+      </span>
       {variant === 'sidebar' && <span className="truncate font-semibold">{name}</span>}
     </Link>
   );

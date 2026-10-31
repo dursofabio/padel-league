@@ -384,7 +384,7 @@ function Editor({
 
         <section aria-labelledby="quick-fill-h" className="grid gap-3">
           <div className="grid gap-1">
-            <h2 id="quick-fill-h" className="text-lg font-bold">
+            <h2 id="quick-fill-h" className="poster text-poster-sm">
               Compila veloce
             </h2>
             <p className="max-w-prose text-ink-muted">
@@ -397,7 +397,7 @@ function Editor({
         </section>
 
         <section aria-labelledby="days-h" className="grid gap-3 border-t border-line pt-5">
-          <h2 id="days-h" className="text-lg font-bold">
+          <h2 id="days-h" className="poster text-poster-sm">
             Giorno per giorno
           </h2>
           {days.length === 0 ? (
@@ -429,12 +429,12 @@ function Editor({
                               <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <p className="flex flex-wrap items-baseline gap-x-3">
                                   <span className="tabular text-lg font-bold">{labelDate(d)}</span>
-                                  {d === todayDate && <span className="text-sm font-semibold text-court dark:text-info-ink">oggi</span>}
+                                  {d === todayDate && <span className="text-sm font-semibold text-ink">oggi</span>}
                                   {empty && openRow !== d && <span className="text-sm text-ink-muted">nessun orario</span>}
                                   {changed.includes(d) && <span className="text-sm text-ink-muted">modificato</span>}
                                 </p>
                                 {empty && openRow !== d && (
-                                  <Button ref={addRef} variant="ghost" className="text-court dark:text-info-ink" aria-label={`Aggiungi orario, ${labelDate(d)}`} onClick={() => setOpenRow(d)}>
+                                  <Button ref={addRef} variant="ghost" className="text-ink" aria-label={`Aggiungi orario, ${labelDate(d)}`} onClick={() => setOpenRow(d)}>
                                     <Plus aria-hidden /> Aggiungi
                                   </Button>
                                 )}

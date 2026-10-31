@@ -18,7 +18,7 @@ export const SLOT_UI: Record<SlotColor, { icon: LucideIcon; tone: Tone; pattern?
 /** Icon + text badge with a semantic tone (for labels not in the shared glossary map). */
 export function Pill({ icon: Icon, tone, children, className }: { icon: LucideIcon; tone: Tone; children: ReactNode; className?: string }) {
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-semibold', TONE_CLASSES[tone], className)}>
+    <span className={cn('inline-flex items-center gap-1 rounded-full border border-current px-2.5 py-0.5 text-sm font-bold', TONE_CLASSES[tone], className)}>
       <Icon className="size-4" aria-hidden />
       {children}
     </span>

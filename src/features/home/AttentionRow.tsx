@@ -1,4 +1,4 @@
-import { AlarmClock, Check } from 'lucide-react';
+import { AlarmClock, ArrowRight, Check } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { WhatsAppButton } from '../../components/WhatsAppButton';
@@ -74,22 +74,47 @@ function doneText(it: AttentionItem): string {
   }
 }
 
+/** How a feed item is drawn: lime = the one thing to do now, clay = availability, paper = other actions, plain = for information. */
+export type RowTone = 'ball' | 'clay' | 'paper' | 'plain';
+
+const BLOCK: Record<Exclude<RowTone, 'plain'>, string> = {
+  ball: 'border-edge bg-ball text-ball-ink',
+  clay: 'border-edge bg-clay text-clay-ink',
+  paper: 'border-line-strong bg-surface text-ink',
+};
+
+/** Deadline as a stamp; urgent ones (priority 0) in danger red, always with the clock icon and the words. */
+export function DeadlineStamp({ text, urgent }: { text: string; urgent: boolean }) {
+  return (
+    <span
+      className={cn(
+        'tabular inline-flex items-center gap-1.5 justify-self-start rounded-full border-2 px-2.5 py-0.5 text-sm font-bold',
+        urgent ? 'border-danger bg-danger text-white' : 'border-current',
+      )}
+    >
+      <AlarmClock className="size-4 shrink-0" aria-hidden />
+      {text}
+    </span>
+  );
+}
+
 /**
- * One row of the feed: icon, what to do, pairs, what is missing and until when, action.
+ * One item of the feed: a poster block (or a plain row for information) with what to do,
+ * the pairs, what is missing and until when, and the action.
  * Tapping the text opens the screen; the button does the inline action.
  */
 export function AttentionRow({
   it,
   ctx,
   now,
-  primary,
+  tone,
   done,
   onDone,
 }: {
   it: AttentionItem;
   ctx: RowContext;
   now: number;
-  primary: boolean;
+  tone: RowTone;
   done?: string;
   onDone: (it: AttentionItem, text: string) => void;
 }) {
@@ -105,13 +130,14 @@ export function AttentionRow({
   const to = destination(it, ctx.tid);
   const deadline = it.deadline && it.kind !== 'upcoming-match' ? describeDeadline(it.deadline, now) : null;
   const Icon = t.icon;
-  const variant = primary ? 'primary' : 'secondary';
-  const buttonCls = cn(primary && 'w-full md:w-auto');
+  const filled = tone === 'ball' || tone === 'clay';
+  const variant = filled ? 'ink' : 'secondary';
+  const buttonCls = cn(filled && 'w-full sm:w-auto');
 
   let action: React.ReactNode;
   if (done) {
     action = (
-      <span className="inline-flex min-h-11 items-center gap-2 font-semibold text-ok-ink">
+      <span className={cn('inline-flex min-h-11 items-center gap-2 font-bold', !filled && 'text-ok-ink')}>
         <Check className="size-5" aria-hidden />
         {done}
       </span>
@@ -131,7 +157,7 @@ export function AttentionRow({
           {t.action}
         </Button>
         {it.kind === 'confirm-result' && (
-          <Link to={to} className={buttonVariants({ variant: 'ghost' })}>
+          <Link to={to} className={buttonVariants({ variant: 'ghost', className: filled ? 'hover:bg-edge/10' : undefined })}>
             Contesta
           </Link>
         )}
@@ -143,7 +169,8 @@ export function AttentionRow({
     action = (
       <WhatsAppButton
         text={`Ciao, per la nostra partita manca la tua conferma per ${when}. Accetta qui: ${appUrl(to)}`}
-        className={cn(primary && 'w-full md:w-auto')}
+        variant={variant}
+        className={buttonCls}
       >
         {t.action}
       </WhatsAppButton>
@@ -156,30 +183,67 @@ export function AttentionRow({
     );
   }
 
-  return (
-    <div className="grid gap-2 py-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6">
-        <Link to={to} className="-mx-2 flex min-h-11 min-w-0 gap-3 rounded-control px-2 py-1 hover:bg-surface-2">
-          <Icon className="mt-0.5 size-6 shrink-0 text-court dark:text-info-ink" aria-hidden />
-          <span className="grid min-w-0 gap-0.5">
-            <span className="text-base font-bold text-balance">{t.title}</span>
-            {t.teams && <span className="text-base">{t.teams}</span>}
-            {t.detail && <span className="tabular text-sm text-ink-muted">{t.detail}</span>}
-            {deadline && (
-              <span className={cn('tabular flex items-center gap-1.5 text-sm font-semibold', it.priority === 0 ? 'text-danger-ink' : 'text-ink-muted')}>
-                <AlarmClock className="size-4 shrink-0" aria-hidden />
-                {deadline}
-              </span>
-            )}
-          </span>
-        </Link>
-        <div className="shrink-0 md:max-w-[50%]">{action}</div>
+  const errorLine = error && (
+    <p role="alert" className={cn('text-sm font-bold', filled ? 'rounded-control bg-paper px-2 py-1 text-danger-ink' : 'text-danger-ink')}>
+      {error}
+    </p>
+  );
+
+  if (tone === 'plain')
+    return (
+      <div className="grid gap-2 py-3">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-6">
+          <Link to={to} className="-mx-2 flex min-h-11 min-w-0 gap-3 rounded-control px-2 py-1 hover:bg-surface-2">
+            <Icon className="mt-0.5 size-5 shrink-0" aria-hidden />
+            <span className="grid min-w-0 gap-0.5">
+              <span className="font-bold text-balance">{t.title}</span>
+              {t.teams && <span>{t.teams}</span>}
+              {t.detail && <span className="tabular text-sm text-ink-muted">{t.detail}</span>}
+            </span>
+          </Link>
+          <div className="shrink-0">{action}</div>
+        </div>
+        {errorLine}
       </div>
-      {error && (
-        <p role="alert" className="text-sm font-semibold text-danger-ink">
-          {error}
-        </p>
+    );
+
+  // The big line leads (the pairs, or the task when there are none); the task follows as the supporting line.
+  // Only the lime block speaks at poster size; the other blocks step down one size.
+  const big = cn('poster break-words', tone === 'ball' ? 'text-poster-sm' : 'text-xl leading-tight');
+  const lines = (
+    <>
+      <span className={big}>{t.teams ?? t.title}</span>
+      {t.teams && (
+        <span className="flex items-center gap-2 font-bold">
+          <Icon className="size-5 shrink-0" aria-hidden />
+          {t.title}
+        </span>
       )}
+      {t.detail && <span className="tabular font-semibold">{t.detail}</span>}
+    </>
+  );
+
+  // A block that only opens a screen is one link, whole surface; the button is its visible label.
+  if (!done && it.action.type === 'navigate' && !(it.kind === 'request-in-progress' && it.missing?.length))
+    return (
+      <Link to={to} className={cn('group grid gap-3 rounded-panel border-2 p-4 sm:p-5', BLOCK[tone])}>
+        <span className="grid min-w-0 gap-1.5 group-hover:underline">{lines}</span>
+        {deadline && <DeadlineStamp text={deadline} urgent={it.priority === 0} />}
+        <span className={cn(buttonVariants({ variant }), buttonCls, 'justify-self-start')}>
+          {t.action}
+          <ArrowRight className="transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden />
+        </span>
+      </Link>
+    );
+
+  return (
+    <div className={cn('grid gap-3 rounded-panel border-2 p-4 sm:p-5', BLOCK[tone])}>
+      <Link to={to} className="-m-1 grid min-w-0 gap-1.5 rounded-control p-1 hover:underline">
+        {lines}
+      </Link>
+      {deadline && <DeadlineStamp text={deadline} urgent={it.priority === 0} />}
+      <div>{action}</div>
+      {errorLine}
     </div>
   );
 }

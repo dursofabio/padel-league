@@ -16,8 +16,8 @@ export function WhatsAppButton({
   phone?: string | null;
   children?: React.ReactNode;
   size?: 'md' | 'sm';
-  /** 'primary' (lime) only when WhatsApp is the main action of the screen. */
-  variant?: 'secondary' | 'primary';
+  /** 'primary' (lime) only when WhatsApp is the main action of the screen; 'ink' inside a lime or clay block. */
+  variant?: 'secondary' | 'primary' | 'ink';
   className?: string;
 }) {
   return (

@@ -483,7 +483,7 @@ function BookingDetail({
               <dt className="text-sm text-ink-muted">Origine</dt>
               <dd>
                 Da una{' '}
-                <Link to="/campo/ricorrenze" className="font-semibold text-court underline dark:text-info-ink">
+                <Link to="/campo/ricorrenze" className="font-semibold text-ink underline">
                   ricorrenza
                 </Link>
                 : liberarla qui non cambia la regola.
@@ -492,7 +492,7 @@ function BookingDetail({
           )}
         </dl>
         {link && (
-          <Link to={link} className="mt-3 inline-flex min-h-11 items-center gap-1.5 font-semibold text-court underline dark:text-info-ink">
+          <Link to={link} className="mt-3 inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline">
             <ExternalLink className="size-4" aria-hidden /> Apri la partita
           </Link>
         )}

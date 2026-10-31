@@ -32,7 +32,7 @@ export function ConfirmDialog({
     <A.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <A.Trigger asChild>{trigger}</A.Trigger>}
       <A.Portal>
-        <A.Overlay className="fixed inset-0 z-40 bg-[oklch(0.2_0.04_258/0.5)]" />
+        <A.Overlay className="fixed inset-0 z-40 bg-edge/50" />
         <A.Content className="fixed top-1/2 left-1/2 z-50 grid w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-panel bg-surface p-5 text-ink shadow-raised">
           <A.Title className="text-lg font-bold">{title}</A.Title>
           {description && <A.Description className="text-base text-ink-muted">{description}</A.Description>}

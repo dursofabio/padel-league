@@ -140,7 +140,7 @@ export default function Finals({ d }: SectionProps) {
                   <span className="inline-flex items-center gap-2">
                     <Trophy className="size-5" aria-hidden /> {phase.charAt(0).toUpperCase() + phase.slice(1)}
                   </span>
-                  <Link to={`/t/${tournament.id}/tabellone/${phase}`} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-court underline dark:text-info-ink">
+                  <Link to={`/t/${tournament.id}/tabellone/${phase}`} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline">
                     Tabellone pubblico <ArrowRight className="size-4" aria-hidden />
                   </Link>
                 </h3>

@@ -1,5 +1,5 @@
 /** Helpers and small components shared by several features (public pages, home, player area). */
-import { ChevronRight, LogIn, Trophy, WifiOff } from 'lucide-react';
+import { ArrowRight, LogIn, Trophy, WifiOff } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../auth/AuthProvider';
@@ -9,6 +9,8 @@ import { TOURNAMENT_STATUS_LABEL } from '../lib/copy';
 import { labelDate } from '../lib/time';
 import { teamName } from '../lib/tournament';
 import type { Match, Period, Team, Tournament } from '../types';
+import { buttonVariants } from '../ui/button';
+import { cn } from '../ui/cn';
 import { EmptyState, ErrorState, SkeletonRows } from './states';
 
 export { TOURNAMENT_STATUS_LABEL };
@@ -94,24 +96,41 @@ export function WinnersLine({ tournament, matches, teamById }: { tournament: Tou
   if (!w.length) return null;
   return (
     <p className="mb-5 flex items-start gap-2 text-lg font-bold">
-      <Trophy className="mt-1 size-5 shrink-0 text-court dark:text-ball" aria-hidden />
+      <Trophy className="mt-1 size-5 shrink-0 text-ink" aria-hidden />
       <span>{w.map((x) => `Vincono il ${x.phase}: ${teamName(teamById, x.team)}`).join(' · ')}</span>
     </p>
   );
 }
 
-/** Footer line for anonymous visitors, not a banner. */
-export function SignInPrompt() {
+/**
+ * The one thing an anonymous visitor can do: a lime block at the end of public pages.
+ * Hidden when logged in.
+ */
+export function SignInPrompt({
+  title = 'Giochi in questo torneo?',
+  text = 'Accedi per segnare quando puoi giocare, programmare le tue partite e inserire i risultati.',
+}: {
+  title?: string;
+  text?: string;
+}) {
   const { user, loading } = useAuth();
   if (user || loading) return null;
   return (
-    <p className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-4 text-ink-muted">
-      <LogIn className="size-5 shrink-0" aria-hidden />
-      Giochi in questo torneo?
-      <Link to="/accedi" className="inline-flex min-h-11 items-center font-semibold text-court underline dark:text-info-ink">
-        Accedi per programmare le tue partite.
+    <section
+      aria-labelledby="sign-in-prompt"
+      className="mt-10 grid gap-4 rounded-panel border-2 border-edge bg-ball p-5 text-ball-ink sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6"
+    >
+      <div className="grid gap-1.5">
+        <h2 id="sign-in-prompt" className="poster text-poster-sm">
+          {title}
+        </h2>
+        <p className="max-w-prose font-semibold">{text}</p>
+      </div>
+      <Link to="/accedi" className={buttonVariants({ variant: 'ink', className: 'w-full sm:w-auto' })}>
+        <LogIn aria-hidden />
+        Accedi
       </Link>
-    </p>
+    </section>
   );
 }
 
@@ -136,7 +155,7 @@ export function TournamentPageState({
       <EmptyState
         title="Torneo non trovato. Controlla il link."
         action={
-          <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-court underline dark:text-info-ink">
+          <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-ink underline">
             Vai all’elenco dei tornei
           </Link>
         }
@@ -146,15 +165,21 @@ export function TournamentPageState({
   return null;
 }
 
-/** A link row in a court-rule list. */
-export function LinkRow({ to, children, detail }: { to: string; children: ReactNode; detail?: ReactNode }) {
+/** A poster tile linking to a section: title in display type, one supporting line, arrow. */
+export function TileLink({ to, children, detail, className }: { to: string; children: ReactNode; detail?: ReactNode; className?: string }) {
   return (
-    <Link to={to} className="-mx-2 flex min-h-14 items-center justify-between gap-3 rounded-control px-2 py-3 hover:bg-surface-2">
-      <span className="grid gap-0.5">
-        <span className="text-base font-semibold">{children}</span>
-        {detail && <span className="text-sm text-ink-muted">{detail}</span>}
+    <Link
+      to={to}
+      className={cn(
+        'group grid h-full min-h-28 content-between gap-3 rounded-panel border-2 border-line-strong bg-surface p-4 hover:bg-surface-2',
+        className,
+      )}
+    >
+      <span className="flex items-start justify-between gap-3">
+        <span className="poster text-xl leading-tight break-words">{children}</span>
+        <ArrowRight className="mt-0.5 size-5 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden />
       </span>
-      <ChevronRight className="size-5 shrink-0 text-ink-muted" aria-hidden />
+      {detail && <span className="text-sm font-semibold text-ink-muted">{detail}</span>}
     </Link>
   );
 }

@@ -19,7 +19,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
   if (!hasRole(...roles))
     return (
       <div className="grid gap-2 py-8">
-        <h1 className="text-2xl font-bold">Area riservata</h1>
+        <h1 className="poster text-poster">Area riservata</h1>
         <p className="text-ink-muted">
           Questa sezione è per chi ha il ruolo di {roles.map((r) => ROLE_LABEL[r]).join(' o ')}. Se pensi di averne diritto, chiedi
           all’amministratore.

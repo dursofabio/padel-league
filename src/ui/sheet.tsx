@@ -34,7 +34,7 @@ export function Sheet({
     <D.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <D.Trigger asChild>{trigger}</D.Trigger>}
       <D.Portal>
-        <D.Overlay className="fixed inset-0 z-40 bg-[oklch(0.2_0.04_258/0.45)] data-[state=open]:animate-[fade-in_150ms_ease-out]" />
+        <D.Overlay className="fixed inset-0 z-40 bg-edge/45 data-[state=open]:animate-[fade-in_150ms_ease-out]" />
         <D.Content
           onCloseAutoFocus={(e) => {
             const el = opener.current;
