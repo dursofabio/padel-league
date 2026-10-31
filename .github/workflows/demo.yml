@@ -1,0 +1,38 @@
+name: Dati di prova
+
+# Loads or removes the demo data (scripts/seed-demo.mjs) on the hosted project.
+# Users admin@, org@, gestore@, p1@…p8@ demo.it with password secrets.DEMO_PASSWORD.
+# Reminder emails are never sent to @demo.it addresses.
+# Settings: vars.VITE_SUPABASE_URL (or vars.SUPABASE_URL), secrets.SUPABASE_SECRET_KEY, secrets.DEMO_PASSWORD.
+
+on:
+  workflow_dispatch:
+    inputs:
+      azione:
+        description: Cosa fare
+        type: choice
+        options: [carica, rimuovi]
+        default: carica
+
+concurrency:
+  group: demo
+  cancel-in-progress: false
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scripts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - name: ${{ inputs.azione == 'rimuovi' && 'Rimuovi i dati di prova' || 'Carica i dati di prova' }}
+        run: node seed-demo.mjs ${{ inputs.azione == 'rimuovi' && '--rimuovi' || '' }}
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}

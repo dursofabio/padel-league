@@ -3,8 +3,13 @@
  *
  *   SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SECRET_KEY=... npm run seed:demo
  *
- * Utenti: admin@demo.it, org@demo.it, gestore@demo.it, p1@demo.it … p8@demo.it, password "password".
+ * Utenti: admin@demo.it, org@demo.it, gestore@demo.it, p1@demo.it … p8@demo.it,
+ * password DEMO_PASSWORD (obbligatoria fuori dal locale; in locale "password").
  * Rieseguibile: gli utenti esistenti vengono riusati, il torneo "Campionato Demo" viene ricreato.
+ *
+ *   node seed-demo.mjs --rimuovi
+ * cancella gli utenti demo, i tornei a cui partecipano e le loro richieste.
+ * I promemoria (cron.mjs) non vengono mai spediti agli indirizzi @demo.it.
  */
 import { createClient } from '@supabase/supabase-js';
 
@@ -15,6 +20,15 @@ if (!key) {
   process.exit(1);
 }
 const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+
+const DOMINIO = 'demo.it';
+const locale = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(url);
+const PASSWORD = process.env.DEMO_PASSWORD || (locale ? 'password' : '');
+const RIMUOVI = process.argv.includes('--rimuovi');
+if (!RIMUOVI && PASSWORD.length < 8) {
+  console.error('Serve DEMO_PASSWORD (almeno 8 caratteri) per un progetto non locale');
+  process.exit(1);
+}
 
 const check = ({ data, error }, cosa) => {
   if (error) throw new Error(`${cosa}: ${error.message}`);
@@ -60,17 +74,47 @@ async function utenteEsistente(email) {
   }
 }
 
+async function utentiDemo() {
+  const tutti = [];
+  for (let page = 1; ; page++) {
+    const { users } = check(await sb.auth.admin.listUsers({ page, perPage: 200 }), 'listUsers');
+    tutti.push(...users.filter((u) => u.email?.endsWith(`@${DOMINIO}`)));
+    if (users.length < 200) return tutti;
+  }
+}
+
+if (RIMUOVI) {
+  const demo = await utentiDemo();
+  const ids = demo.map((u) => u.id);
+  if (ids.length) {
+    // tournaments with demo players (squadre/richieste reference profiles without cascade)
+    const sg = check(await sb.from('squadra_giocatori').select('torneo_id').in('user_id', ids), 'squadre demo');
+    const sq = check(await sb.from('squadre').select('torneo_id').in('creato_da', ids), 'squadre create');
+    const tornei = [...new Set([...sg, ...sq].map((r) => r.torneo_id))];
+    if (tornei.length) check(await sb.from('tornei').delete().in('id', tornei), 'tornei demo');
+    check(await sb.from('richieste').delete().in('creato_da', ids), 'richieste demo');
+    check(await sb.from('occupazioni').delete().in('creato_da', ids), 'occupazioni demo');
+    for (const u of demo) check(await sb.auth.admin.deleteUser(u.id), `elimina ${u.email}`);
+    console.log(`Rimossi ${demo.length} utenti demo e ${tornei.length} tornei con giocatori demo`);
+  } else {
+    console.log('Nessun utente demo da rimuovere');
+  }
+  process.exit(0);
+}
+
 const id = {};
 for (const [nick, nome, roles] of utenti) {
-  const email = `${nick}@demo.it`;
+  const email = `${nick}@${DOMINIO}`;
   const { data, error } = await sb.auth.admin.createUser({
     email,
-    password: 'password',
+    password: PASSWORD,
     email_confirm: true,
     user_metadata: { full_name: nome },
   });
   const user = error ? await utenteEsistente(email) : data.user;
   if (!user) throw new Error(`createUser ${email}: ${error?.message}`);
+  // reused users get the current demo password
+  if (error) check(await sb.auth.admin.updateUserById(user.id, { password: PASSWORD }), `password ${email}`);
   id[nick] = user.id;
   // the auth trigger creates the profile; the service role may set the roles
   check(await sb.from('profiles').upsert({ id: user.id, nome, email, roles }), `profilo ${email}`);

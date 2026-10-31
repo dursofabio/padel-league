@@ -62,7 +62,8 @@ for (const { email, nome, righe } of posta) {
   ]
     .filter((r) => r !== null)
     .join('\n');
-  if (!smtp) {
+  // demo users (scripts/seed-demo.mjs) never receive real email
+  if (!smtp || email.endsWith('@demo.it')) {
     log(`[email simulata] ${email}\n${text}`);
     continue;
   }
