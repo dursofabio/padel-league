@@ -54,6 +54,8 @@ docs/           API contract, UX briefs, reviews
    npx supabase db push
    ```
    Then load the courts from `supabase/seed.sql` (SQL Editor), or create them from the "Campi" screen.
+
+   **Without a local checkout:** use the `.github/workflows/migrations.yml` workflow. Set the variable `SUPABASE_PROJECT_REF` and the secrets `SUPABASE_ACCESS_TOKEN` (Supabase account → Access Tokens) and `SUPABASE_DB_PASSWORD`, then run *Actions → Migrazioni database → Run workflow* (tick the option to load the sample courts). It also runs on every push to `main` that changes a migration.
 4. **Authentication**
    - **URL Configuration:** set Site URL to `https://<user>.github.io/padel-league/` and add the redirect URL `https://<user>.github.io/padel-league/**`. The app uses the PKCE flow, so login links come back as `?code=` and don't clash with hash routing.
    - **Google:** create an OAuth client in Google Cloud with redirect URI `https://<ref>.supabase.co/auth/v1/callback` and enter its ID and secret in Supabase.
