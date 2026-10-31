@@ -3,7 +3,7 @@ name: Promemoria email
 # Scadenze, ricorrenze e partite non giocate girano nel database (pg_cron).
 # Qui solo i promemoria email: scripts/cron.mjs legge email_promemoria() con la
 # chiave segreta di Supabase e invia via SMTP.
-# Variabili: vars.SUPABASE_URL, vars.APP_URL, vars.CRON_ENABLED ('true' per il giro giornaliero).
+# Variabili: vars.SUPABASE_URL (o vars.VITE_SUPABASE_URL), vars.APP_URL, vars.CRON_ENABLED ('true' per il giro giornaliero).
 # Secret: SUPABASE_SECRET_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM.
 on:
   schedule:
@@ -35,7 +35,7 @@ jobs:
       - name: Invia i promemoria
         run: node cron.mjs
         env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.VITE_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           APP_URL: ${{ vars.APP_URL }}
           DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}

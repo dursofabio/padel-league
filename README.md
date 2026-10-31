@@ -76,7 +76,7 @@ docs/           API contract, UX briefs, reviews
 
 | Setting | Values |
 |---|---|
-| Variables | `SUPABASE_URL`, `APP_URL`, `CRON_ENABLED=true` |
+| Variables | `APP_URL`, `CRON_ENABLED=true` (`SUPABASE_URL` only if it differs from `VITE_SUPABASE_URL`) |
 | Secrets | `SUPABASE_SECRET_KEY` (service role), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` |
 
 Request expiry, recurrence materialisation and unplayed-match reports run in **pg_cron**, inside the database.
