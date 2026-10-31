@@ -45,6 +45,6 @@ jobs:
           exit $missing
       - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
       - name: Migrazioni in sospeso
-        run: supabase migration list
+        run: supabase migration list --linked
       - name: Applica le migrazioni
-        run: supabase db push --yes ${{ inputs.seed && '--include-seed' || '' }}
+        run: supabase db push --linked --yes ${{ inputs.seed && '--include-seed' || '' }}
