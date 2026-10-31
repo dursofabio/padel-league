@@ -1,878 +1,858 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-30T23:45:17.314Z",
+  "generatedAt": "2026-10-31T13:38:26.085614Z",
   "title": "Design System: Padel League",
   "extensions": {
     "colorMeta": {
       "ground": {
         "role": "neutral",
-        "displayName": "Daylight Ground",
-        "canonical": "oklch(0.975 0.006 250)",
-        "dark": "oklch(0.17 0.03 260)",
+        "displayName": "Paper Ground",
+        "canonical": "oklch(0.955 0.013 85)",
+        "dark": "oklch(0.16 0.006 80)",
         "tonalRamp": [
-          "oklch(0.15 0.008 250)",
-          "oklch(0.26 0.014 250)",
-          "oklch(0.37 0.018 250)",
-          "oklch(0.48 0.02 250)",
-          "oklch(0.6 0.02 250)",
-          "oklch(0.72 0.018 250)",
-          "oklch(0.84 0.014 250)",
-          "oklch(0.95 0.008 250)"
-        ],
-        "cssVar": "--bg"
+          "oklch(0.15 0.013 85)",
+          "oklch(0.26 0.013 85)",
+          "oklch(0.37 0.013 85)",
+          "oklch(0.48 0.013 85)",
+          "oklch(0.6 0.013 85)",
+          "oklch(0.72 0.013 85)",
+          "oklch(0.84 0.013 85)",
+          "oklch(0.95 0.013 85)"
+        ]
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Paper",
-        "canonical": "oklch(1 0 0)",
-        "dark": "oklch(0.215 0.035 260)",
+        "displayName": "Card Paper",
+        "canonical": "oklch(0.99 0.005 85)",
+        "dark": "oklch(0.21 0.007 80)",
         "tonalRamp": [
-          "oklch(0.15 0.008 250)",
-          "oklch(0.26 0.014 250)",
-          "oklch(0.37 0.018 250)",
-          "oklch(0.48 0.02 250)",
-          "oklch(0.6 0.02 250)",
-          "oklch(0.72 0.018 250)",
-          "oklch(0.84 0.014 250)",
-          "oklch(0.95 0.008 250)"
-        ],
-        "cssVar": "--surface"
+          "oklch(0.15 0.005 85)",
+          "oklch(0.26 0.005 85)",
+          "oklch(0.37 0.005 85)",
+          "oklch(0.48 0.005 85)",
+          "oklch(0.6 0.005 85)",
+          "oklch(0.72 0.005 85)",
+          "oklch(0.84 0.005 85)",
+          "oklch(0.95 0.005 85)"
+        ]
       },
       "surface-2": {
         "role": "neutral",
-        "displayName": "Shade",
-        "canonical": "oklch(0.955 0.01 250)",
-        "dark": "oklch(0.195 0.032 260)",
+        "displayName": "Pressed Paper",
+        "canonical": "oklch(0.925 0.016 85)",
+        "dark": "oklch(0.25 0.008 80)",
         "tonalRamp": [
-          "oklch(0.15 0.008 250)",
-          "oklch(0.26 0.014 250)",
-          "oklch(0.37 0.018 250)",
-          "oklch(0.48 0.02 250)",
-          "oklch(0.6 0.02 250)",
-          "oklch(0.72 0.018 250)",
-          "oklch(0.84 0.014 250)",
-          "oklch(0.95 0.008 250)"
-        ],
-        "cssVar": "--surface-2"
+          "oklch(0.15 0.016 85)",
+          "oklch(0.26 0.016 85)",
+          "oklch(0.37 0.016 85)",
+          "oklch(0.48 0.016 85)",
+          "oklch(0.6 0.016 85)",
+          "oklch(0.72 0.016 85)",
+          "oklch(0.84 0.016 85)",
+          "oklch(0.95 0.016 85)"
+        ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Ink",
-        "canonical": "oklch(0.23 0.035 258)",
-        "dark": "oklch(0.95 0.01 250)",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.95 0.012 85)",
         "tonalRamp": [
-          "oklch(0.15 0.014 258)",
-          "oklch(0.26 0.024 258)",
-          "oklch(0.37 0.031 258)",
-          "oklch(0.48 0.034 258)",
-          "oklch(0.6 0.035 258)",
-          "oklch(0.72 0.031 258)",
-          "oklch(0.84 0.024 258)",
-          "oklch(0.95 0.014 258)"
-        ],
-        "cssVar": "--ink"
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
       },
       "ink-muted": {
         "role": "neutral",
         "displayName": "Muted Ink",
-        "canonical": "oklch(0.45 0.03 258)",
-        "dark": "oklch(0.76 0.025 250)",
+        "canonical": "oklch(0.43 0.014 75)",
+        "dark": "oklch(0.78 0.014 85)",
         "tonalRamp": [
-          "oklch(0.15 0.012 258)",
-          "oklch(0.26 0.021 258)",
-          "oklch(0.37 0.026 258)",
-          "oklch(0.48 0.029 258)",
-          "oklch(0.6 0.03 258)",
-          "oklch(0.72 0.027 258)",
-          "oklch(0.84 0.021 258)",
-          "oklch(0.95 0.012 258)"
-        ],
-        "cssVar": "--ink-muted"
+          "oklch(0.15 0.014 75)",
+          "oklch(0.26 0.014 75)",
+          "oklch(0.37 0.014 75)",
+          "oklch(0.48 0.014 75)",
+          "oklch(0.6 0.014 75)",
+          "oklch(0.72 0.014 75)",
+          "oklch(0.84 0.014 75)",
+          "oklch(0.95 0.014 75)"
+        ]
       },
       "line": {
         "role": "neutral",
-        "displayName": "Court Line",
-        "canonical": "oklch(0.885 0.014 250)",
-        "dark": "oklch(0.32 0.035 260)",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.85 0.014 85)",
+        "dark": "oklch(0.34 0.008 80)",
         "tonalRamp": [
-          "oklch(0.15 0.008 250)",
-          "oklch(0.26 0.014 250)",
-          "oklch(0.37 0.018 250)",
-          "oklch(0.48 0.02 250)",
-          "oklch(0.6 0.02 250)",
-          "oklch(0.72 0.018 250)",
-          "oklch(0.84 0.014 250)",
-          "oklch(0.95 0.008 250)"
-        ],
-        "cssVar": "--line"
+          "oklch(0.15 0.014 85)",
+          "oklch(0.26 0.014 85)",
+          "oklch(0.37 0.014 85)",
+          "oklch(0.48 0.014 85)",
+          "oklch(0.6 0.014 85)",
+          "oklch(0.72 0.014 85)",
+          "oklch(0.84 0.014 85)",
+          "oklch(0.95 0.014 85)"
+        ]
       },
       "line-strong": {
         "role": "neutral",
-        "displayName": "Strong Line",
-        "canonical": "oklch(0.6 0.025 252)",
-        "dark": "oklch(0.55 0.04 256)",
+        "displayName": "Ink Rule",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.95 0.012 85)",
         "tonalRamp": [
-          "oklch(0.15 0.012 252)",
-          "oklch(0.26 0.021 252)",
-          "oklch(0.37 0.026 252)",
-          "oklch(0.48 0.029 252)",
-          "oklch(0.6 0.03 252)",
-          "oklch(0.72 0.027 252)",
-          "oklch(0.84 0.021 252)",
-          "oklch(0.95 0.012 252)"
-        ],
-        "cssVar": "--line-strong"
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
       },
       "court": {
-        "role": "primary",
-        "displayName": "Turf Blue",
-        "canonical": "oklch(0.46 0.135 256)",
-        "dark": "oklch(0.31 0.09 258)",
+        "role": "tertiary",
+        "displayName": "Ink Fill",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.95 0.012 85)",
         "tonalRamp": [
-          "oklch(0.15 0.055 256)",
-          "oklch(0.26 0.093 256)",
-          "oklch(0.37 0.119 256)",
-          "oklch(0.48 0.133 256)",
-          "oklch(0.6 0.134 256)",
-          "oklch(0.72 0.121 256)",
-          "oklch(0.84 0.093 256)",
-          "oklch(0.95 0.055 256)"
-        ],
-        "cssVar": "--court"
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
       },
       "court-deep": {
-        "role": "primary",
-        "displayName": "Night Turf",
-        "canonical": "oklch(0.38 0.115 258)",
-        "dark": "oklch(0.25 0.075 260)",
+        "role": "tertiary",
+        "displayName": "Deep Ink Fill",
+        "canonical": "oklch(0.12 0.004 80)",
+        "dark": "oklch(0.85 0.014 85)",
         "tonalRamp": [
-          "oklch(0.15 0.047 258)",
-          "oklch(0.26 0.079 258)",
-          "oklch(0.37 0.101 258)",
-          "oklch(0.48 0.113 258)",
-          "oklch(0.6 0.114 258)",
-          "oklch(0.72 0.103 258)",
-          "oklch(0.84 0.079 258)",
-          "oklch(0.95 0.047 258)"
-        ],
-        "cssVar": "--court-deep"
+          "oklch(0.15 0.004 80)",
+          "oklch(0.26 0.004 80)",
+          "oklch(0.37 0.004 80)",
+          "oklch(0.48 0.004 80)",
+          "oklch(0.6 0.004 80)",
+          "oklch(0.72 0.004 80)",
+          "oklch(0.84 0.004 80)",
+          "oklch(0.95 0.004 80)"
+        ]
       },
       "court-ink": {
-        "role": "primary",
-        "displayName": "Court White",
-        "canonical": "oklch(0.99 0.004 250)",
-        "dark": "oklch(0.97 0.006 250)",
+        "role": "tertiary",
+        "displayName": "Ink Fill Text",
+        "canonical": "oklch(0.97 0.01 85)",
+        "dark": "oklch(0.17 0.005 80)",
         "tonalRamp": [
-          "oklch(0.15 0.012 250)",
-          "oklch(0.26 0.021 250)",
-          "oklch(0.37 0.026 250)",
-          "oklch(0.48 0.029 250)",
-          "oklch(0.6 0.03 250)",
-          "oklch(0.72 0.027 250)",
-          "oklch(0.84 0.021 250)",
-          "oklch(0.95 0.012 250)"
-        ],
-        "cssVar": "--court-ink"
+          "oklch(0.15 0.01 85)",
+          "oklch(0.26 0.01 85)",
+          "oklch(0.37 0.01 85)",
+          "oklch(0.48 0.01 85)",
+          "oklch(0.6 0.01 85)",
+          "oklch(0.72 0.01 85)",
+          "oklch(0.84 0.01 85)",
+          "oklch(0.95 0.01 85)"
+        ]
       },
       "court-ink-muted": {
-        "role": "primary",
-        "displayName": "Court White Muted",
-        "canonical": "oklch(0.88 0.03 250)",
-        "dark": "oklch(0.84 0.03 250)",
+        "role": "tertiary",
+        "displayName": "Ink Fill Muted Text",
+        "canonical": "oklch(0.8 0.012 85)",
+        "dark": "oklch(0.35 0.01 80)",
         "tonalRamp": [
-          "oklch(0.15 0.012 250)",
-          "oklch(0.26 0.021 250)",
-          "oklch(0.37 0.026 250)",
-          "oklch(0.48 0.029 250)",
-          "oklch(0.6 0.03 250)",
-          "oklch(0.72 0.027 250)",
-          "oklch(0.84 0.021 250)",
-          "oklch(0.95 0.012 250)"
-        ],
-        "cssVar": "--court-ink-muted"
+          "oklch(0.15 0.012 85)",
+          "oklch(0.26 0.012 85)",
+          "oklch(0.37 0.012 85)",
+          "oklch(0.48 0.012 85)",
+          "oklch(0.6 0.012 85)",
+          "oklch(0.72 0.012 85)",
+          "oklch(0.84 0.012 85)",
+          "oklch(0.95 0.012 85)"
+        ]
       },
-      "court-line": {
-        "role": "primary",
-        "displayName": "Court Line on Blue",
-        "canonical": "oklch(1 0 0 / 0.55)",
-        "dark": "oklch(1 0 0 / 0.4)",
+      "bar": {
+        "role": "neutral",
+        "displayName": "The Bar",
+        "canonical": "oklch(0.17 0.005 80)",
+        "dark": "oklch(0.11 0.004 80)",
         "tonalRamp": [
-          "oklch(0.15 0 250)",
-          "oklch(0.26 0 250)",
-          "oklch(0.37 0 250)",
-          "oklch(0.48 0 250)",
-          "oklch(0.6 0 250)",
-          "oklch(0.72 0 250)",
-          "oklch(0.84 0 250)",
-          "oklch(0.95 0 250)"
-        ],
-        "cssVar": "--court-line"
+          "oklch(0.15 0.005 80)",
+          "oklch(0.26 0.005 80)",
+          "oklch(0.37 0.005 80)",
+          "oklch(0.48 0.005 80)",
+          "oklch(0.6 0.005 80)",
+          "oklch(0.72 0.005 80)",
+          "oklch(0.84 0.005 80)",
+          "oklch(0.95 0.005 80)"
+        ]
+      },
+      "bar-ink": {
+        "role": "neutral",
+        "displayName": "Bar Text",
+        "canonical": "oklch(0.97 0.01 85)",
+        "dark": "oklch(0.95 0.012 85)",
+        "tonalRamp": [
+          "oklch(0.15 0.01 85)",
+          "oklch(0.26 0.01 85)",
+          "oklch(0.37 0.01 85)",
+          "oklch(0.48 0.01 85)",
+          "oklch(0.6 0.01 85)",
+          "oklch(0.72 0.01 85)",
+          "oklch(0.84 0.01 85)",
+          "oklch(0.95 0.01 85)"
+        ]
+      },
+      "bar-ink-muted": {
+        "role": "neutral",
+        "displayName": "Bar Muted Text",
+        "canonical": "oklch(0.78 0.012 85)",
+        "dark": "oklch(0.76 0.012 85)",
+        "tonalRamp": [
+          "oklch(0.15 0.012 85)",
+          "oklch(0.26 0.012 85)",
+          "oklch(0.37 0.012 85)",
+          "oklch(0.48 0.012 85)",
+          "oklch(0.6 0.012 85)",
+          "oklch(0.72 0.012 85)",
+          "oklch(0.84 0.012 85)",
+          "oklch(0.95 0.012 85)"
+        ]
       },
       "ball": {
-        "role": "secondary",
+        "role": "primary",
         "displayName": "Ball Lime",
-        "canonical": "oklch(0.91 0.19 120)",
-        "dark": "oklch(0.9 0.19 120)",
+        "canonical": "oklch(0.92 0.2 122)",
+        "dark": "oklch(0.92 0.2 122)",
         "tonalRamp": [
-          "oklch(0.15 0.077 120)",
-          "oklch(0.26 0.131 120)",
-          "oklch(0.37 0.167 120)",
-          "oklch(0.48 0.187 120)",
-          "oklch(0.6 0.188 120)",
-          "oklch(0.72 0.17 120)",
-          "oklch(0.84 0.131 120)",
-          "oklch(0.95 0.077 120)"
-        ],
-        "cssVar": "--ball"
+          "oklch(0.15 0.095 122)",
+          "oklch(0.26 0.121 122)",
+          "oklch(0.37 0.146 122)",
+          "oklch(0.48 0.172 122)",
+          "oklch(0.6 0.2 122)",
+          "oklch(0.72 0.172 122)",
+          "oklch(0.84 0.144 122)",
+          "oklch(0.95 0.118 122)"
+        ]
       },
       "ball-strong": {
-        "role": "secondary",
+        "role": "primary",
         "displayName": "Ball Lime Pressed",
-        "canonical": "oklch(0.86 0.2 122)",
-        "dark": "oklch(0.94 0.17 118)",
+        "canonical": "oklch(0.88 0.21 124)",
+        "dark": "oklch(0.95 0.17 120)",
         "tonalRamp": [
-          "oklch(0.15 0.081 122)",
-          "oklch(0.26 0.138 122)",
-          "oklch(0.37 0.176 122)",
-          "oklch(0.48 0.196 122)",
-          "oklch(0.6 0.198 122)",
-          "oklch(0.72 0.179 122)",
-          "oklch(0.84 0.138 122)",
-          "oklch(0.95 0.081 122)"
-        ],
-        "cssVar": "--ball-strong"
+          "oklch(0.15 0.1 124)",
+          "oklch(0.26 0.127 124)",
+          "oklch(0.37 0.154 124)",
+          "oklch(0.48 0.181 124)",
+          "oklch(0.6 0.21 124)",
+          "oklch(0.72 0.181 124)",
+          "oklch(0.84 0.151 124)",
+          "oklch(0.95 0.124 124)"
+        ]
       },
       "ball-ink": {
-        "role": "secondary",
-        "displayName": "Ball Ink",
-        "canonical": "oklch(0.24 0.05 140)",
-        "dark": "oklch(0.22 0.05 140)",
+        "role": "primary",
+        "displayName": "Ink on Lime",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.17 0.005 80)",
         "tonalRamp": [
-          "oklch(0.15 0.02 140)",
-          "oklch(0.26 0.034 140)",
-          "oklch(0.37 0.044 140)",
-          "oklch(0.48 0.049 140)",
-          "oklch(0.6 0.05 140)",
-          "oklch(0.72 0.045 140)",
-          "oklch(0.84 0.034 140)",
-          "oklch(0.95 0.02 140)"
-        ],
-        "cssVar": "--ball-ink"
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
+      },
+      "clay": {
+        "role": "secondary",
+        "displayName": "Clay Coral",
+        "canonical": "oklch(0.77 0.14 42)",
+        "dark": "oklch(0.77 0.14 42)",
+        "tonalRamp": [
+          "oklch(0.15 0.067 42)",
+          "oklch(0.26 0.084 42)",
+          "oklch(0.37 0.102 42)",
+          "oklch(0.48 0.12 42)",
+          "oklch(0.6 0.14 42)",
+          "oklch(0.72 0.12 42)",
+          "oklch(0.84 0.101 42)",
+          "oklch(0.95 0.083 42)"
+        ]
+      },
+      "clay-strong": {
+        "role": "secondary",
+        "displayName": "Clay Coral Pressed",
+        "canonical": "oklch(0.72 0.15 40)",
+        "dark": "oklch(0.82 0.12 45)",
+        "tonalRamp": [
+          "oklch(0.15 0.071 40)",
+          "oklch(0.26 0.091 40)",
+          "oklch(0.37 0.11 40)",
+          "oklch(0.48 0.129 40)",
+          "oklch(0.6 0.15 40)",
+          "oklch(0.72 0.129 40)",
+          "oklch(0.84 0.108 40)",
+          "oklch(0.95 0.089 40)"
+        ]
+      },
+      "clay-ink": {
+        "role": "secondary",
+        "displayName": "Ink on Clay",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.17 0.005 80)",
+        "tonalRamp": [
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
+      },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Edge (fixed ink)",
+        "canonical": "oklch(0.17 0.005 80)",
+        "dark": "oklch(0.17 0.005 80)",
+        "tonalRamp": [
+          "oklch(0.15 0.005 80)",
+          "oklch(0.26 0.005 80)",
+          "oklch(0.37 0.005 80)",
+          "oklch(0.48 0.005 80)",
+          "oklch(0.6 0.005 80)",
+          "oklch(0.72 0.005 80)",
+          "oklch(0.84 0.005 80)",
+          "oklch(0.95 0.005 80)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper (fixed)",
+        "canonical": "oklch(0.97 0.01 85)",
+        "dark": "oklch(0.97 0.01 85)",
+        "tonalRamp": [
+          "oklch(0.15 0.01 85)",
+          "oklch(0.26 0.01 85)",
+          "oklch(0.37 0.01 85)",
+          "oklch(0.48 0.01 85)",
+          "oklch(0.6 0.01 85)",
+          "oklch(0.72 0.01 85)",
+          "oklch(0.84 0.01 85)",
+          "oklch(0.95 0.01 85)"
+        ]
       },
       "ok": {
-        "role": "tertiary",
-        "displayName": "Green 4/4",
-        "canonical": "oklch(0.52 0.13 150)",
-        "dark": "oklch(0.72 0.14 150)",
+        "role": "state",
+        "displayName": "Confirmed Green",
+        "canonical": "oklch(0.5 0.13 150)",
+        "dark": "oklch(0.74 0.14 150)",
         "tonalRamp": [
-          "oklch(0.15 0.053 150)",
-          "oklch(0.26 0.09 150)",
-          "oklch(0.37 0.114 150)",
-          "oklch(0.48 0.128 150)",
-          "oklch(0.6 0.129 150)",
-          "oklch(0.72 0.116 150)",
-          "oklch(0.84 0.09 150)",
-          "oklch(0.95 0.053 150)"
-        ],
-        "cssVar": "--ok"
+          "oklch(0.15 0.062 150)",
+          "oklch(0.26 0.078 150)",
+          "oklch(0.37 0.095 150)",
+          "oklch(0.48 0.112 150)",
+          "oklch(0.6 0.13 150)",
+          "oklch(0.72 0.112 150)",
+          "oklch(0.84 0.094 150)",
+          "oklch(0.95 0.077 150)"
+        ]
       },
       "ok-soft": {
-        "role": "tertiary",
-        "displayName": "Green Soft",
-        "canonical": "oklch(0.95 0.045 150)",
+        "role": "state",
+        "displayName": "Confirmed Green Soft",
+        "canonical": "oklch(0.93 0.05 150)",
         "dark": "oklch(0.3 0.06 152)",
         "tonalRamp": [
-          "oklch(0.15 0.053 150)",
-          "oklch(0.26 0.09 150)",
-          "oklch(0.37 0.114 150)",
-          "oklch(0.48 0.128 150)",
-          "oklch(0.6 0.129 150)",
-          "oklch(0.72 0.116 150)",
-          "oklch(0.84 0.09 150)",
-          "oklch(0.95 0.053 150)"
-        ],
-        "cssVar": "--ok-soft"
+          "oklch(0.15 0.024 150)",
+          "oklch(0.26 0.03 150)",
+          "oklch(0.37 0.037 150)",
+          "oklch(0.48 0.043 150)",
+          "oklch(0.6 0.05 150)",
+          "oklch(0.72 0.043 150)",
+          "oklch(0.84 0.036 150)",
+          "oklch(0.95 0.03 150)"
+        ]
       },
       "ok-ink": {
-        "role": "tertiary",
-        "displayName": "Green Ink",
-        "canonical": "oklch(0.37 0.1 150)",
-        "dark": "oklch(0.87 0.1 150)",
+        "role": "state",
+        "displayName": "Confirmed Green Ink",
+        "canonical": "oklch(0.36 0.1 150)",
+        "dark": "oklch(0.88 0.1 150)",
         "tonalRamp": [
-          "oklch(0.15 0.053 150)",
-          "oklch(0.26 0.09 150)",
-          "oklch(0.37 0.114 150)",
-          "oklch(0.48 0.128 150)",
-          "oklch(0.6 0.129 150)",
-          "oklch(0.72 0.116 150)",
-          "oklch(0.84 0.09 150)",
-          "oklch(0.95 0.053 150)"
-        ],
-        "cssVar": "--ok-ink"
+          "oklch(0.15 0.048 150)",
+          "oklch(0.26 0.06 150)",
+          "oklch(0.37 0.073 150)",
+          "oklch(0.48 0.086 150)",
+          "oklch(0.6 0.1 150)",
+          "oklch(0.72 0.086 150)",
+          "oklch(0.84 0.072 150)",
+          "oklch(0.95 0.059 150)"
+        ]
       },
       "warn": {
-        "role": "tertiary",
-        "displayName": "Amber 3/4",
+        "role": "state",
+        "displayName": "Pending Amber",
         "canonical": "oklch(0.7 0.15 75)",
         "dark": "oklch(0.8 0.14 80)",
         "tonalRamp": [
-          "oklch(0.15 0.061 75)",
-          "oklch(0.26 0.103 75)",
-          "oklch(0.37 0.132 75)",
-          "oklch(0.48 0.147 75)",
-          "oklch(0.6 0.149 75)",
-          "oklch(0.72 0.134 75)",
-          "oklch(0.84 0.103 75)",
-          "oklch(0.95 0.061 75)"
-        ],
-        "cssVar": "--warn"
+          "oklch(0.15 0.071 75)",
+          "oklch(0.26 0.091 75)",
+          "oklch(0.37 0.11 75)",
+          "oklch(0.48 0.129 75)",
+          "oklch(0.6 0.15 75)",
+          "oklch(0.72 0.129 75)",
+          "oklch(0.84 0.108 75)",
+          "oklch(0.95 0.089 75)"
+        ]
       },
       "warn-soft": {
-        "role": "tertiary",
-        "displayName": "Amber Soft",
-        "canonical": "oklch(0.96 0.06 90)",
+        "role": "state",
+        "displayName": "Pending Amber Soft",
+        "canonical": "oklch(0.94 0.07 90)",
         "dark": "oklch(0.32 0.06 75)",
         "tonalRamp": [
-          "oklch(0.15 0.061 75)",
-          "oklch(0.26 0.103 75)",
-          "oklch(0.37 0.132 75)",
-          "oklch(0.48 0.147 75)",
-          "oklch(0.6 0.149 75)",
-          "oklch(0.72 0.134 75)",
-          "oklch(0.84 0.103 75)",
-          "oklch(0.95 0.061 75)"
-        ],
-        "cssVar": "--warn-soft"
+          "oklch(0.15 0.033 90)",
+          "oklch(0.26 0.042 90)",
+          "oklch(0.37 0.051 90)",
+          "oklch(0.48 0.06 90)",
+          "oklch(0.6 0.07 90)",
+          "oklch(0.72 0.06 90)",
+          "oklch(0.84 0.05 90)",
+          "oklch(0.95 0.041 90)"
+        ]
       },
       "warn-ink": {
-        "role": "tertiary",
-        "displayName": "Amber Ink",
-        "canonical": "oklch(0.44 0.1 65)",
+        "role": "state",
+        "displayName": "Pending Amber Ink",
+        "canonical": "oklch(0.42 0.1 65)",
         "dark": "oklch(0.9 0.1 85)",
         "tonalRamp": [
-          "oklch(0.15 0.061 75)",
-          "oklch(0.26 0.103 75)",
-          "oklch(0.37 0.132 75)",
-          "oklch(0.48 0.147 75)",
-          "oklch(0.6 0.149 75)",
-          "oklch(0.72 0.134 75)",
-          "oklch(0.84 0.103 75)",
-          "oklch(0.95 0.061 75)"
-        ],
-        "cssVar": "--warn-ink"
+          "oklch(0.15 0.048 65)",
+          "oklch(0.26 0.06 65)",
+          "oklch(0.37 0.073 65)",
+          "oklch(0.48 0.086 65)",
+          "oklch(0.6 0.1 65)",
+          "oklch(0.72 0.086 65)",
+          "oklch(0.84 0.072 65)",
+          "oklch(0.95 0.059 65)"
+        ]
       },
       "danger": {
-        "role": "tertiary",
-        "displayName": "Red Occupied",
-        "canonical": "oklch(0.55 0.19 27)",
-        "dark": "oklch(0.7 0.16 27)",
+        "role": "state",
+        "displayName": "Alarm Red",
+        "canonical": "oklch(0.55 0.2 27)",
+        "dark": "oklch(0.7 0.17 27)",
         "tonalRamp": [
-          "oklch(0.15 0.077 27)",
-          "oklch(0.26 0.131 27)",
-          "oklch(0.37 0.167 27)",
-          "oklch(0.48 0.187 27)",
-          "oklch(0.6 0.188 27)",
-          "oklch(0.72 0.17 27)",
-          "oklch(0.84 0.131 27)",
-          "oklch(0.95 0.077 27)"
-        ],
-        "cssVar": "--danger"
+          "oklch(0.15 0.095 27)",
+          "oklch(0.26 0.121 27)",
+          "oklch(0.37 0.146 27)",
+          "oklch(0.48 0.172 27)",
+          "oklch(0.6 0.2 27)",
+          "oklch(0.72 0.172 27)",
+          "oklch(0.84 0.144 27)",
+          "oklch(0.95 0.118 27)"
+        ]
       },
       "danger-soft": {
-        "role": "tertiary",
-        "displayName": "Red Soft",
-        "canonical": "oklch(0.95 0.035 25)",
+        "role": "state",
+        "displayName": "Alarm Red Soft",
+        "canonical": "oklch(0.93 0.04 25)",
         "dark": "oklch(0.31 0.07 25)",
         "tonalRamp": [
-          "oklch(0.15 0.077 27)",
-          "oklch(0.26 0.131 27)",
-          "oklch(0.37 0.167 27)",
-          "oklch(0.48 0.187 27)",
-          "oklch(0.6 0.188 27)",
-          "oklch(0.72 0.17 27)",
-          "oklch(0.84 0.131 27)",
-          "oklch(0.95 0.077 27)"
-        ],
-        "cssVar": "--danger-soft"
+          "oklch(0.15 0.019 25)",
+          "oklch(0.26 0.024 25)",
+          "oklch(0.37 0.029 25)",
+          "oklch(0.48 0.034 25)",
+          "oklch(0.6 0.04 25)",
+          "oklch(0.72 0.034 25)",
+          "oklch(0.84 0.029 25)",
+          "oklch(0.95 0.024 25)"
+        ]
       },
       "danger-ink": {
-        "role": "tertiary",
-        "displayName": "Red Ink",
-        "canonical": "oklch(0.46 0.17 27)",
+        "role": "state",
+        "displayName": "Alarm Red Ink",
+        "canonical": "oklch(0.45 0.17 27)",
         "dark": "oklch(0.88 0.08 25)",
         "tonalRamp": [
-          "oklch(0.15 0.077 27)",
-          "oklch(0.26 0.131 27)",
-          "oklch(0.37 0.167 27)",
-          "oklch(0.48 0.187 27)",
-          "oklch(0.6 0.188 27)",
-          "oklch(0.72 0.17 27)",
-          "oklch(0.84 0.131 27)",
-          "oklch(0.95 0.077 27)"
-        ],
-        "cssVar": "--danger-ink"
+          "oklch(0.15 0.081 27)",
+          "oklch(0.26 0.103 27)",
+          "oklch(0.37 0.124 27)",
+          "oklch(0.48 0.146 27)",
+          "oklch(0.6 0.17 27)",
+          "oklch(0.72 0.146 27)",
+          "oklch(0.84 0.122 27)",
+          "oklch(0.95 0.101 27)"
+        ]
       },
       "info": {
-        "role": "tertiary",
+        "role": "state",
         "displayName": "Request Blue",
         "canonical": "oklch(0.5 0.14 258)",
-        "dark": "oklch(0.72 0.12 255)",
+        "dark": "oklch(0.74 0.12 255)",
         "tonalRamp": [
-          "oklch(0.15 0.057 258)",
-          "oklch(0.26 0.096 258)",
-          "oklch(0.37 0.123 258)",
-          "oklch(0.48 0.137 258)",
-          "oklch(0.6 0.139 258)",
-          "oklch(0.72 0.125 258)",
-          "oklch(0.84 0.096 258)",
-          "oklch(0.95 0.057 258)"
-        ],
-        "cssVar": "--info"
+          "oklch(0.15 0.067 258)",
+          "oklch(0.26 0.084 258)",
+          "oklch(0.37 0.102 258)",
+          "oklch(0.48 0.12 258)",
+          "oklch(0.6 0.14 258)",
+          "oklch(0.72 0.12 258)",
+          "oklch(0.84 0.101 258)",
+          "oklch(0.95 0.083 258)"
+        ]
       },
       "info-soft": {
-        "role": "tertiary",
+        "role": "state",
         "displayName": "Request Blue Soft",
-        "canonical": "oklch(0.945 0.035 258)",
-        "dark": "oklch(0.3 0.07 258)",
+        "canonical": "oklch(0.93 0.035 258)",
+        "dark": "oklch(0.3 0.06 258)",
         "tonalRamp": [
-          "oklch(0.15 0.057 258)",
-          "oklch(0.26 0.096 258)",
-          "oklch(0.37 0.123 258)",
-          "oklch(0.48 0.137 258)",
-          "oklch(0.6 0.139 258)",
-          "oklch(0.72 0.125 258)",
-          "oklch(0.84 0.096 258)",
-          "oklch(0.95 0.057 258)"
-        ],
-        "cssVar": "--info-soft"
+          "oklch(0.15 0.017 258)",
+          "oklch(0.26 0.021 258)",
+          "oklch(0.37 0.026 258)",
+          "oklch(0.48 0.03 258)",
+          "oklch(0.6 0.035 258)",
+          "oklch(0.72 0.03 258)",
+          "oklch(0.84 0.025 258)",
+          "oklch(0.95 0.021 258)"
+        ]
       },
       "info-ink": {
-        "role": "tertiary",
+        "role": "state",
         "displayName": "Request Blue Ink",
-        "canonical": "oklch(0.42 0.13 258)",
+        "canonical": "oklch(0.4 0.13 258)",
         "dark": "oklch(0.88 0.06 255)",
         "tonalRamp": [
-          "oklch(0.15 0.057 258)",
-          "oklch(0.26 0.096 258)",
-          "oklch(0.37 0.123 258)",
-          "oklch(0.48 0.137 258)",
-          "oklch(0.6 0.139 258)",
-          "oklch(0.72 0.125 258)",
-          "oklch(0.84 0.096 258)",
-          "oklch(0.95 0.057 258)"
-        ],
-        "cssVar": "--info-ink"
+          "oklch(0.15 0.062 258)",
+          "oklch(0.26 0.078 258)",
+          "oklch(0.37 0.095 258)",
+          "oklch(0.48 0.112 258)",
+          "oklch(0.6 0.13 258)",
+          "oklch(0.72 0.112 258)",
+          "oklch(0.84 0.094 258)",
+          "oklch(0.95 0.077 258)"
+        ]
       },
       "idle-soft": {
-        "role": "tertiary",
-        "displayName": "Idle Soft",
-        "canonical": "oklch(0.94 0.008 250)",
-        "dark": "oklch(0.27 0.025 258)",
+        "role": "state",
+        "displayName": "Idle Paper",
+        "canonical": "oklch(0.91 0.012 85)",
+        "dark": "oklch(0.27 0.008 80)",
         "tonalRamp": [
-          "oklch(0.15 0.008 255)",
-          "oklch(0.26 0.014 255)",
-          "oklch(0.37 0.018 255)",
-          "oklch(0.48 0.02 255)",
-          "oklch(0.6 0.02 255)",
-          "oklch(0.72 0.018 255)",
-          "oklch(0.84 0.014 255)",
-          "oklch(0.95 0.008 255)"
-        ],
-        "cssVar": "--idle-soft"
+          "oklch(0.15 0.012 85)",
+          "oklch(0.26 0.012 85)",
+          "oklch(0.37 0.012 85)",
+          "oklch(0.48 0.012 85)",
+          "oklch(0.6 0.012 85)",
+          "oklch(0.72 0.012 85)",
+          "oklch(0.84 0.012 85)",
+          "oklch(0.95 0.012 85)"
+        ]
       },
       "idle-ink": {
-        "role": "tertiary",
+        "role": "state",
         "displayName": "Idle Ink",
-        "canonical": "oklch(0.42 0.02 258)",
-        "dark": "oklch(0.8 0.02 250)",
+        "canonical": "oklch(0.38 0.014 75)",
+        "dark": "oklch(0.82 0.012 85)",
         "tonalRamp": [
-          "oklch(0.15 0.008 255)",
-          "oklch(0.26 0.014 255)",
-          "oklch(0.37 0.018 255)",
-          "oklch(0.48 0.02 255)",
-          "oklch(0.6 0.02 255)",
-          "oklch(0.72 0.018 255)",
-          "oklch(0.84 0.014 255)",
-          "oklch(0.95 0.008 255)"
-        ],
-        "cssVar": "--idle-ink"
+          "oklch(0.15 0.014 75)",
+          "oklch(0.26 0.014 75)",
+          "oklch(0.37 0.014 75)",
+          "oklch(0.48 0.014 75)",
+          "oklch(0.6 0.014 75)",
+          "oklch(0.72 0.014 75)",
+          "oklch(0.84 0.014 75)",
+          "oklch(0.95 0.014 75)"
+        ]
       },
       "focus": {
-        "role": "primary",
-        "displayName": "Focus",
-        "canonical": "oklch(0.38 0.115 258)",
-        "dark": "oklch(0.9 0.19 120)",
+        "role": "neutral",
+        "displayName": "Focus Ring",
+        "canonical": "oklch(0.2 0.006 80)",
+        "dark": "oklch(0.92 0.2 122)",
         "tonalRamp": [
-          "oklch(0.15 0.047 258)",
-          "oklch(0.26 0.079 258)",
-          "oklch(0.37 0.101 258)",
-          "oklch(0.48 0.113 258)",
-          "oklch(0.6 0.114 258)",
-          "oklch(0.72 0.103 258)",
-          "oklch(0.84 0.079 258)",
-          "oklch(0.95 0.047 258)"
-        ],
-        "cssVar": "--focus",
-        "note": "Light: court-deep. Dark and on .bg-court/.bg-court-deep: ball."
+          "oklch(0.15 0.006 80)",
+          "oklch(0.26 0.006 80)",
+          "oklch(0.37 0.006 80)",
+          "oklch(0.48 0.006 80)",
+          "oklch(0.6 0.006 80)",
+          "oklch(0.72 0.006 80)",
+          "oklch(0.84 0.006 80)",
+          "oklch(0.95 0.006 80)"
+        ]
       }
     },
     "typographyMeta": {
-      "headline": {
-        "displayName": "Headline",
-        "purpose": "The single h1 per page (PageHeader); sets document.title."
+      "poster-2xl": {
+        "displayName": "Poster 2XL",
+        "purpose": "Position numeral in the standing tile."
       },
-      "statement": {
-        "displayName": "Statement",
-        "purpose": "The answer to \"what now?\" on a match: \"Si gioca dom 01/11 alle 14:00 · Campo 2\", acceptance count, score inputs."
+      "poster-xl": {
+        "displayName": "Poster XL",
+        "purpose": "Page titles from 640px."
+      },
+      "poster-lg": {
+        "displayName": "Poster LG",
+        "purpose": "Date and time of the next match."
+      },
+      "poster": {
+        "displayName": "Poster",
+        "purpose": "Page titles and the home greeting on phones."
+      },
+      "poster-sm": {
+        "displayName": "Poster SM",
+        "purpose": "Section titles, the lime block big line, standings positions and points."
+      },
+      "poster-block": {
+        "displayName": "Poster Block",
+        "purpose": "Big line of paper, clay and group blocks; the wordmark."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Section h2, sheet and dialog titles, empty-state titles."
+        "purpose": "Sheet and dialog titles."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "All running text, list rows, inputs, notices. Minimum 17px."
+        "purpose": "All running text."
       },
       "body-strong": {
         "displayName": "Body Strong",
-        "purpose": "Buttons, nav items, emphasised row text."
+        "purpose": "Supporting lines, primary and ink buttons, emphasised rows."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Form labels, badges, lane headers and blocks, hints, hour labels."
+        "purpose": "Field labels, badges, deadline stamps, table heads, lane headers."
       },
       "caption": {
         "displayName": "Caption",
-        "purpose": "Mobile tab labels, counters, standings zone tags. Never actionable content."
-      },
-      "numeric": {
-        "displayName": "Numeric",
-        "purpose": "Times, dates, scores and counts: always tabular-nums (.tabular)."
+        "purpose": "Tab-bar labels and zone pills only."
       }
-    },
-    "themes": {
-      "light": ":root",
-      "dark": "[data-theme='dark']",
-      "note": "Tailwind dark variant is bound to [data-theme=dark]; .bg-court and .bg-court-deep remap --focus to --ball."
     },
     "shadows": [
       {
         "name": "raised",
-        "value": "0 1px 2px oklch(0.23 0.035 258 / 0.08), 0 8px 24px -8px oklch(0.23 0.035 258 / 0.18)",
-        "dark": "0 1px 2px oklch(0 0 0 / 0.4), 0 10px 30px -10px oklch(0 0 0 / 0.6)",
-        "purpose": "Sheet and ConfirmDialog only (--shadow / shadow-raised)."
-      },
-      {
-        "name": "primary-press",
-        "value": "inset 0 -2px 0 oklch(0 0 0 / 0.08)",
-        "purpose": "Inner bottom shade of the lime primary button."
+        "value": "0 2px 4px oklch(0.2 0.006 80 / 0.08), 0 14px 32px -12px oklch(0.2 0.006 80 / 0.28)",
+        "dark": "0 2px 4px oklch(0 0 0 / 0.4), 0 14px 32px -12px oklch(0 0 0 / 0.7)",
+        "purpose": "Sheets, confirm dialogs, popover menus and sticky action bars only; never blocks on the page."
       },
       {
         "name": "selection-halo",
         "value": "0 0 0 5px var(--ball)",
-        "purpose": "With a 2px court-deep outline (ball in dark) offset 1px: the selected lane block or request. A ring, not elevation."
-      },
-      {
-        "name": "overlay-scrim",
-        "value": "oklch(0.2 0.04 258 / 0.45)",
-        "purpose": "Sheet backdrop (0.5 for ConfirmDialog)."
+        "purpose": "Ring with a 2px court-deep outline offset 1px (lime outline in dark): selected slot, lane block or request card."
       }
     ],
     "motion": [
       {
-        "name": "state-transition",
+        "name": "state-colour",
         "value": "150ms ease-out",
-        "purpose": "Colour, border and shadow transitions on buttons, inputs and lane block hover."
+        "purpose": "Background, border and colour changes on buttons and fields."
       },
       {
-        "name": "overlay-fade",
-        "value": "fade-in 150ms ease-out",
-        "purpose": "Sheet backdrop."
+        "name": "arrow-nudge",
+        "value": "200ms ease-out, translateX(4px)",
+        "purpose": "Arrow on navigating blocks and tiles on hover."
       },
       {
         "name": "sheet-enter",
         "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "sheet-up (phone) / sheet-left (from 768px)."
+        "purpose": "Sheet slides up on phone, in from the right from 768px."
+      },
+      {
+        "name": "overlay-fade",
+        "value": "150ms ease-out",
+        "purpose": "Sheet overlay fade-in."
       },
       {
         "name": "reduced-motion",
-        "value": "animation-duration and transition-duration 0.01ms",
-        "purpose": "Applied globally under prefers-reduced-motion: reduce; spinners and skeleton pulses also stop."
+        "value": "0.01ms",
+        "purpose": "All animations and transitions collapse under prefers-reduced-motion."
       }
     ],
     "breakpoints": [
       {
         "name": "sm",
-        "value": "640px",
-        "purpose": "Standings show V/P; section tab icons appear."
+        "value": "640px"
       },
       {
         "name": "md",
-        "value": "768px",
-        "purpose": "Sheet becomes a 28rem right panel; top bar sticky; bracket rounds side by side; main padding 1.5rem."
+        "value": "768px"
       },
       {
-        "name": "gestore-two-pane",
-        "value": "820px",
-        "purpose": "Manager Richieste splits into list (2fr) and detail with lanes (3fr)."
+        "name": "manager-two-pane",
+        "value": "820px"
       },
       {
         "name": "lg",
-        "value": "1024px",
-        "purpose": "Sidebar (16rem) replaces top bar and tab bar; Da fare gains the Prossime partite column."
+        "value": "1024px"
       }
-    ],
-    "courtLanes": {
-      "gutter": "2.75rem",
-      "laneGap": "0.375rem",
-      "lineEvery": "30 minutes, 1px var(--line)",
-      "minBlockHeight": "20px",
-      "scales": {
-        "playerGrid": "0.8 px/min × rootFontPx/16 (90-minute slot = 72px at 16px)",
-        "managerDay": "1 px/min, 08:00–24:00",
-        "requestDetail": "1 px/min clipped to the request",
-        "settingsPreview": "0.45 px/min"
-      },
-      "blockInset": {
-        "standard": "4px both sides",
-        "overlay": "12px left, 4px right (sfalsato)"
-      },
-      "patterns": {
-        "hatch": "occupied / unusable (single -45° hatch, currentColor 22%)",
-        "cross": "closure (double hatch)",
-        "dots": "few players free (8px dot grid, currentColor 18%)"
-      },
-      "playerSlots": {
-        "4/4": "ok · circle-check · \"4/4 liberi\"",
-        "3/4": "warn · user-x · \"3/4, ne manca uno\"",
-        "≤2/4": "idle flat borderless · circle-minus · \"2/4 o meno: non si può chiedere\"",
-        "occupied": "danger + hatch · lock · \"Occupato\"",
-        "requested": "info · send · \"Richiesto da un’altra partita\""
-      },
-      "managerBlocks": {
-        "freeSlot": "dashed idle outline, \"libero\" +",
-        "unusable": "idle + hatch · ban · \"inutilizzabile\"",
-        "campionato": "court solid · trophy",
-        "esterno": "idle-soft solid · users",
-        "lezione": "surface + hatch · graduation-cap",
-        "chiusura": "danger + cross · door-closed",
-        "pendingRequest": "info, 2px dashed, info-soft 70% · hourglass · \"Richiesta in attesa\""
-      },
-      "selection": "2px court-deep outline offset 1px + 5px ball halo (outline ball in dark), z-10, aria-pressed, check icon top-right in player grid"
-    },
-    "statusGlossary": {
-      "match": {
-        "da programmare": [
-          "Da programmare",
-          "calendar-clock",
-          "idle"
-        ],
-        "richiesta": [
-          "Richiesta inviata",
-          "send",
-          "info"
-        ],
-        "programmata": [
-          "Programmata",
-          "calendar-check",
-          "ok"
-        ],
-        "giocata": [
-          "Giocata",
-          "trophy",
-          "idle"
-        ],
-        "contestata": [
-          "Contestata",
-          "flag",
-          "danger"
-        ],
-        "tavolino": [
-          "Tavolino",
-          "gavel",
-          "idle"
-        ]
-      },
-      "request": {
-        "attesa": [
-          "In attesa",
-          "hourglass",
-          "info"
-        ],
-        "confermata": [
-          "Confermata",
-          "circle-check",
-          "ok"
-        ],
-        "rifiutata": [
-          "Rifiutata",
-          "circle-x",
-          "danger"
-        ],
-        "annullata": [
-          "Annullata",
-          "ban",
-          "idle"
-        ],
-        "conflitto": [
-          "Conflitto",
-          "triangle-alert",
-          "danger"
-        ],
-        "scaduta": [
-          "Scaduta",
-          "timer-off",
-          "idle"
-        ]
-      }
-    },
-    "knownDeviations": [
-      "Initial JS ~219 KB gzip vs 180 KB budget (accepted; PWA precache).",
-      "Mobile tab label \"Orari\" for Disponibilità.",
-      "Light-theme focus ring is court-deep; lime focus on blue surfaces and in dark.",
-      "Strong secondary actions use the court variant in dark, keeping lime for the one primary."
     ]
   },
   "components": [
     {
-      "name": "Primary Button (ball)",
+      "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one lime action per screen.",
-      "html": "<button class=\"ds-btn-primary\">Trova un orario</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:0.5rem;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1.0625rem;font-weight:600;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;cursor:pointer;border:none;background:var(--ball, oklch(0.91 0.19 120));color:var(--ball-ink, oklch(0.24 0.05 140));box-shadow:inset 0 -2px 0 oklch(0 0 0 / 0.08);} .ds-btn-primary:hover{background:var(--ball-strong, oklch(0.86 0.2 122));} .ds-btn-primary:active{transform:translateY(1px);} .ds-btn-primary:focus-visible{outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:2px;}"
+      "description": "Lime, the one action to do now. One per screen.",
+      "html": "<button class=\"ds-btn-primary\">Segna occupazione</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:2px solid oklch(0.17 0.005 80);border-radius:0.75rem;background:var(--ball);color:var(--ball-ink);font:700 1.0625rem/1.55rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;cursor:pointer;transition:background-color 150ms ease-out}.ds-btn-primary:hover{background:var(--ball-strong)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Default variant for every other action (court-blue outline).",
-      "html": "<button class=\"ds-btn-secondary\">Condividi su WhatsApp</button>",
-      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:0.5rem;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1.0625rem;font-weight:600;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;cursor:pointer;border:1px solid var(--court, oklch(0.46 0.135 256));background:var(--surface, oklch(1 0 0));color:var(--court, oklch(0.46 0.135 256));} .ds-btn-secondary:hover{background:var(--info-soft, oklch(0.945 0.035 258));} .ds-btn-secondary:focus-visible{outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:2px;}"
+      "description": "Default button: paper with a 2px ink border.",
+      "html": "<button class=\"ds-btn-secondary\">Mostra</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:2px solid var(--line-strong);border-radius:0.75rem;background:var(--surface);color:var(--ink);font:600 1.0625rem/1.55rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;cursor:pointer;transition:background-color 150ms ease-out}.ds-btn-secondary:hover{background:var(--surface-2)}.ds-btn-secondary:active{transform:translateY(1px)}.ds-btn-secondary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}"
     },
     {
-      "name": "Court Button",
+      "name": "Ink Button",
       "kind": "button",
-      "refersTo": "button-court",
-      "description": "Solid turf blue for strong secondary actions.",
-      "html": "<button class=\"ds-btn-court\">Aggiungi a tutto il periodo</button>",
-      "css": ".ds-btn-court{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:0.5rem;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1.0625rem;font-weight:600;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;cursor:pointer;border:none;background:var(--court, oklch(0.46 0.135 256));color:var(--court-ink, oklch(0.99 0.004 250));} .ds-btn-court:hover{background:var(--court-deep, oklch(0.38 0.115 258));} .ds-btn-court:focus-visible{outline:2px solid var(--ball, oklch(0.91 0.19 120));outline-offset:2px;}"
+      "refersTo": "button-ink",
+      "description": "The action inside a lime or clay block; fixed ink in both themes.",
+      "html": "<div class=\"ds-ink-wrap\"><button class=\"ds-btn-ink\">Trova un orario <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button></div>",
+      "css": ".ds-ink-wrap{background:var(--ball);padding:16px;border-radius:1.125rem;border:2px solid oklch(0.17 0.005 80)}.ds-btn-ink{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:2px solid oklch(0.17 0.005 80);border-radius:0.75rem;background:oklch(0.17 0.005 80);color:oklch(0.97 0.01 85);font:700 1.0625rem/1.55rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;cursor:pointer}.ds-btn-ink:hover{background:oklch(0.17 0.005 80 / 0.85)}.ds-btn-ink:focus-visible{outline:3px solid oklch(0.17 0.005 80);outline-offset:2px}"
     },
     {
-      "name": "Danger Button",
-      "kind": "button",
-      "refersTo": "button-danger",
-      "description": "Destructive confirmation inside ConfirmDialog.",
-      "html": "<button class=\"ds-btn-danger\">Annulla partita</button>",
-      "css": ".ds-btn-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:0.5rem;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1.0625rem;font-weight:600;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;cursor:pointer;border:1px solid var(--danger, oklch(0.55 0.19 27));background:var(--surface, oklch(1 0 0));color:var(--danger-ink, oklch(0.46 0.17 27));} .ds-btn-danger:hover{background:var(--danger-soft, oklch(0.95 0.035 25));} .ds-btn-danger:focus-visible{outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:2px;}"
-    },
-    {
-      "name": "Field",
+      "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Label + 44px control + hint, tabular numerals.",
-      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-in\">Dalle</label><input id=\"ds-in\" class=\"ds-input\" value=\"18:00\"><p class=\"ds-hint\">Ogni 30 minuti</p></div>",
-      "css": ".ds-field{display:grid;gap:6px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;} .ds-label{font-size:0.9375rem;font-weight:600;color:var(--ink, oklch(0.23 0.035 258));} .ds-input{min-height:44px;padding:0 12px;border:1px solid var(--line-strong, oklch(0.6 0.025 252));border-radius:0.5rem;background:var(--surface, oklch(1 0 0));color:var(--ink, oklch(0.23 0.035 258));font-size:1.0625rem;font-variant-numeric:tabular-nums;transition:border-color 150ms;} .ds-input:hover{border-color:var(--ink-muted, oklch(0.45 0.03 258));} .ds-input:focus-visible{border-color:var(--court, oklch(0.46 0.135 256));outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:0;} .ds-hint{margin:0;font-size:0.9375rem;color:var(--ink-muted, oklch(0.45 0.03 258));}"
+      "description": "44px paper field with a 2px ink border.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nome della coppia</span><input class=\"ds-input\" placeholder=\"Es. Le Bandejas\"></label>",
+      "css": ".ds-field{display:grid;gap:6px;font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-field-label{font-size:0.9375rem;font-weight:600;color:var(--ink)}.ds-input{min-height:44px;padding:0 12px;border:2px solid var(--line-strong);border-radius:0.75rem;background:var(--surface);color:var(--ink);font-size:1.0625rem}.ds-input::placeholder{color:var(--ink-muted)}.ds-input:hover{border-color:var(--ink-muted)}.ds-input:focus-visible{outline:2px solid var(--focus);outline-offset:0;border-color:var(--line-strong)}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Black bottom bar; active item has a lime pill and lime label.",
+      "html": "<nav class=\"ds-tabbar\"><a class=\"ds-tab ds-tab-active\"><span class=\"ds-tab-pill\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"3\" y=\"5\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"m3 17 2 2 4-4\"/><path d=\"M13 6h8M13 12h8M13 18h8\"/></svg></span>Da fare</a><a class=\"ds-tab\"><span class=\"ds-tab-pill\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/></svg></span>Partite</a><a class=\"ds-tab\"><span class=\"ds-tab-pill\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z\"/></svg></span>Torneo</a></nav>",
+      "css": ".ds-tabbar{display:grid;grid-template-columns:repeat(3,1fr);background:oklch(0.17 0.005 80);font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:64px;font-size:0.8125rem;font-weight:600;color:oklch(0.78 0.012 85);text-decoration:none;cursor:pointer}.ds-tab:hover{color:oklch(0.97 0.01 85)}.ds-tab-pill{display:grid;place-items:center;width:48px;height:32px;border-radius:9999px}.ds-tab-active{color:var(--ball)}.ds-tab-active .ds-tab-pill{background:var(--ball);color:var(--ball-ink)}.ds-tab:focus-visible{outline:3px solid var(--ball);outline-offset:2px}"
     },
     {
       "name": "Status Badge",
       "kind": "chip",
-      "refersTo": "badge-ok",
-      "description": "Tone fill + tone ink + icon + Italian label, from the glossary.",
-      "html": "<span class=\"ds-badge ds-badge-ok\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>Programmata</span> <span class=\"ds-badge ds-badge-info\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg>Richiesta inviata</span>",
-      "css": ".ds-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:9999px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:0.9375rem;font-weight:600;white-space:nowrap;} .ds-badge-ok{background:var(--ok-soft, oklch(0.95 0.045 150));color:var(--ok-ink, oklch(0.37 0.1 150));} .ds-badge-info{background:var(--info-soft, oklch(0.945 0.035 258));color:var(--info-ink, oklch(0.42 0.13 258));}"
+      "refersTo": "status-badge",
+      "description": "Tone fill, tone ink, icon and word; never colour alone.",
+      "html": "<span class=\"ds-badge\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>Confermata</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border:1px solid currentColor;border-radius:9999px;background:var(--ok-soft);color:var(--ok-ink);font:700 0.9375rem/1.35rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;white-space:nowrap}"
     },
     {
-      "name": "Mobile Tab Bar",
-      "kind": "nav",
-      "refersTo": "tab-bar",
-      "description": "Fixed bottom bar, max 5 items, active item court blue with a top bar.",
-      "html": "<nav class=\"ds-tabs\" aria-label=\"Principale\"><a class=\"ds-tab ds-tab-active\" href=\"#\" aria-current=\"page\"><span class=\"ds-tab-mark\"></span>Da fare</a><a class=\"ds-tab\" href=\"#\">Partite</a><a class=\"ds-tab\" href=\"#\">Orari</a><a class=\"ds-tab\" href=\"#\">Torneo</a></nav>",
-      "css": ".ds-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-width:36rem;border-top:1px solid var(--line, oklch(0.885 0.014 250));background:var(--surface, oklch(1 0 0));font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;} .ds-tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;font-size:0.8125rem;font-weight:600;color:var(--ink-muted, oklch(0.45 0.03 258));text-decoration:none;} .ds-tab:hover{color:var(--ink, oklch(0.23 0.035 258));} .ds-tab:focus-visible{outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:2px;} .ds-tab-active{color:var(--court, oklch(0.46 0.135 256));} .ds-tab-mark{position:absolute;top:0;left:16px;right:16px;height:2px;border-radius:9999px;background:var(--court, oklch(0.46 0.135 256));}"
+      "name": "Lime Feed Block",
+      "kind": "card",
+      "refersTo": "block-ball",
+      "description": "The one thing to do now: poster big line, task line, deadline stamp, ink button.",
+      "html": "<div class=\"ds-block\"><p class=\"ds-block-big\">Por Tres contro Le Bandejas</p><p class=\"ds-block-task\">Programma la partita</p><span class=\"ds-stamp\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2 2M5 3 2 6M22 6l-3-3\"/></svg>entro ven 20/11</span><button class=\"ds-block-btn\">Trova un orario</button></div>",
+      "css": ".ds-block{display:grid;gap:12px;padding:20px;border:2px solid oklch(0.17 0.005 80);border-radius:1.125rem;background:var(--ball);color:var(--ball-ink);font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-block-big{margin:0;font-family:Anton,'Atkinson Hyperlegible Next Variable',sans-serif;font-weight:400;font-size:1.75rem;line-height:1.05;text-transform:uppercase;letter-spacing:0.01em}.ds-block-task{margin:0;font-weight:700}.ds-stamp{justify-self:start;display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border:2px solid currentColor;border-radius:9999px;font-size:0.9375rem;font-weight:700;font-variant-numeric:tabular-nums}.ds-block-btn{justify-self:start;min-height:44px;padding:0 16px;border:2px solid oklch(0.17 0.005 80);border-radius:0.75rem;background:oklch(0.17 0.005 80);color:oklch(0.97 0.01 85);font:700 1.0625rem 'Atkinson Hyperlegible Next Variable',sans-serif;cursor:pointer}.ds-block-btn:hover{background:oklch(0.17 0.005 80 / 0.85)}.ds-block-btn:focus-visible{outline:3px solid oklch(0.17 0.005 80);outline-offset:2px}"
     },
     {
-      "name": "Sidebar Item",
-      "kind": "nav",
-      "refersTo": "sidebar-item-active",
-      "description": "Desktop sidebar on night turf; active item filled with a 1px court-line ring and a lime icon.",
-      "html": "<nav class=\"ds-side\"><a class=\"ds-side-item ds-side-active\" href=\"#\"><span class=\"ds-dot\"></span>Da fare<span class=\"ds-count\">2</span></a><a class=\"ds-side-item\" href=\"#\"><span class=\"ds-dot\"></span>Partite</a></nav>",
-      "css": ".ds-side{display:grid;gap:2px;width:16rem;padding:8px 12px;background:var(--court-deep, oklch(0.38 0.115 258));font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;} .ds-side-item{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:0.5rem;font-size:1.0625rem;font-weight:600;color:var(--court-ink-muted, oklch(0.88 0.03 250));text-decoration:none;} .ds-side-item:hover{background:var(--court, oklch(0.46 0.135 256));color:var(--court-ink, oklch(0.99 0.004 250));} .ds-side-item:focus-visible{outline:2px solid var(--ball, oklch(0.91 0.19 120));outline-offset:2px;} .ds-side-active{background:var(--court, oklch(0.46 0.135 256));color:var(--court-ink, oklch(0.99 0.004 250));box-shadow:0 0 0 1px var(--court-line, oklch(1 0 0 / 0.55));} .ds-dot{width:20px;height:20px;border-radius:9999px;border:2px solid currentColor;} .ds-side-active .ds-dot{border-color:var(--ball, oklch(0.91 0.19 120));} .ds-count{margin-left:auto;padding:0 8px;border-radius:9999px;background:var(--ball, oklch(0.91 0.19 120));color:var(--ball-ink, oklch(0.24 0.05 140));font-size:0.9375rem;font-variant-numeric:tabular-nums;}"
-    },
-    {
-      "name": "Court Lanes (signature)",
+      "name": "Next Match Block",
       "kind": "custom",
-      "refersTo": "lane",
-      "description": "Two parallel court lanes with the 30-minute stagger, start times on the lines; slot blocks by tone, icon, text and pattern; selected block with court-deep outline and lime halo.",
-      "html": "<figure class=\"ds-lanes\"><div></div><div class=\"ds-lane-h\">Campo 1</div><div class=\"ds-lane-h\">Campo 2</div><div class=\"ds-axis\"><span style=\"top:0\">14:00</span><span style=\"top:48px\">15:00</span><span style=\"top:96px\">16:00</span></div><div class=\"ds-lane\"><button class=\"ds-block ds-ok\" style=\"top:0;height:72px\" aria-pressed=\"false\"><b>13:30</b><span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>4/4 liberi</span></button><button class=\"ds-block ds-danger ds-hatch\" style=\"top:72px;height:72px\"><b>15:00</b><span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg>Occupato</span></button></div><div class=\"ds-lane\"><button class=\"ds-block ds-warn ds-sel\" style=\"top:24px;height:72px\" aria-pressed=\"true\"><b>14:00</b><span>3/4</span></button><button class=\"ds-block ds-info\" style=\"top:96px;height:48px\"><b>15:30</b><span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg>Richiesto</span></button></div></figure>",
-      "css": ".ds-lanes{display:grid;grid-template-columns:2.75rem repeat(2,minmax(0,1fr));column-gap:6px;margin:0;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;max-width:360px;} .ds-lane-h{padding:6px 8px;border-radius:0.5rem 0.5rem 0 0;background:var(--court, oklch(0.46 0.135 256));color:var(--court-ink, oklch(0.99 0.004 250));font-size:0.9375rem;font-weight:700;text-align:center;} .ds-axis{position:relative;height:144px;} .ds-axis span{position:absolute;right:4px;transform:translateY(-50%);font-size:0.9375rem;color:var(--ink-muted, oklch(0.45 0.03 258));font-variant-numeric:tabular-nums;} .ds-lane{position:relative;height:144px;border:1px solid var(--line, oklch(0.885 0.014 250));border-top:none;border-radius:0 0 0.5rem 0.5rem;background-color:var(--surface-2, oklch(0.955 0.01 250));background-image:repeating-linear-gradient(to bottom,var(--line, oklch(0.885 0.014 250)) 0 1px,transparent 1px 24px);} .ds-block{position:absolute;left:4px;right:4px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:4px 8px;border:1px solid;border-radius:6px;font:inherit;font-size:0.9375rem;line-height:1.15;text-align:left;cursor:pointer;transition:filter 150ms;} .ds-block b{font-variant-numeric:tabular-nums;} .ds-block span{display:inline-flex;align-items:center;gap:4px;font-weight:600;} .ds-block:hover{filter:brightness(0.97);} .ds-block:focus-visible{outline:2px solid var(--focus, oklch(0.38 0.115 258));outline-offset:2px;} .ds-ok{background:var(--ok-soft, oklch(0.95 0.045 150));color:var(--ok-ink, oklch(0.37 0.1 150));border-color:var(--ok, oklch(0.52 0.13 150));} .ds-warn{background:var(--warn-soft, oklch(0.96 0.06 90));color:var(--warn-ink, oklch(0.44 0.1 65));border-color:var(--warn, oklch(0.7 0.15 75));} .ds-danger{background-color:var(--danger-soft, oklch(0.95 0.035 25));color:var(--danger-ink, oklch(0.46 0.17 27));border-color:var(--danger, oklch(0.55 0.19 27));} .ds-info{background:var(--info-soft, oklch(0.945 0.035 258));color:var(--info-ink, oklch(0.42 0.13 258));border-color:var(--info, oklch(0.5 0.14 258));} .ds-hatch{background-image:repeating-linear-gradient(-45deg,transparent 0 6px,color-mix(in oklch,currentColor 22%,transparent) 6px 8px);} .ds-sel{z-index:10;outline:2px solid var(--court-deep, oklch(0.38 0.115 258));outline-offset:1px;box-shadow:0 0 0 5px var(--ball, oklch(0.91 0.19 120));}"
+      "refersTo": "block-next-match",
+      "description": "Ink block with date and time in poster type, the time on the lime highlighter.",
+      "html": "<a class=\"ds-next\"><span class=\"ds-next-when\">Dom 01/11 <span class=\"ds-mark\">17:00</span></span><span class=\"ds-next-line\">La tua prossima partita · Campo 2</span><span class=\"ds-next-teams\">Rete e Muro <small>contro</small> Le Bandejas</span></a>",
+      "css": ".ds-next{display:grid;gap:12px;padding:20px;border:2px solid var(--line-strong);border-radius:1.125rem;background:var(--court);color:var(--court-ink);font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;text-decoration:none;cursor:pointer}.ds-next:focus-visible{outline:3px solid var(--ball);outline-offset:2px}.ds-next-when,.ds-next-teams{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:0.01em;font-variant-numeric:tabular-nums}.ds-next-when{font-size:3.25rem;line-height:0.95}.ds-next-teams{font-size:1.5rem;line-height:1.1}.ds-next-teams small{font-family:'Atkinson Hyperlegible Next Variable',sans-serif;font-size:1.0625rem;font-weight:600;text-transform:none}.ds-next-line{font-weight:700}.ds-mark{display:inline-block;background:var(--ball);color:var(--ball-ink);padding:0.04em 0.12em 0;line-height:0.96}"
+    },
+    {
+      "name": "Standing Tile",
+      "kind": "card",
+      "refersTo": "standing-tile",
+      "description": "Position as a huge numeral, group and zone in words.",
+      "html": "<a class=\"ds-tile\"><span class=\"ds-tile-n\">2°</span><span class=\"ds-tile-text\"><b>posto nel Girone A</b><span>4 punti · zona Gold</span></span></a>",
+      "css": ".ds-tile{display:flex;align-items:center;gap:16px;padding:20px;border:2px solid var(--line-strong);border-radius:1.125rem;background:var(--surface);color:var(--ink);font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;text-decoration:none;cursor:pointer}.ds-tile:hover{background:var(--surface-2)}.ds-tile:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.ds-tile-n{font-family:Anton,sans-serif;font-weight:400;font-size:4.5rem;line-height:0.9}.ds-tile-text{display:grid;gap:2px}.ds-tile-text span{font-weight:600;color:var(--ink-muted);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented-option-checked",
+      "description": "Full-round ink-bordered track; checked option lime.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-seg-opt\" aria-checked=\"true\">Girone A</button><button class=\"ds-seg-opt\" aria-checked=\"false\">Girone B</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:4px;padding:4px;border:2px solid var(--line-strong);border-radius:1.75rem;background:var(--surface);font-family:'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-seg-opt{min-height:44px;padding:0 16px;border:0;border-radius:9999px;background:transparent;color:var(--ink-muted);font-size:0.9375rem;font-weight:700;cursor:pointer}.ds-seg-opt:hover{color:var(--ink)}.ds-seg-opt[aria-checked=true]{background:var(--ball);color:var(--ball-ink)}.ds-seg-opt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}"
     }
   ],
   "narrative": {
-    "northStar": "Righe del campo (the court's own lines)",
-    "overview": "The app is drawn the way a padel court is drawn: a turf-blue field, white lines that divide it, and a yellow-lime ball that marks the one thing in play. Schedules are not a grid of identical white cards; they are two parallel court lanes, Campo 1 and Campo 2, with the 30-minute stagger between them visible and start times sitting on the lines. Everything else in the system (lists, sections, tables, the shell) is ruled by the same 1px line, so the product feels like one surface marked out, not a stack of boxes.\n\nIt is an Operate-mode tool for mixed-age amateur players (including 50+) on phones in the sun, one or two court managers at the front desk on a phone or tablet, and a volunteer organizer at a desktop. Density is moderate and generous at the same time: big type (body 17px), 44px targets everywhere, few colours, and every state spelled out in Italian words with an icon. The light theme is the court in daylight on cool neutral grounds; the dark theme is the same court at night under floodlights: a deep blue-black ground with the same white lines, and lime taking over the selection and focus roles that court blue holds in daylight.\n\nThe build rejects the category's default look (a single brand colour on white cards), imitation materials (no turf texture, bevels, glass, gradient text), kickers above headings and colour-only state. Hatching on occupied slots is a state pattern, not a material.",
+    "northStar": "The Tournament Poster",
+    "overview": "The app is the tournament's poster. Every screen leads with one huge condensed statement in Anton, uppercase: what you have to do (\"Ciao Marco, hai 10 cose da fare\"), who you play (\"Por Tres contro Le Bandejas\"), where you stand (a 72px \"2°\"). Everything else steps back to a quiet supporting line in Atkinson Hyperlegible Next. The category default, an even list of identical rows with outline buttons, is what this world replaces: content is ranked into blocks, and the block's fill says what kind of thing it is.\n\nThe material is printed matter. A warm paper ground, ink-black text, solid 2px ink borders on every block and control, flat colour fills with no gradients or textures. Colour has jobs, not moods: ball lime is the one thing to do now (the first feed block, the primary action, the current selection, the active nav item, the highlighter on the key word of a headline); clay coral is availability and time windows; paper is everything else. The navigation bar is ink black in both themes. Dark is the poster in negative: a near-black ground with paper text and paper borders, the \"next match\" block flips to a paper fill with black ink, and the lime and clay fills stay identical with black ink.\n\nThe audience is mixed-age amateur players (many 50+) on phones in the sun, a court manager at the front desk on a phone or tablet, and a volunteer organizer at a desktop. So the poster is never at the expense of reading: body text is 17px, every target is at least 44px, nothing is carried by colour alone, and the state colours (ok, warn, danger, info, idle) stay with an icon and an Italian word.",
     "keyCharacteristics": [
-      "Turf blue (`court`) for the shell and for selection on light grounds; white or neutral 1px court lines as the only dividers.",
-      "Ball lime (`ball`) for the one primary action per screen, current selection, focus on blue surfaces and in dark, and nothing else.",
-      "One family, Atkinson Hyperlegible Next, with tabular numerals for every time, date, score and count.",
-      "The signature component: `CourtLanes`, one lane per court, time running down, start times on the lines.",
-      "State is always tone + icon + text (+ pattern in the lanes); never colour alone.",
-      "Sheets for contextual tasks, ConfirmDialog only for destructive or irreversible ones."
+      "One poster statement per screen, Anton uppercase; everything else is Atkinson at reading size.",
+      "Paper ground, ink text, 2px ink borders on blocks and controls; flat fills, no texture.",
+      "Lime = the one thing to do now; clay = availability; paper = everything else; ink fill = your next match and \"today\".",
+      "The black bar (tab bar, sidebar) with lime marking where you are.",
+      "Dark theme is the same poster in negative; lime and clay never change.",
+      "State is always tone + icon + text (+ pattern in the court lanes)."
     ],
     "rules": [
       {
-        "name": "The One Ball Rule",
-        "body": "Lime appears on at most one action per screen: the primary button for the thing that needs the user now (\"Trova un orario\", \"Invia richiesta al campo\"). Everything else is court blue (`court` or `secondary`), ghost, or danger. A second lime button means one of them is not the primary.",
+        "name": "The One Lime Rule",
+        "body": "Lime marks the single thing to do now. One lime block at the top of the feed, one primary button per screen, one highlighted word per headline. A second lime element on the same screen is either the selection or the active nav item, never a second \"most important\" thing.",
         "section": "colors"
       },
       {
-        "name": "The Lime Licence Rule",
-        "body": "Lime is licensed for exactly four jobs: the primary action, current selection (the halo on lane blocks and the selected request; in dark, every checked control), focus where blue would vanish (blue surfaces, all of dark), and the ball dot in the court mark. Lime as a heading underline, border or decoration is not licensed.",
+        "name": "The Fills Don't Invert Rule",
+        "body": "Lime and clay are the same in both themes and always carry `edge` borders, `edge` buttons and black ink. Only paper and ink swap in dark.",
         "section": "colors"
       },
       {
-        "name": "The Trio Rule",
-        "body": "A state colour is never used alone: its soft fill carries its ink for text, its strong value is only an edge, and an icon plus a word always come with it.",
+        "name": "The Never By Colour Rule",
+        "body": "Every state colour, zone and deadline comes with an icon and a word; in the court lanes also with a pattern. If you removed the colour, the screen must still say the same thing.",
         "section": "colors"
       },
       {
-        "name": "The Tabular Rule",
-        "body": "Every time, date, score, count, standings figure and numeric input carries tabular numerals (`.tabular`, `font-variant-numeric: tabular-nums`; `Input` and `Select` have it built in), so columns of times line up on the court lines.",
+        "name": "The One Statement Rule",
+        "body": "Each screen has one poster statement at the top (the h1) and poster section titles under it; inside the content only the lime block's big line speaks at Poster SM, the other blocks step down to Poster Block. If two things on a screen are equally huge, neither is the statement.",
         "section": "typography"
       },
       {
-        "name": "The No Kicker Rule",
-        "body": "A page heading stands alone: optional back link above it (\"← Partite\"), optional subtitle below in muted body, actions to the right. No eyebrow or category label above the `h1`.",
+        "name": "The Anton Is Never Bold Rule",
+        "body": "Anton has one weight (400). Never apply `font-bold` to poster type, and never set running text, sentences or buttons in Anton. Connecting words inside a poster line (\"contro\") drop to Atkinson, lowercase.",
         "section": "typography"
       },
       {
-        "name": "The Flat Court Rule",
-        "body": "Nothing on the court surface floats. If an element needs to stand out, it gets a line, a tone or the lime halo, never a drop shadow. Shadows belong to things that sit above the court: sheets and dialogs.",
+        "name": "The Highlighter Rule",
+        "body": "Emphasis inside a headline is a lime `.mark` behind one word or numeral (inline-block, ink text), not a colour change of the text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Poster Rule",
+        "body": "Nothing printed on the poster floats. To stand out, a block gets a fill or a bigger statement, never a shadow.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** separate rows, sections and lane half-hours with the 1px `line` court rule; use `court-line` on blue.",
-      "**Do** give each screen exactly one lime primary action, labelled with a verb (\"Trova un orario\", \"Invia richiesta al campo\"); make every other action `secondary`, `court`, `ghost` or `danger`.",
-      "**Do** pair every state colour with an icon and an Italian word, and in the lanes with a pattern where the glossary assigns one (hatch occupied, cross closure, dots few free).",
-      "**Do** draw anything that lives on a court and a time as `CourtLanes` with the 30' stagger and start times on the lines, never as a uniform card grid.",
-      "**Do** put tabular numerals on every time, date, score and count.",
-      "**Do** keep targets at 44px minimum (tab-bar items 64px) and body text at 17px; let buttons wrap rather than truncate.",
-      "**Do** open contextual tasks in a Sheet and reserve ConfirmDialog for destructive or irreversible steps; offer \"Annulla\" in a toast for reversible ones.",
-      "**Do** switch focus and selection to lime on blue surfaces and in the dark theme; keep light-theme focus `court-deep` on neutral grounds.",
-      "**Do** write in Italian, informal \"tu\", short and concrete, and always say what is missing and until when: \"L’anteprima è provvisoria: mancano 3 partite dei gironi.\", \"Scade tra 38 h (dom 01/11 alle 13:00)\", \"Puoi annullarla fino a sab 31/10 alle 14:00\".",
-      "**Do** announce real-time changes and page changes through polite live regions (\"Le richieste sono state aggiornate.\", \"Pagina: Partite\")."
+      "**Do** open every screen with one Anton uppercase statement (Poster on phones, Poster XL from 640px) and put everything else at reading size.",
+      "**Do** use lime for exactly one \"do this now\" thing per screen, plus the selection and the active nav item.",
+      "**Do** use clay for availability and time windows, and only there.",
+      "**Do** give every paper block and control a 2px ink border, and every lime or clay fill a 2px `edge` border with `ink` buttons inside.",
+      "**Do** collapse repeated items of the same kind into one group block with the list inside.",
+      "**Do** pair every state colour with an icon and an Italian word, and in the lanes with a pattern (hatch occupied, cross closure, dots few free).",
+      "**Do** put tabular numerals on every time, date, score, count and position.",
+      "**Do** keep every target at least 44px and running text at least 16px (body 17px).",
+      "**Do** draw anything that lives on a court and a time as `CourtLanes`, never as a uniform card grid.",
+      "**Do** keep the navigation in the black bar in both themes, with lime for the active item."
     ],
     "donts": [
-      "**Don't** use lime as decoration: no lime borders, heading underlines, side stripes or backgrounds outside the four licensed jobs.",
-      "**Don't** communicate a state by colour alone, and don't reuse amber for anything but 3/4 and \"waiting on someone\" (lessons are neutral + hatch, not amber).",
-      "**Don't** add drop shadows to cards, rows or lane blocks; only sheets and dialogs are raised.",
-      "**Don't** put a kicker or eyebrow above a page heading, or use uppercase tracked labels.",
-      "**Don't** introduce a second font family, a display face, a monospace for numbers, or fluid type sizes.",
-      "**Don't** add coloured side stripes thicker than 1px to list items, cards or nav items.",
-      "**Don't** imitate materials: no turf texture, bevels, glass or gradient text; hatching is a state pattern only.",
-      "**Don't** cut visible text inside a lane block; drop the time (the axis carries it) before truncating a title.",
-      "**Don't** use a modal dialog for choosing a slot or editing an occupation; the court must stay visible behind the task.",
-      "**Don't** animate beyond 150ms colour transitions and the 150-220ms overlay entrances; everything collapses to 0.01ms under `prefers-reduced-motion`."
+      "**Don't** put a small kicker or eyebrow label above a heading; the poster h1 stands alone (a back link is not a kicker).",
+      "**Don't** fake-bold Anton or set sentences, buttons or body copy in it.",
+      "**Don't** add drop shadows to blocks on the page; shadows are for sheets, dialogs, menus and sticky bars.",
+      "**Don't** introduce gradients, textures, glass or gradient text; fills are flat printed inks (state hatching is a pattern, not a material).",
+      "**Don't** use coloured side stripes to tag blocks; a block's meaning comes from its full fill.",
+      "**Don't** invert lime or clay in dark, or put paper text on them.",
+      "**Don't** rely on colour alone for any state, zone or deadline.",
+      "**Don't** make two blocks on one screen speak at the same poster size."
     ]
   }
 }

@@ -12,7 +12,7 @@ Status labels, icons and tones: see the glossary in [README.md](README.md). Assu
 
 - Primary action: complete the most urgent item without leaving the feed when it is a one-tap decision (accept a request, confirm a result, confirm a 4/4 request, approve a team); otherwise one tap opens the exact screen.
 - Success: the feed reaches the empty state; nobody wonders "what now?" (Product Principle 3): every item says what is missing, from whom, and until when.
-- Product truth: items are derived only from server data (`partite_v`, `richieste` + `richiesta_giocatori`, `disponibilita`, `squadre`, `periodi`) by a pure function, so the feed is identical on every device and testable.
+- Product truth: items are derived only from server data (`matches_v`, `richieste` + `request_players`, `disponibilita`, `squadre`, `periodi`) by a pure function, so the feed is identical on every device and testable.
 
 ## 3. Selected direction consequences
 
@@ -24,7 +24,7 @@ Status labels, icons and tones: see the glossary in [README.md](README.md). Assu
 
 ## 4. Scope and anti-goals
 
-- In: the feed, its three priority groups, inline actions, role filter for multi-role users, empty/loading/error/offline states, realtime refresh (TanStack invalidation on `richieste`, `richiesta_giocatori`, `partite`, `squadre`, `disponibilita`).
+- In: the feed, its three priority groups, inline actions, role filter for multi-role users, empty/loading/error/offline states, realtime refresh (TanStack invalidation on `richieste`, `request_players`, `partite`, `squadre`, `disponibilita`).
 - In: `deriveAttention()` in `src/lib/attention.ts` (pure, unit-tested) as the single source for the feed and for tab badges.
 - Out: notifications history, read/unread state, chat, settings. No dashboard tiles, no hero numbers, no "statistiche".
 - Anti-goal: a list of all my matches (that is `/t/:tid/partite`). The feed shows only what needs attention or is imminent.
@@ -54,7 +54,7 @@ interface AttentionInput {
   periodi: { id: string; fase: string; turno: number | null; inizio: string; fine: string; etichetta: string }[];
   squadre: { id: string; nome: string; stato: 'in attesa partner' | 'da approvare' | 'approvata' | 'ritirata';
              girone: string | null; creatoDa: string; giocatori: string[] }[];
-  partite: {                         // rows of partite_v for the tournament
+  partite: {                         // rows of matches_v for the tournament
     id: string; codice: string; fase: string; girone: string | null; turno: number | null;
     squadraA: string | null; squadraB: string | null; giocatoriA: string[]; giocatoriB: string[];
     periodoId: string | null; stato: StatoPartita; richiestaId: string | null;

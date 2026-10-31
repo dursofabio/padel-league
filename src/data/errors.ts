@@ -1,5 +1,5 @@
 /** Error → Italian message, by RPC code (hint), Postgres code, or auth/network error. */
-const PER_HINT: Record<string, string> = {
+const BY_HINT: Record<string, string> = {
   NOT_AUTHORIZED: 'Non hai i permessi per questa operazione.',
   NOT_FOUND: 'Non trovato: forse è stato appena eliminato.',
   BAD_STATE: 'Operazione non più possibile: lo stato è cambiato nel frattempo.',
@@ -25,14 +25,14 @@ const PER_HINT: Record<string, string> = {
   BAD_BRACKET: 'Il tabellone non è coerente: rigeneralo.',
 };
 
-const PER_PG: Record<string, string> = {
+const BY_PG_CODE: Record<string, string> = {
   '23505': 'Esiste già: qualcuno l’ha appena creato.',
   '23P01': 'Il campo è già occupato in quell’orario.',
   '42501': 'Non hai i permessi per questa operazione.',
   PGRST116: 'Non trovato.',
 };
 
-const PER_AUTH: Record<string, string> = {
+const BY_AUTH_CODE: Record<string, string> = {
   invalid_credentials: 'Email o password non corretti.',
   email_not_confirmed: 'Conferma prima la tua email: controlla la posta.',
   user_already_exists: 'Esiste già un account con questa email.',
@@ -48,15 +48,16 @@ interface ErrLike {
   name?: string;
 }
 
-export function messaggioErrore(e: unknown): string {
+/** Italian message for the user. */
+export function errorMessage(e: unknown): string {
   const err = (e ?? {}) as ErrLike;
-  if (err.hint && PER_HINT[err.hint]) {
+  if (err.hint && BY_HINT[err.hint]) {
     // For OVERLAP and INVALID_SCORE the server explains the reason in Italian: show it.
     if ((err.hint === 'OVERLAP' || err.hint === 'INVALID_SCORE') && err.message) return err.message;
-    return PER_HINT[err.hint];
+    return BY_HINT[err.hint];
   }
-  if (err.code && PER_AUTH[err.code]) return PER_AUTH[err.code];
-  if (err.code && PER_PG[err.code]) return PER_PG[err.code];
+  if (err.code && BY_AUTH_CODE[err.code]) return BY_AUTH_CODE[err.code];
+  if (err.code && BY_PG_CODE[err.code]) return BY_PG_CODE[err.code];
   if (err.code === 'P0001' && err.message) return err.message;
   if (err.name === 'TypeError' || /fetch|network/i.test(err.message ?? ''))
     return 'Sei offline o il server non risponde. Riprova tra poco.';

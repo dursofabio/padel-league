@@ -1,12 +1,13 @@
 /**
- * Status glossary: one label, icon and tone per state, used by every screen.
+ * Status glossary: one Italian label, icon and tone per state, used by every screen.
+ * Stored enum values are English; the Italian the user sees lives only here (and in feature copy).
  * Tone = semantic family of the token (ok, warn, danger, info, idle); never colour alone: always icon + text.
  */
-import type { ColoreSlot } from './slots';
-import type { StatoPartita, StatoRichiesta, TipoOccupazione } from '../types';
+import type { SlotColor } from './slots';
+import type { BookingType, MatchStatus, RequestStatus, Role, TeamStatus, TournamentStatus } from '../types';
 
-export type Tono = 'ok' | 'warn' | 'danger' | 'info' | 'idle';
-export type IconaStato =
+export type Tone = 'ok' | 'warn' | 'danger' | 'info' | 'idle';
+export type StatusIcon =
   | 'calendar-clock'
   | 'send'
   | 'calendar-check'
@@ -24,41 +25,64 @@ export type IconaStato =
   | 'lock'
   | 'clock';
 
-export interface Voce {
+export interface StatusEntry {
   label: string;
-  icona: IconaStato;
-  tono: Tono;
+  icon: StatusIcon;
+  tone: Tone;
 }
 
-export const STATO_PARTITA: Record<StatoPartita, Voce> = {
-  'da programmare': { label: 'Da programmare', icona: 'calendar-clock', tono: 'idle' },
-  richiesta: { label: 'Richiesta inviata', icona: 'send', tono: 'info' },
-  programmata: { label: 'Programmata', icona: 'calendar-check', tono: 'ok' },
-  giocata: { label: 'Giocata', icona: 'trophy', tono: 'idle' },
-  contestata: { label: 'Contestata', icona: 'flag', tono: 'danger' },
-  tavolino: { label: 'Tavolino', icona: 'gavel', tono: 'idle' },
+export const MATCH_STATUS: Record<MatchStatus, StatusEntry> = {
+  unscheduled: { label: 'Da programmare', icon: 'calendar-clock', tone: 'idle' },
+  requested: { label: 'Richiesta inviata', icon: 'send', tone: 'info' },
+  scheduled: { label: 'Programmata', icon: 'calendar-check', tone: 'ok' },
+  played: { label: 'Giocata', icon: 'trophy', tone: 'idle' },
+  disputed: { label: 'Contestata', icon: 'flag', tone: 'danger' },
+  forfeit: { label: 'Tavolino', icon: 'gavel', tone: 'idle' },
 };
 
-export const STATO_RICHIESTA: Record<StatoRichiesta, Voce> = {
-  attesa: { label: 'In attesa', icona: 'hourglass', tono: 'info' },
-  confermata: { label: 'Confermata', icona: 'circle-check', tono: 'ok' },
-  rifiutata: { label: 'Rifiutata', icona: 'circle-x', tono: 'danger' },
-  annullata: { label: 'Annullata', icona: 'ban', tono: 'idle' },
-  conflitto: { label: 'Conflitto', icona: 'triangle-alert', tono: 'danger' },
-  scaduta: { label: 'Scaduta', icona: 'timer-off', tono: 'idle' },
+export const REQUEST_STATUS: Record<RequestStatus, StatusEntry> = {
+  pending: { label: 'In attesa', icon: 'hourglass', tone: 'info' },
+  confirmed: { label: 'Confermata', icon: 'circle-check', tone: 'ok' },
+  rejected: { label: 'Rifiutata', icon: 'circle-x', tone: 'danger' },
+  cancelled: { label: 'Annullata', icon: 'ban', tone: 'idle' },
+  conflict: { label: 'Conflitto', icon: 'triangle-alert', tone: 'danger' },
+  expired: { label: 'Scaduta', icon: 'timer-off', tone: 'idle' },
 };
 
-export const STATO_SLOT: Record<ColoreSlot, Voce> = {
-  verde: { label: '4/4 liberi', icona: 'check', tono: 'ok' },
-  giallo: { label: '3/4', icona: 'circle-dashed', tono: 'warn' },
-  grigio: { label: '≤2/4', icona: 'circle-dashed', tono: 'idle' },
-  rosso: { label: 'Occupato', icona: 'lock', tono: 'danger' },
-  blu: { label: 'Richiesto', icona: 'clock', tono: 'info' },
+export const SLOT_STATUS: Record<SlotColor, StatusEntry> = {
+  green: { label: '4/4 liberi', icon: 'check', tone: 'ok' },
+  yellow: { label: '3/4', icon: 'circle-dashed', tone: 'warn' },
+  grey: { label: '≤2/4', icon: 'circle-dashed', tone: 'idle' },
+  red: { label: 'Occupato', icon: 'lock', tone: 'danger' },
+  blue: { label: 'Richiesto', icon: 'clock', tone: 'info' },
 };
 
-export const TIPO_OCCUPAZIONE: Record<TipoOccupazione, string> = {
-  esterno: 'Esterno',
-  lezione: 'Lezione',
-  chiusura: 'Chiuso',
-  campionato: 'Partita del campionato',
+export const BOOKING_TYPE_LABEL: Record<BookingType, string> = {
+  external: 'Esterno',
+  lesson: 'Lezione',
+  closure: 'Chiuso',
+  match: 'Partita del campionato',
+};
+
+export const TOURNAMENT_STATUS_LABEL: Record<TournamentStatus, string> = {
+  registration: 'Iscrizioni aperte',
+  groups: 'Fase a gironi',
+  finals: 'Fasi finali',
+  completed: 'Concluso',
+};
+
+/** Team status as plain text (the Italian values the database used to store). */
+export const TEAM_STATUS_LABEL: Record<TeamStatus, string> = {
+  awaiting_partner: 'in attesa partner',
+  pending_approval: 'da approvare',
+  approved: 'approvata',
+  withdrawn: 'ritirata',
+};
+
+/** Role names as plain lowercase text (the Italian values the database used to store). */
+export const ROLE_LABEL: Record<Role, string> = {
+  admin: 'admin',
+  organizer: 'organizzatore',
+  manager: 'gestore',
+  player: 'giocatore',
 };

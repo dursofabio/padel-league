@@ -109,7 +109,7 @@ Severity scale: **Critical = P0**, **Serious = P1**, **Moderate = P2**, **Minor 
 - **Suggested command:** `/impeccable harden`
 
 #### [P1] S2. "Aggiungi orario" unmounts its own button and drops focus to `<body>`
-- **Location:** `src/features/player/availability/DisponibilitaPage.tsx:357-360` (`{aperto !== d && <Button …>Aggiungi orario</Button>}`) and `GiornoEditor.tsx` (`AggiungiOrario`).
+- **Location:** `src/features/player/availability/AvailabilityPage.tsx:357-360` (`{aperto !== d && <Button …>Aggiungi orario</Button>}`) and `GiornoEditor.tsx` (`AggiungiOrario`).
 - **Route:** `#/t/<tid>/disponibilita` (list view, 390 px).
 - **Evidence:** focus "Aggiungi orario", press Enter. The inline editor opens, but `document.activeElement = BODY`.
 - **Category:** Accessibility
@@ -256,8 +256,8 @@ Severity scale: **Critical = P0**, **Serious = P1**, **Moderate = P2**, **Minor 
 
 #### [P2] M5. Selection relies on ball yellow at 1.17:1 in light mode
 - **Location:**
-  - `src/features/gestore/RichiestePage.tsx:351`: selected request `bg-surface-2 outline-2 outline-ball`.
-  - `src/features/player/availability/SettimanaStrip.tsx:76`: selected day `outline-2 outline-offset-4 outline-ball`.
+  - `src/features/manager/RequestsPage.tsx:351`: selected request `bg-surface-2 outline-2 outline-ball`.
+  - `src/features/player/availability/WeekStrip.tsx:76`: selected day `outline-2 outline-offset-4 outline-ball`.
 - **Evidence:** `--ball` against `--bg` is **1.17:1** and against `--surface` 1.26:1 (light); `--surface-2` against `--surface` is about 1.04:1. The slot grid avoids the problem (`ring-2 ring-court-deep` plus a check icon), so this is inconsistent with the system's own rule.
 - **WCAG:** 1.4.11 Non-text Contrast (AA) for state indication.
 - **Recommendation:** reuse the slot grid treatment (`outline-ball ring-2 ring-court-deep`) or a `--court` outline in light mode.
@@ -287,7 +287,7 @@ Severity scale: **Critical = P0**, **Serious = P1**, **Moderate = P2**, **Minor 
 ### Minor (P3)
 
 #### [P3] m1. Calendar day headings concatenate without a separator
-- **Location:** `src/features/public/CalendarioPage.tsx:125-128`.
+- **Location:** `src/features/public/SchedulePage.tsx:125-128`.
 - **Evidence:** the accessible text of the `<h3>` is "Giornata 1entro gio 26/11".
 - **Recommendation:** insert `{' · '}` or `<span class="sr-only">, </span>` before the `entro` span.
 - **Suggested command:** `/impeccable clarify`

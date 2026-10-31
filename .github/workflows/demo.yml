@@ -1,4 +1,4 @@
-name: Dati di prova
+name: Demo data
 
 # Loads or removes the demo data (scripts/seed-demo.mjs) on the hosted project.
 # Users admin@, org@, gestore@, p1@…p40@ demo.it with password secrets.DEMO_PASSWORD.
@@ -8,11 +8,11 @@ name: Dati di prova
 on:
   workflow_dispatch:
     inputs:
-      azione:
-        description: Cosa fare
+      action:
+        description: What to do
         type: choice
-        options: [carica, rimuovi]
-        default: carica
+        options: [load, remove]
+        default: load
 
 concurrency:
   group: demo
@@ -30,8 +30,8 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --no-audit --no-fund
-      - name: ${{ inputs.azione == 'rimuovi' && 'Rimuovi i dati di prova' || 'Carica i dati di prova' }}
-        run: node seed-demo.mjs ${{ inputs.azione == 'rimuovi' && '--rimuovi' || '' }}
+      - name: ${{ inputs.action == 'remove' && 'Remove the demo data' || 'Load the demo data' }}
+        run: node seed-demo.mjs ${{ inputs.action == 'remove' && '--remove' || '' }}
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL || vars.VITE_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}

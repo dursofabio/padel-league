@@ -11,7 +11,7 @@ Glossary and consolidated assumptions: [README.md](README.md).
 
 - Primary task: read the standings of my group with the qualification cut understood without colour; second: find a match in the calendar; third: follow the bracket.
 - Success: anonymous users never hit a login wall for read views; standings are always current (client-computed from official results with the configured tie-break chain).
-- Product truth: standings via `classificaGirone`/`classificheTorneo`, ties flagged by `pariMerito`, qualification via `qualifica` (perPosizione or avulsa), brackets via `derivaTabellone`; `partite_v` and `giocatori_pubblici` are anon-readable.
+- Product truth: standings via `classificaGirone`/`classificheTorneo`, ties flagged by `pariMerito`, qualification via `qualifica` (perPosizione or avulsa), brackets via `derivaTabellone`; `matches_v` and `public_players` are anon-readable.
 
 ## 3. Selected direction consequences
 

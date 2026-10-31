@@ -110,14 +110,14 @@ Target: the whole app shell and its working screens (`src/components/AppShell.ts
 
 **M1. [P1] A request can expire after the time it asks for.**
 - **Where:** player request block (`flow/07-p1-richiesta.png`, 390 light) and the manager inbox (`flow/08-gestore-inbox.png`, 1024 light).
-- **What is wrong:** the request is for Sat 31/10 at 14:00, but it shows "Scade tra 2 giorni (dom 01/11 alle 22:47)", and the manager sees "scade tra 2 g". The server sets the expiry to `now() + scadenzaRichiesteOre` and never caps it at the slot's start (`supabase/migrations/20261101000500_rpc_prenotazioni.sql:103`). `confirm_request` (line 191 onward) has no check for a start time in the past. The result:
+- **What is wrong:** the request is for Sat 31/10 at 14:00, but it shows "Scade tra 2 giorni (dom 01/11 alle 22:47)", and the manager sees "scade tra 2 g". The server sets the expiry to `now() + scadenzaRichiesteOre` and never caps it at the slot's start (`supabase/migrations/20261031000500_rpc_requests.sql:103`). `confirm_request` (line 191 onward) has no check for a start time in the past. The result:
   - a request for tomorrow stays "In attesa" after the match time has passed;
   - the match stays locked in `richiesta`, so `MATCH_HAS_REQUEST` blocks a new request;
   - the manager can still "confirm" a slot that is already over.
 - **Why it matters:** the product's promise is "always say what's missing … how long until it expires". A countdown that outlives the match is the kind of nonsense that sends a 50+ player back to WhatsApp, and it lets the manager act on stale data.
 - **Fix:**
   - Server: in `private.crea_richiesta`, set the expiry to `least(now() + cfg, (data + inizio) - interval '1 hour')`, or another lead time the manager needs. Make `confirm_request`, `accept_request` and the expiry job treat any `attesa` request whose start is in the past as `scaduta`.
-  - Client: `scadenzaTesto` (`src/features/gestore/logic.ts:36`) and the player's request block should show the earlier of the expiry and the start time, and promote the line when it is under 2 hours, as the brief requires.
+  - Client: `scadenzaTesto` (`src/features/manager/logic.ts:36`) and the player's request block should show the earlier of the expiry and the start time, and promote the line when it is under 2 hours, as the brief requires.
 
 **M2. [P1] The phone slot grid is a 5,000 px wall of mostly non-actionable cells.**
 - **Where:** `giocatore-partita-da-programmare-390-light/dark`, `flow/05-p1-partita.png`.
@@ -142,7 +142,7 @@ Target: the whole app shell and its working screens (`src/components/AppShell.ts
   - The presets that make this fast (Pausa pranzo, Sera, …) are only reachable after opening a day.
   - No week grouping: the user cannot tell where one week ends and the next begins.
 - **Why it matters:** the brief frames this as a 2–5 minute session for players aged 50+, done right after a WhatsApp nudge. At this length people fill in one day and stop, and the app's matching depends on availability being complete.
-- **Fix:** in `src/features/player/availability/GiornoEditor.tsx` and `LineaTempo.tsx`:
+- **Fix:** in `src/features/player/availability/DayEditor.tsx` and `LineaTempo.tsx`:
   - Render empty days as one compact 56 px row: the date plus a "+ Aggiungi" text button on the right. No rail.
   - Show the rail only when the day has windows, with labels at 08, 14 and 20.
   - Put week headers ("Settimana 2 · 02/11–08/11") between weeks.
@@ -160,7 +160,7 @@ Target: the whole app shell and its working screens (`src/components/AppShell.ts
   - Alternatively, default to "Vista elenco" until the player has saved at least once.
 
 **M5. [P1] Manager timeline blocks lose their button role for screen readers.**
-- **Where:** `src/components/CourtLanes.tsx:160` (`<button role="listitem">`), used for the free slots, occupations and requests in `src/features/gestore/GiornoLanes.tsx:86,141,167`.
+- **Where:** `src/components/CourtLanes.tsx:160` (`<button role="listitem">`), used for the free slots, occupations and requests in `src/features/manager/DayLanes.tsx:86,141,167`.
 - **What is wrong:** the explicit `role="listitem"` overrides the button's native role, so VoiceOver and NVDA announce these as list items, not actionable controls (WCAG 4.1.2). The player grid does this correctly: a `div` list item wraps a real button.
 - **Why it matters:** the target is WCAG 2.2 AA, and "Segna occupazione" from a free slot is a core manager action.
 - **Fix:** when `onClick` is set, render `<div role="listitem"><button …/></div>`, the same pattern `SlotGrid.tsx` already uses.
@@ -169,7 +169,7 @@ Target: the whole app shell and its working screens (`src/components/AppShell.ts
 
 **P1. [P2] The decision line of the manager's request card breaks at tablet width.**
 - **Where:** `flow/08-gestore-inbox.png` and `gestore-richieste-820-light`.
-- **What is wrong:** "sab 31/10 · 14:00–15:30" wraps inside its own span and "· Campo 2" ends up in a second column. Cause: `Intestazione` in `src/features/gestore/RichiestePage.tsx:276–289` is an `inline-flex` containing two sibling spans.
+- **What is wrong:** "sab 31/10 · 14:00–15:30" wraps inside its own span and "· Campo 2" ends up in a second column. Cause: `Intestazione` in `src/features/manager/RequestsPage.tsx:276–289` is an `inline-flex` containing two sibling spans.
 - **Why it matters:** this is the one line the manager reads before tapping "Conferma", and the tablet at the desk is their main device.
 - **Fix:** put the text in a single span with `text-wrap: balance`, or use `flex-wrap` on a block element, and keep "Campo 2" together with a non-breaking space.
 

@@ -5,24 +5,24 @@ import { cn } from '../ui/cn';
 
 /** Every key moment has a ready message for WhatsApp. */
 export function WhatsAppButton({
-  testo,
-  telefono,
+  text,
+  phone,
   children = 'Condividi su WhatsApp',
   size = 'md',
   variant = 'secondary',
   className,
 }: {
-  testo: string;
-  telefono?: string | null;
+  text: string;
+  phone?: string | null;
   children?: React.ReactNode;
   size?: 'md' | 'sm';
-  /** 'primary' (lime) only when WhatsApp is the main action of the screen. */
-  variant?: 'secondary' | 'primary';
+  /** 'primary' (lime) only when WhatsApp is the main action of the screen; 'ink' inside a lime or clay block. */
+  variant?: 'secondary' | 'primary' | 'ink';
   className?: string;
 }) {
   return (
     <a
-      href={waLink(testo, telefono ?? undefined)}
+      href={waLink(text, phone ?? undefined)}
       target="_blank"
       rel="noreferrer"
       className={cn(buttonVariants({ variant, size }), className)}

@@ -1,10 +1,10 @@
-/** Link WhatsApp generati lato client (gratuiti, nessun backend). */
-export function waLink(testo: string, telefono?: string): string {
-  const num = (telefono ?? '').replace(/[^\d]/g, '');
-  return `https://wa.me/${num}?text=${encodeURIComponent(testo)}`;
+/** WhatsApp links generated on the client (free, no backend). */
+export function waLink(text: string, phone?: string): string {
+  const num = (phone ?? '').replace(/[^\d]/g, '');
+  return `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
 }
 
-/** URL assoluto di una rotta hash dell'app. */
+/** Absolute URL of an app hash route. */
 export function appUrl(path: string): string {
   const base = window.location.href.split('#')[0];
   return `${base}#${path.startsWith('/') ? path : `/${path}`}`;

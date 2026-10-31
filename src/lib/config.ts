@@ -1,28 +1,28 @@
-import type { TorneoConfig } from '../types';
+import type { TournamentConfig } from '../types';
 
-/** Configurazione di default di un torneo (punti aperti delle specifiche: modificabile dall'organizzatore). */
-export const CONFIG_DEFAULT: TorneoConfig = {
-  puntiVittoria: 3,
-  puntiSconfitta: 0,
-  puntiSconfittaSetDecisivo: 1,
-  formatoSet: { setPerVincere: 2, superTieBreak: true },
-  spareggi: ['punti', 'scontroDiretto', 'diffSet', 'diffGame', 'sorteggio'],
-  criterioQualificazione: 'perPosizione',
-  fasiFinali: [
-    { nome: 'Gold', posti: 8 },
-    { nome: 'Silver', posti: 8 },
+/** Default tournament configuration (open points of the spec: the organizer can change it). */
+export const DEFAULT_CONFIG: TournamentConfig = {
+  pointsWin: 3,
+  pointsLoss: 0,
+  pointsLossDecidingSet: 1,
+  setFormat: { setsToWin: 2, superTieBreak: true },
+  tiebreakers: ['points', 'headToHead', 'setDiff', 'gameDiff', 'draw'],
+  qualificationRule: 'byPosition',
+  finals: [
+    { name: 'Gold', spots: 8 },
+    { name: 'Silver', spots: 8 },
   ],
-  consentiFuoriGriglia: true,
-  passoFuoriGriglia: 30,
-  scadenzaRichiesteOre: 48,
-  annullamentoGiocatoreOre: 24,
+  allowOffGrid: true,
+  offGridStep: 30,
+  requestExpiryHours: 48,
+  playerCancelHours: 24,
 };
 
-/** Completa una configurazione salvata (anche parziale) con i default. */
-export function conConfigDefault(c: Partial<TorneoConfig> | null | undefined): TorneoConfig {
+/** Completes a saved (possibly partial) configuration with the defaults. */
+export function withDefaultConfig(c: Partial<TournamentConfig> | null | undefined): TournamentConfig {
   return {
-    ...CONFIG_DEFAULT,
+    ...DEFAULT_CONFIG,
     ...(c ?? {}),
-    formatoSet: { ...CONFIG_DEFAULT.formatoSet, ...(c?.formatoSet ?? {}) },
+    setFormat: { ...DEFAULT_CONFIG.setFormat, ...(c?.setFormat ?? {}) },
   };
 }

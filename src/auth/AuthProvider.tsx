@@ -2,6 +2,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toProfile } from '../data/adapters';
+import { qk } from '../data/keys';
 import { supabase } from '../data/supabase';
 import type { Role, UserProfile } from '../types';
 
@@ -18,7 +19,7 @@ interface AuthState {
 
 const Ctx = createContext<AuthState | null>(null);
 
-const TUTTI: Role[] = ['admin', 'organizzatore', 'gestore', 'giocatore'];
+const ALL_ROLES: Role[] = ['admin', 'organizer', 'manager', 'player'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
-      ripulisciUrl();
+      cleanUpUrl();
     });
     const { data } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
@@ -40,8 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const uid = session?.user.id;
   // The profile is created by a database trigger at sign-up: retry briefly if not there yet.
-  const profilo = useQuery({
-    queryKey: ['profili', 'me', uid],
+  const profileQuery = useQuery({
+    queryKey: qk.me(uid ?? ''),
     enabled: !!uid,
     retry: 3,
     queryFn: async () => {
@@ -52,21 +53,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const value = useMemo<AuthState>(() => {
-    const own = profilo.data?.roles ?? [];
-    const roles = own.includes('admin') ? TUTTI : own;
+    const own = profileQuery.data?.roles ?? [];
+    const roles = own.includes('admin') ? ALL_ROLES : own;
     return {
       session,
       user: session?.user ?? null,
-      profile: profilo.data ?? null,
+      profile: profileQuery.data ?? null,
       roles,
       hasRole: (...r) => r.some((x) => roles.includes(x)),
-      loading: !ready || (!!uid && profilo.isPending),
+      loading: !ready || (!!uid && profileQuery.isPending),
       signOut: async () => {
         await supabase.auth.signOut();
         qc.clear();
       },
     };
-  }, [session, profilo.data, profilo.isPending, ready, uid, qc]);
+  }, [session, profileQuery.data, profileQuery.isPending, ready, uid, qc]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -78,16 +79,16 @@ export function useAuth() {
 }
 
 /** After the PKCE exchange, remove ?code= and go back to the saved route. */
-function ripulisciUrl() {
+function cleanUpUrl() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has('code') && !url.searchParams.has('error_description')) return;
   url.searchParams.delete('code');
   url.searchParams.delete('error');
   url.searchParams.delete('error_code');
   url.searchParams.delete('error_description');
-  const dopo = sessionStorage.getItem('auth:next');
+  const next = sessionStorage.getItem('auth:next');
   sessionStorage.removeItem('auth:next');
-  url.hash = dopo ? `#${dopo}` : url.hash || '#/';
+  url.hash = next ? `#${next}` : url.hash || '#/';
   window.history.replaceState(null, '', url.toString());
 }
 

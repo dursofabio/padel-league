@@ -1,21 +1,20 @@
-import { LogIn } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader } from '../../components/PageHeader';
-import { EmptyState, QueryState, SkeletonRighe } from '../../components/states';
-import { useTornei } from '../../data/queries';
-import { buttonVariants } from '../../ui/button';
-import { RigaLink, STATO_TORNEO } from '../public/comune';
+import { EmptyState, QueryState, SkeletonRows } from '../../components/states';
+import { useTournaments } from '../../data/queries';
+import { SignInPrompt, TOURNAMENT_STATUS_LABEL } from '../../components/common';
 
 // The feed (attention logic, mutations, rows) is only downloaded by logged-in users.
-const DaFare = lazy(() => import('./DaFare').then((m) => ({ default: m.DaFare })));
+const TodoFeed = lazy(() => import('./TodoFeed').then((m) => ({ default: m.TodoFeed })));
 
-function Caricamento() {
+function Loading() {
   return (
     <>
-      <PageHeader titolo="Da fare" />
-      <SkeletonRighe righe={3} />
+      <PageHeader title="Da fare" />
+      <SkeletonRows rows={3} />
     </>
   );
 }
@@ -23,54 +22,58 @@ function Caricamento() {
 /** "/": the "Da fare" feed when logged in; the tournaments to follow when logged out. */
 export default function HomePage() {
   const { user, loading } = useAuth();
-  if (loading) return <Caricamento />;
+  if (loading) return <Loading />;
   return user ? (
-    <Suspense fallback={<Caricamento />}>
-      <DaFare />
+    <Suspense fallback={<Loading />}>
+      <TodoFeed />
     </Suspense>
   ) : (
-    <Pubblica />
+    <PublicHome />
   );
 }
 
-function Pubblica() {
-  const tornei = useTornei();
+function PublicHome() {
+  const tournaments = useTournaments();
   return (
     <>
-      <PageHeader titolo="Tornei" sottotitolo="Classifiche, calendario e tabelloni: si leggono senza accedere." />
-      <div className="grid max-w-3xl gap-8">
-        <QueryState
-          isPending={tornei.isPending}
-          error={tornei.error}
-          data={tornei.data}
-          onRiprova={() => void tornei.refetch()}
-          vuoto={(t) =>
-            t.length ? null : <EmptyState titolo="Non c’è ancora nessun torneo." testo="Quando l’organizzatore crea il torneo, lo trovi qui." />
-          }
-        >
-          {(t) => (
-            <ul className="court-rule">
-              {t.map((x) => (
-                <li key={x.id}>
-                  <RigaLink to={`/t/${x.id}`} dettaglio={STATO_TORNEO[x.stato]}>
-                    {x.nome}
-                  </RigaLink>
-                </li>
-              ))}
-            </ul>
-          )}
-        </QueryState>
-
-        <section aria-labelledby="accedi" className="grid justify-items-start gap-3 border-t border-line pt-5">
-          <h2 id="accedi" className="text-lg font-bold">
-            Giochi in un torneo?
-          </h2>
-          <p className="max-w-prose text-ink-muted">Accedi per segnare quando puoi giocare, programmare le tue partite e inserire i risultati.</p>
-          <Link to="/accedi" className={buttonVariants({ variant: 'primary' })}>
-            <LogIn aria-hidden />
-            Accedi
-          </Link>
-        </section>
+      <PageHeader
+        title={
+          <>
+            Segui il <span className="mark">torneo</span>
+          </>
+        }
+        subtitle="Classifiche, calendario e tabelloni si leggono senza accedere."
+      />
+      <QueryState
+        isPending={tournaments.isPending}
+        error={tournaments.error}
+        data={tournaments.data}
+        onRetry={() => void tournaments.refetch()}
+        empty={(t) =>
+          t.length ? null : <EmptyState title="Non c’è ancora nessun torneo." text="Quando l’organizzatore crea il torneo, lo trovi qui." />
+        }
+      >
+        {(t) => (
+          <ul className="grid max-w-3xl gap-4">
+            {t.map((x) => (
+              <li key={x.id}>
+                <Link to={`/t/${x.id}`} className="group grid gap-4 rounded-panel border-2 border-line-strong bg-court p-5 text-court-ink sm:p-6">
+                  <span className="flex items-start justify-between gap-3">
+                    <span className="poster text-poster break-words">{x.name}</span>
+                    <ArrowRight className="mt-1 size-7 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden />
+                  </span>
+                  <span className="grid gap-0.5">
+                    <span className="font-bold">{TOURNAMENT_STATUS_LABEL[x.status]}</span>
+                    <span className="font-semibold text-court-ink-muted">Classifiche, calendario e tabelloni</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </QueryState>
+      <div className="max-w-3xl">
+        <SignInPrompt title="Giochi in un torneo?" />
       </div>
     </>
   );

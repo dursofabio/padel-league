@@ -1,4 +1,4 @@
-/** Utility per orari "hh:mm" e date "yyyy-mm-dd" (sempre in ora locale del circolo). */
+/** Helpers for "hh:mm" times and "yyyy-mm-dd" dates (always in the club's local time). */
 
 export function toMin(hhmm: string): number {
   const [h, m] = hhmm.split(':').map(Number);
@@ -15,7 +15,7 @@ export function addMin(hhmm: string, delta: number): string {
   return fromMin(toMin(hhmm) + delta);
 }
 
-/** Intervalli semiaperti [a0, a1) e [b0, b1): si toccano senza sovrapporsi se a1 == b0. */
+/** Half-open intervals [a0, a1) and [b0, b1): they touch without overlapping when a1 == b0. */
 export function overlaps(a0: string, a1: string, b0: string, b1: string): boolean {
   return toMin(a0) < toMin(b1) && toMin(b0) < toMin(a1);
 }
@@ -24,12 +24,12 @@ export function covers(outer0: string, outer1: string, in0: string, in1: string)
   return toMin(outer0) <= toMin(in0) && toMin(in1) <= toMin(outer1);
 }
 
-export function parseFascia(f: string): [string, string] {
-  const [a, b] = f.split('-');
+export function parseWindow(w: string): [string, string] {
+  const [a, b] = w.split('-');
   return [a, b];
 }
 
-export function formatFascia(a: string, b: string): string {
+export function formatWindow(a: string, b: string): string {
   return `${a}-${b}`;
 }
 
@@ -66,22 +66,24 @@ export function weekday(date: string): number {
   return parseDate(date).getDay();
 }
 
-/** Tutte le date da `from` a `to` incluse. */
+/** All dates from `from` to `to`, inclusive. */
 export function dateRange(from: string, to: string): string[] {
   const out: string[] = [];
   for (let d = from; d <= to; d = addDays(d, 1)) out.push(d);
   return out;
 }
 
-const GIORNI = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
-export const GIORNI_LUNGHI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+const SHORT_DAYS = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+/** Italian weekday names (UI copy), indexed 0 = Sunday. */
+export const WEEKDAY_NAMES = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 
 /** "2026-11-14" -> "sab 14/11" */
 export function labelDate(date: string): string {
   const d = parseDate(date);
-  return `${GIORNI[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `${SHORT_DAYS[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-export function giornoBreve(n: number): string {
-  return GIORNI[n];
+/** Short Italian weekday name (UI copy), 0 = Sunday. */
+export function shortWeekday(n: number): string {
+  return SHORT_DAYS[n];
 }

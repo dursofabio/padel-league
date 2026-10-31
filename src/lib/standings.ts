@@ -1,141 +1,141 @@
-import type { Partita, Spareggio, TorneoConfig } from '../types';
-import { risultatoUfficiale, statistiche } from './results';
+import type { Match, Tiebreaker, TournamentConfig } from '../types';
+import { hasOfficialResult, matchStats } from './results';
 
-export interface RigaClassifica {
-  squadraId: string;
-  girone: string;
-  giocate: number;
-  vinte: number;
-  perse: number;
-  punti: number;
-  setVinti: number;
-  setPersi: number;
-  gameVinti: number;
-  gamePersi: number;
-  posizione: number;
-  /** Pari merito non risolto dalla catena di spareggio: serve un sorteggio. */
-  pariMerito: boolean;
+export interface StandingsRow {
+  teamId: string;
+  group: string;
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+  setsWon: number;
+  setsLost: number;
+  gamesWon: number;
+  gamesLost: number;
+  position: number;
+  /** Tie not resolved by the tiebreaker chain: a draw is needed. */
+  tied: boolean;
 }
 
-interface Esito {
-  squadraA: string;
-  squadraB: string;
-  setA: number;
-  setB: number;
-  gameA: number;
-  gameB: number;
-  puntiA: number;
-  puntiB: number;
-  vinceA: boolean;
+interface Outcome {
+  teamA: string;
+  teamB: string;
+  setsA: number;
+  setsB: number;
+  gamesA: number;
+  gamesB: number;
+  pointsA: number;
+  pointsB: number;
+  aWins: boolean;
 }
 
-function esiti(partite: Partita[], config: TorneoConfig): Esito[] {
-  return partite
-    .filter((p) => risultatoUfficiale(p) && p.squadraA && p.squadraB)
-    .map((p) => {
-      const s = statistiche(p.risultato!.set, config.formatoSet);
-      const vinceA = s.vincitore === 'A';
-      const puntiPerdente = config.puntiSconfitta + (s.setDecisivo ? config.puntiSconfittaSetDecisivo ?? 0 : 0);
+function outcomes(matches: Match[], config: TournamentConfig): Outcome[] {
+  return matches
+    .filter((m) => hasOfficialResult(m) && m.teamA && m.teamB)
+    .map((m) => {
+      const s = matchStats(m.result!.sets, config.setFormat);
+      const aWins = s.winner === 'A';
+      const loserPoints = config.pointsLoss + (s.decidingSet ? config.pointsLossDecidingSet ?? 0 : 0);
       return {
-        squadraA: p.squadraA!,
-        squadraB: p.squadraB!,
-        setA: s.setA,
-        setB: s.setB,
-        gameA: s.gameA,
-        gameB: s.gameB,
-        vinceA,
-        puntiA: vinceA ? config.puntiVittoria : puntiPerdente,
-        puntiB: vinceA ? puntiPerdente : config.puntiVittoria,
+        teamA: m.teamA!,
+        teamB: m.teamB!,
+        setsA: s.setsA,
+        setsB: s.setsB,
+        gamesA: s.gamesA,
+        gamesB: s.gamesB,
+        aWins,
+        pointsA: aWins ? config.pointsWin : loserPoints,
+        pointsB: aWins ? loserPoints : config.pointsWin,
       };
     });
 }
 
-type Tot = Omit<RigaClassifica, 'posizione' | 'pariMerito' | 'girone'>;
+type Totals = Omit<StandingsRow, 'position' | 'tied' | 'group'>;
 
-function totali(ids: string[], es: Esito[]): Map<string, Tot> {
-  const m = new Map<string, Tot>();
+function totals(ids: string[], os: Outcome[]): Map<string, Totals> {
+  const m = new Map<string, Totals>();
   for (const id of ids)
-    m.set(id, { squadraId: id, giocate: 0, vinte: 0, perse: 0, punti: 0, setVinti: 0, setPersi: 0, gameVinti: 0, gamePersi: 0 });
-  for (const e of es) {
-    const a = m.get(e.squadraA);
-    const b = m.get(e.squadraB);
+    m.set(id, { teamId: id, played: 0, won: 0, lost: 0, points: 0, setsWon: 0, setsLost: 0, gamesWon: 0, gamesLost: 0 });
+  for (const o of os) {
+    const a = m.get(o.teamA);
+    const b = m.get(o.teamB);
     if (!a || !b) continue;
-    a.giocate++; b.giocate++;
-    if (e.vinceA) { a.vinte++; b.perse++; } else { b.vinte++; a.perse++; }
-    a.punti += e.puntiA; b.punti += e.puntiB;
-    a.setVinti += e.setA; a.setPersi += e.setB; b.setVinti += e.setB; b.setPersi += e.setA;
-    a.gameVinti += e.gameA; a.gamePersi += e.gameB; b.gameVinti += e.gameB; b.gamePersi += e.gameA;
+    a.played++; b.played++;
+    if (o.aWins) { a.won++; b.lost++; } else { b.won++; a.lost++; }
+    a.points += o.pointsA; b.points += o.pointsB;
+    a.setsWon += o.setsA; a.setsLost += o.setsB; b.setsWon += o.setsB; b.setsLost += o.setsA;
+    a.gamesWon += o.gamesA; a.gamesLost += o.gamesB; b.gamesWon += o.gamesB; b.gamesLost += o.gamesA;
   }
   return m;
 }
 
 /**
- * Classifica di un girone, calcolata dal client a partire dai risultati ufficiali.
- * La catena di spareggio si applica in modo ricorsivo: ogni criterio divide il gruppo
- * dei pari merito in sottogruppi, e i sottogruppi ancora pari passano al criterio successivo.
- * Lo scontro diretto è la classifica avulsa delle sole partite tra le squadre a pari merito.
+ * Standings of a group, computed on the client from the official results.
+ * The tiebreaker chain is applied recursively: each criterion splits the tied group
+ * into subgroups, and the subgroups still tied move on to the next criterion.
+ * Head-to-head is the standings of the matches between the tied teams only.
  */
-export function classificaGirone(
-  girone: string,
-  squadre: string[],
-  partite: Partita[],
-  config: TorneoConfig,
-  sorteggio: Record<string, number> = {},
-): RigaClassifica[] {
-  const es = esiti(partite, config);
-  const tot = totali(squadre, es);
-  const catena: Spareggio[] = config.spareggi?.length ? config.spareggi : ['punti'];
+export function groupStandings(
+  group: string,
+  teams: string[],
+  matches: Match[],
+  config: TournamentConfig,
+  draw: Record<string, number> = {},
+): StandingsRow[] {
+  const os = outcomes(matches, config);
+  const tot = totals(teams, os);
+  const chain: Tiebreaker[] = config.tiebreakers?.length ? config.tiebreakers : ['points'];
 
-  const ordinati: { id: string; pari: boolean }[] = [];
+  const ordered: { id: string; tied: boolean }[] = [];
 
-  const chiave = (crit: Spareggio, id: string, gruppo: string[]): number => {
-    if (crit === 'scontroDiretto') {
-      const sub = es.filter((e) => gruppo.includes(e.squadraA) && gruppo.includes(e.squadraB));
-      return totali(gruppo, sub).get(id)!.punti;
+  const key = (crit: Tiebreaker, id: string, tiedGroup: string[]): number => {
+    if (crit === 'headToHead') {
+      const sub = os.filter((o) => tiedGroup.includes(o.teamA) && tiedGroup.includes(o.teamB));
+      return totals(tiedGroup, sub).get(id)!.points;
     }
     const t = tot.get(id)!;
     switch (crit) {
-      case 'punti': return t.punti;
-      case 'diffSet': return t.setVinti - t.setPersi;
-      case 'diffGame': return t.gameVinti - t.gamePersi;
-      case 'setVinti': return t.setVinti;
-      case 'gameVinti': return t.gameVinti;
-      case 'sorteggio': return id in sorteggio ? -sorteggio[id] : Number.NEGATIVE_INFINITY;
+      case 'points': return t.points;
+      case 'setDiff': return t.setsWon - t.setsLost;
+      case 'gameDiff': return t.gamesWon - t.gamesLost;
+      case 'setsWon': return t.setsWon;
+      case 'gamesWon': return t.gamesWon;
+      case 'draw': return id in draw ? -draw[id] : Number.NEGATIVE_INFINITY;
     }
   };
 
-  const risolvi = (gruppo: string[], idx: number) => {
-    if (gruppo.length === 1) { ordinati.push({ id: gruppo[0], pari: false }); return; }
-    if (idx >= catena.length) {
-      // pari merito non risolto: ordine stabile, segnalato per il sorteggio
-      [...gruppo].sort().forEach((id) => ordinati.push({ id, pari: true }));
+  const resolve = (tiedGroup: string[], idx: number) => {
+    if (tiedGroup.length === 1) { ordered.push({ id: tiedGroup[0], tied: false }); return; }
+    if (idx >= chain.length) {
+      // unresolved tie: stable order, flagged for the draw
+      [...tiedGroup].sort().forEach((id) => ordered.push({ id, tied: true }));
       return;
     }
-    const crit = catena[idx];
+    const crit = chain[idx];
     const byKey = new Map<number, string[]>();
-    for (const id of gruppo) {
-      const k = chiave(crit, id, gruppo);
+    for (const id of tiedGroup) {
+      const k = key(crit, id, tiedGroup);
       byKey.set(k, [...(byKey.get(k) ?? []), id]);
     }
-    [...byKey.keys()].sort((a, b) => b - a).forEach((k) => risolvi(byKey.get(k)!, idx + 1));
+    [...byKey.keys()].sort((a, b) => b - a).forEach((k) => resolve(byKey.get(k)!, idx + 1));
   };
 
-  risolvi([...squadre], 0);
-  return ordinati.map(({ id, pari }, i) => ({ ...tot.get(id)!, girone, posizione: i + 1, pariMerito: pari }));
+  resolve([...teams], 0);
+  return ordered.map(({ id, tied }, i) => ({ ...tot.get(id)!, group, position: i + 1, tied }));
 }
 
-/** Classifica avulsa tra squadre di gironi diversi: media punti, poi differenze per partita. */
-export function confrontoAvulsa(a: RigaClassifica, b: RigaClassifica, sorteggio: Record<string, number> = {}): number {
-  const media = (r: RigaClassifica, v: number) => (r.giocate ? v / r.giocate : 0);
+/** Cross-group ranking between teams of different groups: average points, then per-match differences. */
+export function compareCrossGroup(a: StandingsRow, b: StandingsRow, draw: Record<string, number> = {}): number {
+  const avg = (r: StandingsRow, v: number) => (r.played ? v / r.played : 0);
   const crit = [
-    (r: RigaClassifica) => media(r, r.punti),
-    (r: RigaClassifica) => media(r, r.setVinti - r.setPersi),
-    (r: RigaClassifica) => media(r, r.gameVinti - r.gamePersi),
-    (r: RigaClassifica) => -(sorteggio[r.squadraId] ?? Number.MAX_SAFE_INTEGER),
+    (r: StandingsRow) => avg(r, r.points),
+    (r: StandingsRow) => avg(r, r.setsWon - r.setsLost),
+    (r: StandingsRow) => avg(r, r.gamesWon - r.gamesLost),
+    (r: StandingsRow) => -(draw[r.teamId] ?? Number.MAX_SAFE_INTEGER),
   ];
   for (const c of crit) {
     const d = c(b) - c(a);
     if (Math.abs(d) > 1e-9) return d;
   }
-  return a.girone.localeCompare(b.girone);
+  return a.group.localeCompare(b.group);
 }

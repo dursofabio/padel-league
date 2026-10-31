@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { INVALIDA_PER_TABELLA } from './keys';
+import { INVALIDATE_BY_TABLE } from './keys';
 import { supabase } from './supabase';
 
 /**
@@ -8,21 +8,21 @@ import { supabase } from './supabase';
  * (debounced to 250ms). The server stays the truth: no cache patching.
  * Realtime respects RLS: everyone receives only what they can read.
  */
-export function useRealtime(enabled: boolean, onEvento?: (tabella: string) => void) {
+export function useRealtime(enabled: boolean, onEvent?: (table: string) => void) {
   const qc = useQueryClient();
   useEffect(() => {
     if (!enabled) return;
     const pending = new Set<string>();
     let timer: ReturnType<typeof setTimeout> | undefined;
     const flush = () => {
-      for (const t of pending) for (const key of INVALIDA_PER_TABELLA[t] ?? []) qc.invalidateQueries({ queryKey: key });
+      for (const t of pending) for (const key of INVALIDATE_BY_TABLE[t] ?? []) qc.invalidateQueries({ queryKey: key });
       pending.clear();
     };
     const channel = supabase.channel('app');
-    for (const table of Object.keys(INVALIDA_PER_TABELLA)) {
+    for (const table of Object.keys(INVALIDATE_BY_TABLE)) {
       channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => {
         pending.add(table);
-        onEvento?.(table);
+        onEvent?.(table);
         clearTimeout(timer);
         timer = setTimeout(flush, 250);
       });
@@ -35,5 +35,5 @@ export function useRealtime(enabled: boolean, onEvento?: (tabella: string) => vo
       clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [enabled, qc, onEvento]);
+  }, [enabled, qc, onEvent]);
 }

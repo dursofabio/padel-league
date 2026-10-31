@@ -4,54 +4,54 @@
  */
 import { Check, CircleDashed, Clock, Lock } from 'lucide-react';
 import { useState } from 'react';
-import { useTema } from '../app/theme';
-import { CourtLanes, LaneBlock, scalaDaCampi } from '../components/CourtLanes';
+import { useTheme } from '../app/theme';
+import { CourtLanes, LaneBlock, scaleFromCourts } from '../components/CourtLanes';
 import { MatchRow } from '../components/MatchRow';
-import { PageHeader, Sezione } from '../components/PageHeader';
-import { EmptyState, ErrorState, SkeletonRighe } from '../components/states';
+import { PageHeader, Section } from '../components/PageHeader';
+import { EmptyState, ErrorState, SkeletonRows } from '../components/states';
 import { StandingsTable } from '../components/StandingsTable';
-import { Badge, StatoPartitaBadge, StatoRichiestaBadge } from '../components/StatusBadge';
-import { STATO_SLOT } from '../lib/copy';
-import { slotGriglia } from '../lib/slots';
-import type { Campo, Partita, Squadra, StatoPartita, StatoRichiesta } from '../types';
+import { Badge, MatchStatusBadge, RequestStatusBadge } from '../components/StatusBadge';
+import { SLOT_STATUS } from '../lib/copy';
+import { gridSlots } from '../lib/slots';
+import type { Court, Match, MatchStatus, RequestStatus, Team } from '../types';
 import { Button, Checkbox, ConfirmDialog, Field, Input, Segmented, Select, Sheet, Switch } from '../ui';
 
-const campi: Campo[] = [
-  { id: 'c1', nome: 'Campo 1', primoSlot: '13:30', ultimoSlot: '21:00', durata: 90, giorniAttivi: [0, 1, 2, 3, 4, 5, 6], eccezioni: [] },
-  { id: 'c2', nome: 'Campo 2', primoSlot: '14:00', ultimoSlot: '20:00', durata: 90, giorniAttivi: [0, 1, 2, 3, 4, 5, 6], eccezioni: [] },
+const courts: Court[] = [
+  { id: 'c1', name: 'Campo 1', firstSlot: '13:30', lastSlot: '21:00', slotMinutes: 90, activeDays: [0, 1, 2, 3, 4, 5, 6], closedDates: [] },
+  { id: 'c2', name: 'Campo 2', firstSlot: '14:00', lastSlot: '20:00', slotMinutes: 90, activeDays: [0, 1, 2, 3, 4, 5, 6], closedDates: [] },
 ];
-const squadre: Squadra[] = [
-  { id: 's1', nome: 'Le Bandejas', giocatori: [], stato: 'approvata', creatoDa: '', girone: 'A' },
-  { id: 's2', nome: 'Vibora Team', giocatori: [], stato: 'approvata', creatoDa: '', girone: 'A' },
-  { id: 's3', nome: 'Chiquita', giocatori: [], stato: 'approvata', creatoDa: '', girone: 'A' },
-  { id: 's4', nome: 'Por Tres', giocatori: [], stato: 'approvata', creatoDa: '', girone: 'A' },
+const teams: Team[] = [
+  { id: 's1', name: 'Le Bandejas', players: [], status: 'approved', createdBy: '', group: 'A' },
+  { id: 's2', name: 'Vibora Team', players: [], status: 'approved', createdBy: '', group: 'A' },
+  { id: 's3', name: 'Chiquita', players: [], status: 'approved', createdBy: '', group: 'A' },
+  { id: 's4', name: 'Por Tres', players: [], status: 'approved', createdBy: '', group: 'A' },
 ];
-const byId = new Map(squadre.map((s) => [s.id, s]));
-const base = { giocatoriA: [] as string[], giocatoriB: [] as string[], giocatori: [] as string[], fase: 'gironi' };
-const partite: Partita[] = [
-  { ...base, id: 'p1', squadraA: 's1', squadraB: 's2', stato: 'programmata', programmazione: { campoId: 'c2', data: '2026-11-14', inizio: '18:30', fine: '20:00' } },
-  { ...base, id: 'p2', squadraA: 's3', squadraB: 's4', stato: 'giocata', risultato: { set: [{ a: 6, b: 4 }, { a: 3, b: 6 }, { a: 10, b: 7 }], inseritoDa: 'x', confermatoDa: 'y' } },
-  { ...base, id: 'p3', squadraA: 's2', squadraB: 's3', stato: 'da programmare' },
+const byId = new Map(teams.map((t) => [t.id, t]));
+const base = { playersA: [] as string[], playersB: [] as string[], players: [] as string[], phase: 'groups' };
+const matches: Match[] = [
+  { ...base, id: 'p1', teamA: 's1', teamB: 's2', status: 'scheduled', schedule: { courtId: 'c2', date: '2026-11-14', start: '18:30', end: '20:00' } },
+  { ...base, id: 'p2', teamA: 's3', teamB: 's4', status: 'played', result: { sets: [{ a: 6, b: 4 }, { a: 3, b: 6 }, { a: 10, b: 7 }], enteredBy: 'x', confirmedBy: 'y' } },
+  { ...base, id: 'p3', teamA: 's2', teamB: 's3', status: 'unscheduled' },
 ];
-const stati = ['verde', 'verde', 'giallo', 'rosso', 'grigio', 'blu'] as const;
-const icone = { verde: Check, giallo: CircleDashed, grigio: CircleDashed, rosso: Lock, blu: Clock };
-const toni = { verde: 'ok', giallo: 'warn', grigio: 'idle', rosso: 'danger', blu: 'info' } as const;
+const colors = ['green', 'green', 'yellow', 'red', 'grey', 'blue'] as const;
+const icons = { green: Check, yellow: CircleDashed, grey: CircleDashed, red: Lock, blue: Clock };
+const tones = { green: 'ok', yellow: 'warn', grey: 'idle', red: 'danger', blue: 'info' } as const;
 
 export default function KitPage() {
-  const [tema, setTema] = useTema();
+  const [theme, setTheme] = useTheme();
   const [sheet, setSheet] = useState(false);
   const [sel, setSel] = useState<string | null>('c2-15:30');
-  const scala = scalaDaCampi(campi, 0.75);
+  const scale = scaleFromCourts(courts, 0.75);
   return (
     <div className="grid gap-8">
       <PageHeader
-        titolo="Kit di sistema"
-        sottotitolo="Dati sintetici, solo sviluppo."
-        azioni={
+        title="Kit di sistema"
+        subtitle="Dati sintetici, solo sviluppo."
+        actions={
           <Segmented
             label="Tema"
-            value={tema}
-            onValueChange={setTema}
+            value={theme}
+            onValueChange={setTheme}
             options={[
               { value: 'light', label: 'Chiaro' },
               { value: 'dark', label: 'Scuro' },
@@ -60,7 +60,7 @@ export default function KitPage() {
           />
         }
       />
-      <Sezione titolo="Azioni">
+      <Section title="Azioni">
         <div className="flex flex-wrap gap-2">
           <Button variant="primary">Invia richiesta</Button>
           <Button>Proponi un altro orario</Button>
@@ -72,8 +72,8 @@ export default function KitPage() {
           </Button>
           <Button variant="link">Ho dimenticato la password</Button>
         </div>
-      </Sezione>
-      <Sezione titolo="Campi del modulo">
+      </Section>
+      <Section title="Campi del modulo">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Nome della coppia" hint="Lo vedranno tutti in classifica.">
             {(p) => <Input {...p} defaultValue="Le Bandejas" />}
@@ -93,89 +93,89 @@ export default function KitPage() {
             <Switch defaultChecked /> Set decisivo come super tie-break
           </label>
         </div>
-      </Sezione>
-      <Sezione titolo="Stati">
+      </Section>
+      <Section title="Stati">
         <div className="flex flex-wrap gap-2">
-          {(['da programmare', 'richiesta', 'programmata', 'giocata', 'contestata', 'tavolino'] as StatoPartita[]).map((s) => (
-            <StatoPartitaBadge key={s} stato={s} />
+          {(['unscheduled', 'requested', 'scheduled', 'played', 'disputed', 'forfeit'] as MatchStatus[]).map((s) => (
+            <MatchStatusBadge key={s} status={s} />
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          {(['attesa', 'confermata', 'rifiutata', 'annullata', 'conflitto', 'scaduta'] as StatoRichiesta[]).map((s) => (
-            <StatoRichiestaBadge key={s} stato={s} />
+          {(['pending', 'confirmed', 'rejected', 'cancelled', 'conflict', 'expired'] as RequestStatus[]).map((s) => (
+            <RequestStatusBadge key={s} status={s} />
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          {Object.values(STATO_SLOT).map((v) => (
-            <Badge key={v.label} voce={v} />
+          {Object.values(SLOT_STATUS).map((v) => (
+            <Badge key={v.label} entry={v} />
           ))}
         </div>
-      </Sezione>
-      <Sezione titolo="Partite">
+      </Section>
+      <Section title="Partite">
         <ul className="court-rule">
-          {partite.map((p) => (
-            <li key={p.id}>
-              <MatchRow p={p} squadraById={byId} campi={campi} href="#" evidenzia={['s1']} />
+          {matches.map((m) => (
+            <li key={m.id}>
+              <MatchRow match={m} teamById={byId} courts={courts} href="#" highlight={['s1']} />
             </li>
           ))}
         </ul>
-      </Sezione>
-      <Sezione titolo="Corsie dei campi">
+      </Section>
+      <Section title="Corsie dei campi">
         <CourtLanes
-          campi={campi}
-          scala={scala}
+          courts={courts}
+          scale={scale}
           caption="sab 14/11"
-          oraCorrente={17 * 60 + 10}
+          nowMinute={17 * 60 + 10}
           renderLane={(c) =>
-            slotGriglia(c, '2026-11-14').map((s, i) => {
-              const st = stati[(i + (c.id === 'c2' ? 2 : 0)) % stati.length];
-              const Icon = icone[st];
-              const key = `${c.id}-${s.inizio}`;
+            gridSlots(c, '2026-11-14').map((s, i) => {
+              const st = colors[(i + (c.id === 'c2' ? 2 : 0)) % colors.length];
+              const Icon = icons[st];
+              const key = `${c.id}-${s.start}`;
               return (
                 <LaneBlock
                   key={key}
-                  scala={scala}
-                  inizio={s.inizio}
-                  fine={s.fine}
-                  tono={toni[st]}
-                  pattern={st === 'rosso' ? 'hatch' : st === 'grigio' ? 'dots' : undefined}
-                  selezionato={sel === key}
+                  scale={scale}
+                  start={s.start}
+                  end={s.end}
+                  tone={tones[st]}
+                  pattern={st === 'red' ? 'hatch' : st === 'grey' ? 'dots' : undefined}
+                  selected={sel === key}
                   onClick={() => setSel(key)}
-                  ariaLabel={`${s.inizio}, ${c.nome}: ${STATO_SLOT[st].label}`}
+                  ariaLabel={`${s.start}, ${c.name}: ${SLOT_STATUS[st].label}`}
                 >
                   <span className="tabular flex items-center gap-1 font-bold">
                     <Icon className="size-4" aria-hidden />
-                    {s.inizio}
+                    {s.start}
                   </span>
-                  <span className="text-xs">{st === 'giallo' ? '3/4 · manca Luca' : STATO_SLOT[st].label}</span>
+                  <span className="text-xs">{st === 'yellow' ? '3/4 · manca Luca' : SLOT_STATUS[st].label}</span>
                 </LaneBlock>
               );
             })
           }
         />
-      </Sezione>
-      <Sezione titolo="Classifica">
+      </Section>
+      <Section title="Classifica">
         <StandingsTable
-          girone="A"
-          squadraById={byId}
-          fasi={[
-            { nome: 'Gold', posti: 2 },
-            { nome: 'Silver', posti: 2 },
+          group="A"
+          teamById={byId}
+          phases={[
+            { name: 'Gold', spots: 2 },
+            { name: 'Silver', spots: 2 },
           ]}
-          nGironi={1}
-          evidenzia="s1"
-          righe={squadre.map((s, i) => ({
-            squadraId: s.id, girone: 'A', giocate: 3, vinte: 3 - i, perse: i, punti: 9 - i * 3, setVinti: 6 - i, setPersi: i * 2,
-            gameVinti: 40 - i * 5, gamePersi: 20 + i * 5, posizione: i + 1, pariMerito: i === 3,
+          groupCount={1}
+          highlight="s1"
+          rows={teams.map((t, i) => ({
+            teamId: t.id, group: 'A', played: 3, won: 3 - i, lost: i, points: 9 - i * 3, setsWon: 6 - i, setsLost: i * 2,
+            gamesWon: 40 - i * 5, gamesLost: 20 + i * 5, position: i + 1, tied: i === 3,
           }))}
         />
-      </Sezione>
-      <Sezione titolo="Stati di pagina">
-        <SkeletonRighe righe={2} />
-        <EmptyState titolo="Niente da fare" testo="Prossima partita: sab 14/11 alle 18:30 sul Campo 2." azione={<Button>Vedi le partite</Button>} />
-        <ErrorState errore={{ hint: 'SLOT_TAKEN' }} onRiprova={() => undefined} />
-      </Sezione>
-      <Sezione titolo="Pannelli">
+      </Section>
+      <Section title="Stati di pagina">
+        <SkeletonRows rows={2} />
+        <EmptyState title="Niente da fare" text="Prossima partita: sab 14/11 alle 18:30 sul Campo 2." action={<Button>Vedi le partite</Button>} />
+        <ErrorState error={{ hint: 'SLOT_TAKEN' }} onRetry={() => undefined} />
+      </Section>
+      <Section title="Pannelli">
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => setSheet(true)}>Apri pannello</Button>
           <ConfirmDialog
@@ -196,7 +196,7 @@ export default function KitPage() {
         >
           <p>Contenuto del pannello.</p>
         </Sheet>
-      </Sezione>
+      </Section>
     </div>
   );
 }

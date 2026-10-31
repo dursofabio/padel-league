@@ -1,18 +1,18 @@
 /**
- * Promemoria email del campionato (GitHub Actions, una volta al giorno).
+ * League reminder emails (GitHub Actions, once a day).
  *
- * Scadenze, ricorrenze e partite non giocate girano nel database con pg_cron
- * (vedi supabase/migrations/*_cron.sql). Qui resta solo l'invio delle email:
- * il contenuto è calcolato dalla RPC `email_promemoria()` (solo service_role)
- * → [{ email, nome, righe: string[] }].
+ * Request expiry, recurrences and unplayed matches run inside the database with pg_cron
+ * (see supabase/migrations/*_cron.sql). Only sending the emails is left here:
+ * the content is computed by the RPC `reminder_emails()` (service_role only)
+ * → [{ email, name, lines: string[] }]. The email text is user-facing, so it stays Italian.
  *
- * Variabili d'ambiente:
- *   SUPABASE_URL          URL del progetto (https://<ref>.supabase.co)
- *   SUPABASE_SECRET_KEY   chiave segreta / service_role (secret)
- *   APP_URL               URL pubblico dell'app (link in fondo all'email, facoltativo)
+ * Environment variables:
+ *   SUPABASE_URL          project URL (https://<ref>.supabase.co)
+ *   SUPABASE_SECRET_KEY   secret / service_role key (secret)
+ *   APP_URL               public URL of the app (link at the bottom of the email, optional)
  *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
- *                         se SMTP_HOST manca le email sono solo stampate nel log
- *   DRY_RUN=1             non invia nulla, stampa le email
+ *                         without SMTP_HOST the emails are only printed to the log
+ *   DRY_RUN=1             sends nothing, prints the emails
  */
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
@@ -23,7 +23,7 @@ const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 const { SUPABASE_URL, SUPABASE_SECRET_KEY } = process.env;
 if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('Servono SUPABASE_URL e SUPABASE_SECRET_KEY');
+  console.error('SUPABASE_URL and SUPABASE_SECRET_KEY are required');
   process.exit(1);
 }
 
@@ -31,12 +31,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const { data, error } = await supabase.rpc('email_promemoria');
+const { data, error } = await supabase.rpc('reminder_emails');
 if (error) {
-  console.error('email_promemoria:', error.message);
+  console.error('reminder_emails:', error.message);
   process.exit(1);
 }
-const posta = Array.isArray(data) ? data : [];
+const mail = Array.isArray(data) ? data : [];
 
 const smtp =
   process.env.SMTP_HOST && !DRY
@@ -48,23 +48,23 @@ const smtp =
       })
     : null;
 
-let inviate = 0;
-let errori = 0;
-for (const { email, nome, righe } of posta) {
-  if (!email || !righe?.length) continue;
+let sent = 0;
+let failed = 0;
+for (const { email, name, lines } of mail) {
+  if (!email || !lines?.length) continue;
   const text = [
-    `Ciao ${nome || ''},`,
+    `Ciao ${name || ''},`,
     '',
-    ...righe.map((r) => `• ${r}`),
+    ...lines.map((l) => `• ${l}`),
     '',
     APP_URL ? `Apri l'app: ${APP_URL}` : null,
     'Campionato di padel',
   ]
-    .filter((r) => r !== null)
+    .filter((l) => l !== null)
     .join('\n');
   // demo users (scripts/seed-demo.mjs) never receive real email
   if (!smtp || email.endsWith('@demo.it')) {
-    log(`[email simulata] ${email}\n${text}`);
+    log(`[simulated email] ${email}\n${text}`);
     continue;
   }
   try {
@@ -74,11 +74,11 @@ for (const { email, nome, righe } of posta) {
       subject: 'Campionato di padel: promemoria',
       text,
     });
-    inviate++;
+    sent++;
   } catch (e) {
-    errori++;
-    console.error(`invio a ${email} fallito:`, e.message);
+    failed++;
+    console.error(`sending to ${email} failed:`, e.message);
   }
 }
-log(`email: ${posta.length} destinatari, ${inviate} inviate${DRY ? ' (dry run)' : ''}${errori ? `, ${errori} errori` : ''}`);
-if (errori) process.exitCode = 1;
+log(`email: ${mail.length} recipients, ${sent} sent${DRY ? ' (dry run)' : ''}${failed ? `, ${failed} failed` : ''}`);
+if (failed) process.exitCode = 1;

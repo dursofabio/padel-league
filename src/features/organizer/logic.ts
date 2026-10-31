@@ -2,17 +2,19 @@
  * Pure helpers of the organizer area: capacity, group draw, calendar and finals payloads,
  * bracket sync, tie blocks, tournament phases. No React, no I/O: tested in __tests__/logic.test.ts.
  */
-import { berger, giornataToPeriodo } from '../../lib/berger';
-import { derivaTabellone, generaTabellone, nextPow2 } from '../../lib/bracket';
-import { occupazioniId } from '../../lib/slots';
-import type { RigaClassifica } from '../../lib/standings';
-import { risultatoUfficiale } from '../../lib/results';
+import type { CalendarMatchInput, FinalsMatchInput } from '../../data/mutations';
+import { berger, matchdayToPeriod } from '../../lib/berger';
+import { deriveBracket, generateBracket, nextPow2 } from '../../lib/bracket';
+import { courtDayId } from '../../lib/slots';
+import type { StandingsRow } from '../../lib/standings';
+import { hasOfficialResult } from '../../lib/results';
 import { addDays, dateRange, weekday } from '../../lib/time';
-import type { FormatoSet, Occupazione, Partita, Periodo, Ricorrenza, Spareggio, Squadra, StatoTorneo, Torneo } from '../../types';
+import type { Booking, Match, Period, Recurrence, SetFormat, Team, Tiebreaker, Tournament, TournamentStatus } from '../../types';
 
 // ------------------------------------------------------------------ sections
 
-export const SEZIONI = [
+/** Organizer sections; ids are the URL segments (/t/:tid/organizza/:section), so they stay Italian. */
+export const SECTIONS = [
   { id: 'panoramica', label: 'Panoramica' },
   { id: 'configurazione', label: 'Configurazione' },
   { id: 'periodi', label: 'Periodi' },
@@ -22,61 +24,62 @@ export const SEZIONI = [
   { id: 'finali', label: 'Fasi finali' },
 ] as const;
 
-export type SezioneId = (typeof SEZIONI)[number]['id'];
+export type SectionId = (typeof SECTIONS)[number]['id'];
 
-export function sezioneValida(s: string | undefined): SezioneId {
-  return (SEZIONI.find((x) => x.id === s)?.id ?? 'panoramica') as SezioneId;
+export function validSection(s: string | undefined): SectionId {
+  return (SECTIONS.find((x) => x.id === s)?.id ?? 'panoramica') as SectionId;
 }
 
 // ------------------------------------------------------------------ labels
 
-export const NOMI_SPAREGGIO: Record<Spareggio, string> = {
-  punti: 'Punti',
-  scontroDiretto: 'Scontro diretto',
-  diffSet: 'Differenza set',
-  diffGame: 'Differenza game',
-  setVinti: 'Set vinti',
-  gameVinti: 'Game vinti',
-  sorteggio: 'Sorteggio',
+export const TIEBREAKER_LABEL: Record<Tiebreaker, string> = {
+  points: 'Punti',
+  headToHead: 'Scontro diretto',
+  setDiff: 'Differenza set',
+  gameDiff: 'Differenza game',
+  setsWon: 'Set vinti',
+  gamesWon: 'Game vinti',
+  draw: 'Sorteggio',
 };
 
-export const TUTTI_SPAREGGI = Object.keys(NOMI_SPAREGGIO) as Spareggio[];
+export const ALL_TIEBREAKERS = Object.keys(TIEBREAKER_LABEL) as Tiebreaker[];
 
-export function nomeFase(fase: string): string {
-  if (fase === 'gironi') return 'Gironi';
-  return fase.charAt(0).toUpperCase() + fase.slice(1);
+/** Italian label of a phase value: "Gironi" for the group phase, otherwise the capitalised name. */
+export function phaseLabel(phase: string): string {
+  if (phase === 'groups') return 'Gironi';
+  return phase.charAt(0).toUpperCase() + phase.slice(1);
 }
 
-export function lettereGironi(n: number): string[] {
+export function groupLetters(n: number): string[] {
   return Array.from({ length: Math.max(0, n) }, (_, i) => String.fromCharCode(65 + i));
 }
 
 /** "3ª" */
-export function ordinale(n: number): string {
+export function ordinal(n: number): string {
   return `${n}ª`;
 }
 
 // ------------------------------------------------------------------ tournament phases
 
-export const FASI_TORNEO: { stato: StatoTorneo; label: string }[] = [
-  { stato: 'iscrizioni', label: 'Iscrizioni' },
-  { stato: 'gironi', label: 'Gironi' },
-  { stato: 'fasiFinali', label: 'Fasi finali' },
-  { stato: 'concluso', label: 'Concluso' },
+export const TOURNAMENT_PHASES: { status: TournamentStatus; label: string }[] = [
+  { status: 'registration', label: 'Iscrizioni' },
+  { status: 'groups', label: 'Gironi' },
+  { status: 'finals', label: 'Fasi finali' },
+  { status: 'completed', label: 'Concluso' },
 ];
 
-export type StatoPasso = 'fatto' | 'corrente' | 'futuro';
+export type StepState = 'done' | 'current' | 'future';
 
-export function passiTorneo(stato: StatoTorneo): { stato: StatoTorneo; label: string; passo: StatoPasso }[] {
-  const idx = FASI_TORNEO.findIndex((f) => f.stato === stato);
-  return FASI_TORNEO.map((f, i) => ({ ...f, passo: i < idx ? 'fatto' : i === idx ? 'corrente' : 'futuro' }));
+export function phaseSteps(status: TournamentStatus): { status: TournamentStatus; label: string; step: StepState }[] {
+  const idx = TOURNAMENT_PHASES.findIndex((f) => f.status === status);
+  return TOURNAMENT_PHASES.map((f, i) => ({ ...f, step: i < idx ? 'done' : i === idx ? 'current' : 'future' }));
 }
 
-/** State a concluded tournament returns to with "Riapri" (same rule as set_tournament_state). */
-export function statoPrecedente(torneo: Torneo, partite: Partita[]): StatoTorneo {
-  if ((torneo.fasiGenerate ?? []).length) return 'fasiFinali';
-  if (partite.some((p) => p.fase === 'gironi')) return 'gironi';
-  return 'iscrizioni';
+/** Status a completed tournament returns to with "Riapri" (same rule as set_tournament_state). */
+export function previousStatus(tournament: Tournament, matches: Match[]): TournamentStatus {
+  if ((tournament.generatedPhases ?? []).length) return 'finals';
+  if (matches.some((m) => m.phase === 'groups')) return 'groups';
+  return 'registration';
 }
 
 // ------------------------------------------------------------------ deterministic shuffle
@@ -93,7 +96,7 @@ export function prng(seed: number): () => number {
   };
 }
 
-export function mescola<T>(items: T[], rand: () => number = Math.random): T[] {
+export function shuffle<T>(items: T[], rand: () => number = Math.random): T[] {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
@@ -105,101 +108,94 @@ export function mescola<T>(items: T[], rand: () => number = Math.random): T[] {
 // ------------------------------------------------------------------ groups
 
 /** Random draw of the approved teams into n groups (A, B, …), sizes differing by at most one. */
-export function sorteggiaGironi(ids: string[], n: number, rand: () => number = Math.random): Record<string, string> {
-  const lettere = lettereGironi(Math.max(1, n));
+export function drawGroups(ids: string[], n: number, rand: () => number = Math.random): Record<string, string> {
+  const letters = groupLetters(Math.max(1, n));
   const out: Record<string, string> = {};
-  mescola(ids, rand).forEach((id, i) => (out[id] = lettere[i % lettere.length]));
+  shuffle(ids, rand).forEach((id, i) => (out[id] = letters[i % letters.length]));
   return out;
 }
 
 /** Approved teams per group (only approved ones play). */
-export function squadrePerGirone(squadre: Squadra[]): Map<string, Squadra[]> {
-  const m = new Map<string, Squadra[]>();
-  for (const s of squadre)
-    if (s.stato === 'approvata' && s.girone) m.set(s.girone, [...(m.get(s.girone) ?? []), s]);
+export function teamsByGroup(teams: Team[]): Map<string, Team[]> {
+  const m = new Map<string, Team[]>();
+  for (const t of teams)
+    if (t.status === 'approved' && t.group) m.set(t.group, [...(m.get(t.group) ?? []), t]);
   return new Map([...m.entries()].sort(([a], [b]) => a.localeCompare(b)));
 }
 
 // ------------------------------------------------------------------ calendar
 
-export interface RigaCalendario {
-  codice: string;
-  girone: string;
-  turno: number;
-  posizione: number;
-  squadra_a: string;
-  squadra_b: string;
-  periodo_id: string | null;
-}
+/** Row of the generate_calendar payload. */
+export type CalendarRow = CalendarMatchInput;
 
-export interface RiepilogoGirone {
-  girone: string;
-  squadre: number;
-  partite: number;
-  giornate: number;
+export interface GroupSummary {
+  group: string;
+  teams: number;
+  matches: number;
+  matchdays: number;
   /** Consecutive matchday blocks per period. */
-  blocchi: { periodoId: string | null; etichetta: string; da: number; a: number }[];
+  blocks: { periodId: string | null; label: string; from: number; to: number }[];
 }
 
-export function periodiGironi(periodi: Periodo[]): Periodo[] {
-  return periodi.filter((p) => p.fase === 'gironi').sort((a, b) => a.inizio.localeCompare(b.inizio));
+export function groupPeriods(periods: Period[]): Period[] {
+  return periods.filter((p) => p.phase === 'groups').sort((a, b) => a.startsOn.localeCompare(b.startsOn));
 }
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
 /**
  * Group-phase calendar (Berger) for the approved teams with a group: payload of generate_calendar
- * (docs/contratto-api.md) plus a summary for the preview. Codes are "gA-01-1" (group, matchday, match).
+ * (docs/api-contract.md) plus a summary for the preview. Codes are "gA-01-1" (group, matchday, match).
  * Matchdays go to the group periods in consecutive blocks.
  */
-export function pianoCalendario(
-  squadre: Squadra[],
-  periodi: Periodo[],
+export function planCalendar(
+  teams: Team[],
+  periods: Period[],
   rand: () => number = Math.random,
-): { partite: RigaCalendario[]; gironi: RiepilogoGirone[] } {
-  const per = periodiGironi(periodi);
-  const partite: RigaCalendario[] = [];
-  const riepilogo: RiepilogoGirone[] = [];
-  for (const [girone, lista] of squadrePerGirone(squadre)) {
+): { matches: CalendarRow[]; groups: GroupSummary[] } {
+  const per = groupPeriods(periods);
+  const matches: CalendarRow[] = [];
+  const summary: GroupSummary[] = [];
+  for (const [group, list] of teamsByGroup(teams)) {
     // random order: the calendar does not depend on the registration order
-    const cal = berger(mescola(lista.map((s) => s.id), rand));
-    const giornate = Math.max(0, ...cal.map((c) => c.giornata));
-    const toPer = giornataToPeriodo(giornate, per.length);
-    const contatore = new Map<number, number>();
+    const cal = berger(shuffle(list.map((t) => t.id), rand));
+    const matchdays = Math.max(0, ...cal.map((c) => c.matchday));
+    const toPer = matchdayToPeriod(matchdays, per.length);
+    const counter = new Map<number, number>();
     for (const c of cal) {
-      const i = contatore.get(c.giornata) ?? 0;
-      contatore.set(c.giornata, i + 1);
-      partite.push({
-        codice: `g${girone}-${pad2(c.giornata)}-${i + 1}`,
-        girone,
-        turno: c.giornata,
-        posizione: i,
-        squadra_a: c.casa,
-        squadra_b: c.ospite,
-        periodo_id: per.length ? per[toPer(c.giornata)].id : null,
+      const i = counter.get(c.matchday) ?? 0;
+      counter.set(c.matchday, i + 1);
+      matches.push({
+        code: `g${group}-${pad2(c.matchday)}-${i + 1}`,
+        group_name: group,
+        round: c.matchday,
+        position: i,
+        team_a: c.home,
+        team_b: c.away,
+        period_id: per.length ? per[toPer(c.matchday)].id : null,
       });
     }
-    const blocchi: RiepilogoGirone['blocchi'] = [];
-    for (let g = 1; g <= giornate; g++) {
+    const blocks: GroupSummary['blocks'] = [];
+    for (let g = 1; g <= matchdays; g++) {
       const p = per.length ? per[toPer(g)] : null;
-      const last = blocchi[blocchi.length - 1];
-      if (last && last.periodoId === (p?.id ?? null)) last.a = g;
-      else blocchi.push({ periodoId: p?.id ?? null, etichetta: p?.etichetta ?? 'senza periodo', da: g, a: g });
+      const last = blocks[blocks.length - 1];
+      if (last && last.periodId === (p?.id ?? null)) last.to = g;
+      else blocks.push({ periodId: p?.id ?? null, label: p?.label ?? 'senza periodo', from: g, to: g });
     }
-    riepilogo.push({ girone, squadre: lista.length, partite: cal.length, giornate, blocchi });
+    summary.push({ group, teams: list.length, matches: cal.length, matchdays, blocks });
   }
-  return { partite, gironi: riepilogo };
+  return { matches, groups: summary };
 }
 
 // ------------------------------------------------------------------ capacity
 
-/** Recurring occupations as "virtual" occupations, to estimate capacity without materialising days. */
-export function occupazioniDaRicorrenze(ric: Ricorrenza[], giorni: string[]): Record<string, Record<string, Occupazione>> {
-  const out: Record<string, Record<string, Occupazione>> = {};
-  for (const r of ric)
-    for (const d of giorni)
-      if (d >= r.dal && d <= r.al && weekday(d) === r.giornoSettimana)
-        (out[occupazioniId(r.campoId, d)] ??= {})[r.id] = { inizio: r.inizio, fine: r.fine, tipo: r.tipo };
+/** Recurring bookings as "virtual" bookings, to estimate capacity without materialising days. */
+export function bookingsFromRecurrences(recurrences: Recurrence[], days: string[]): Record<string, Record<string, Booking>> {
+  const out: Record<string, Record<string, Booking>> = {};
+  for (const r of recurrences)
+    for (const d of days)
+      if (d >= r.validFrom && d <= r.validTo && weekday(d) === r.weekday)
+        (out[courtDayId(r.courtId, d)] ??= {})[r.id] = { start: r.start, end: r.end, type: r.type };
   return out;
 }
 
@@ -207,141 +203,134 @@ export function occupazioniDaRicorrenze(ric: Ricorrenza[], giorni: string[]): Re
  * Matches a period must hold: the assigned ones once the calendar exists, otherwise an estimate
  * (Berger distribution across the group periods; for a final phase, the bracket size per round).
  */
-export function partiteNelPeriodo(periodo: Periodo, periodi: Periodo[], partite: Partita[], squadre: Squadra[], fasiFinali: { nome: string; posti: number }[]): number {
-  const assegnate = partite.filter((p) => p.periodoId === periodo.id).length;
-  if (assegnate || partite.some((p) => p.fase === periodo.fase.toLowerCase())) return assegnate;
-  if (periodo.fase === 'gironi') {
-    const per = periodiGironi(periodi);
-    const idx = per.findIndex((p) => p.id === periodo.id);
+export function matchesInPeriod(period: Period, periods: Period[], matches: Match[], teams: Team[], finals: { name: string; spots: number }[]): number {
+  const assigned = matches.filter((m) => m.periodId === period.id).length;
+  if (assigned || matches.some((m) => m.phase === period.phase.toLowerCase())) return assigned;
+  if (period.phase === 'groups') {
+    const per = groupPeriods(periods);
+    const idx = per.findIndex((p) => p.id === period.id);
     let n = 0;
-    for (const lista of squadrePerGirone(squadre).values()) {
-      const cal = berger(lista.map((s) => s.id));
-      const giornate = Math.max(0, ...cal.map((c) => c.giornata));
-      const toPer = giornataToPeriodo(giornate, per.length);
-      n += cal.filter((c) => toPer(c.giornata) === idx).length;
+    for (const list of teamsByGroup(teams).values()) {
+      const cal = berger(list.map((t) => t.id));
+      const matchdays = Math.max(0, ...cal.map((c) => c.matchday));
+      const toPer = matchdayToPeriod(matchdays, per.length);
+      n += cal.filter((c) => toPer(c.matchday) === idx).length;
     }
     return n;
   }
-  const fase = fasiFinali.find((f) => f.nome.toLowerCase() === periodo.fase.toLowerCase());
-  if (!fase || fase.posti < 2) return 0;
-  const size = nextPow2(fase.posti);
-  if (periodo.turno) return Math.max(0, size / 2 ** periodo.turno - (periodo.turno === 1 ? size - fase.posti : 0));
-  return fase.posti - 1;
+  const phase = finals.find((f) => f.name.toLowerCase() === period.phase.toLowerCase());
+  if (!phase || phase.spots < 2) return 0;
+  const size = nextPow2(phase.spots);
+  if (period.round) return Math.max(0, size / 2 ** period.round - (period.round === 1 ? size - phase.spots : 0));
+  return phase.spots - 1;
 }
 
-export type TonoCapienza = 'ok' | 'warn' | 'danger';
+export type CapacityTone = 'ok' | 'warn' | 'danger';
 
-export interface Capienza {
-  giorni: number;
-  slot: number;
-  partite: number;
+export interface Capacity {
+  days: number;
+  slots: number;
+  matches: number;
   /** Slots per match; null when there is nothing to play. */
-  rapporto: number | null;
-  tono: TonoCapienza | null;
-  slotSettimana: number;
-  servonoSettimana: number;
+  ratio: number | null;
+  tone: CapacityTone | null;
+  slotsPerWeek: number;
+  neededPerWeek: number;
 }
 
 /** Thresholds (ASSUNZIONE O4): ≥ 3 slots per match good, 1.5–3 tight, < 1.5 insufficient. */
-export function valutaCapienza(slot: number, partite: number, giorni: number): Capienza {
-  const settimane = Math.max(1, giorni / 7);
-  const rapporto = partite > 0 ? slot / partite : null;
-  const tono: TonoCapienza | null = rapporto === null ? null : rapporto >= 3 ? 'ok' : rapporto >= 1.5 ? 'warn' : 'danger';
+export function assessCapacity(slots: number, matches: number, days: number): Capacity {
+  const weeks = Math.max(1, days / 7);
+  const ratio = matches > 0 ? slots / matches : null;
+  const tone: CapacityTone | null = ratio === null ? null : ratio >= 3 ? 'ok' : ratio >= 1.5 ? 'warn' : 'danger';
   return {
-    giorni,
-    slot,
-    partite,
-    rapporto,
-    tono,
-    slotSettimana: Math.floor(slot / settimane),
-    servonoSettimana: Math.ceil(partite / settimane),
+    days,
+    slots,
+    matches,
+    ratio,
+    tone,
+    slotsPerWeek: Math.floor(slots / weeks),
+    neededPerWeek: Math.ceil(matches / weeks),
   };
 }
 
-export function giorniPeriodo(p: Pick<Periodo, 'inizio' | 'fine'>): string[] {
-  return p.fine >= p.inizio ? dateRange(p.inizio, p.fine) : [];
+/** Every date of a period (empty when the range is inverted). */
+export function periodDates(p: Pick<Period, 'startsOn' | 'endsOn'>): string[] {
+  return p.endsOn >= p.startsOn ? dateRange(p.startsOn, p.endsOn) : [];
 }
 
 /** "2,1" */
-export function formatRapporto(r: number): string {
+export function formatRatio(r: number): string {
   return r.toFixed(1).replace('.', ',');
 }
 
 // ------------------------------------------------------------------ finals
 
-export interface RigaFinale {
-  codice: string;
-  turno: number;
-  posizione: number;
-  prossima_codice: string | null;
-  lato: 'A' | 'B' | null;
-  squadra_a: string | null;
-  squadra_b: string | null;
-  periodo_id: string | null;
-}
+/** Row of the generate_finals payload. */
+export type FinalsRow = FinalsMatchInput;
 
 /**
- * Payload of generate_finals for one phase: codes are the generaTabellone ids ("gold-t1-p0"),
+ * Payload of generate_finals for one phase: codes are the generateBracket ids ("gold-t1-p0"),
  * next match by code, and the period of the round (or the phase period without a round).
  */
-export function pianoFase(
-  fase: string,
-  teste: string[],
-  gironeDi: (id: string) => string | undefined,
-  periodi: Periodo[],
-): RigaFinale[] {
-  const f = fase.toLowerCase();
-  const perFase = periodi.filter((p) => p.fase.toLowerCase() === f);
-  return generaTabellone(f, teste, gironeDi).map((m) => ({
-    codice: m.id,
-    turno: m.turno,
-    posizione: m.posizione,
-    prossima_codice: m.prossimaPartita,
-    lato: m.lato,
-    squadra_a: m.squadraA,
-    squadra_b: m.squadraB,
-    periodo_id: (perFase.find((p) => p.turno === m.turno) ?? perFase.find((p) => !p.turno))?.id ?? null,
+export function planPhase(
+  phase: string,
+  seeds: string[],
+  groupOf: (id: string) => string | undefined,
+  periods: Period[],
+): FinalsRow[] {
+  const f = phase.toLowerCase();
+  const phasePeriods = periods.filter((p) => p.phase.toLowerCase() === f);
+  return generateBracket(f, seeds, groupOf).map((m) => ({
+    code: m.id,
+    round: m.round,
+    position: m.position,
+    next_code: m.nextCode,
+    side: m.side,
+    team_a: m.teamA,
+    team_b: m.teamB,
+    period_id: (phasePeriods.find((p) => p.round === m.round) ?? phasePeriods.find((p) => !p.round))?.id ?? null,
   }));
 }
 
 /** Preview rows of a bracket as matches, for the shared Bracket component. */
-export function partiteAnteprima(fase: string, righe: RigaFinale[]): Partita[] {
-  return righe.map((r) => ({
-    id: r.codice,
-    codice: r.codice,
-    fase,
-    girone: null,
-    turno: r.turno,
-    posizione: r.posizione,
-    prossimaPartita: r.prossima_codice,
-    lato: r.lato,
-    squadraA: r.squadra_a,
-    squadraB: r.squadra_b,
-    giocatoriA: [],
-    giocatoriB: [],
-    giocatori: [],
-    periodoId: r.periodo_id,
-    stato: 'da programmare',
+export function previewMatches(phase: string, rows: FinalsRow[]): Match[] {
+  return rows.map((r) => ({
+    id: r.code,
+    code: r.code,
+    phase,
+    group: null,
+    round: r.round,
+    position: r.position,
+    nextCode: r.next_code,
+    side: r.side,
+    teamA: r.team_a,
+    teamB: r.team_b,
+    playersA: [],
+    playersB: [],
+    players: [],
+    periodId: r.period_id,
+    status: 'unscheduled',
   }));
 }
 
 /**
- * sync_bracket updates: generated-phase matches still "da programmare" whose pairs, derived from
+ * sync_bracket updates: generated-phase matches still unscheduled whose pairs, derived from
  * the official results, differ from the stored ones.
  */
-export function aggiornamentiTabellone(
-  partite: Partita[],
-  formato: FormatoSet,
-  fasiGenerate: string[],
-): { codice: string; squadra_a: string | null; squadra_b: string | null }[] {
-  const finali = partite.filter((p) => fasiGenerate.includes(p.fase));
-  const der = derivaTabellone(finali, formato);
-  const out: { codice: string; squadra_a: string | null; squadra_b: string | null }[] = [];
-  for (const p of finali) {
-    const d = der.get(p.id);
-    if (!d || !p.codice || p.stato !== 'da programmare') continue;
-    if (d.squadraA === p.squadraA && d.squadraB === p.squadraB) continue;
-    out.push({ codice: p.codice, squadra_a: d.squadraA, squadra_b: d.squadraB });
+export function bracketUpdates(
+  matches: Match[],
+  format: SetFormat,
+  generatedPhases: string[],
+): { code: string; team_a: string | null; team_b: string | null }[] {
+  const finals = matches.filter((m) => generatedPhases.includes(m.phase));
+  const derived = deriveBracket(finals, format);
+  const out: { code: string; team_a: string | null; team_b: string | null }[] = [];
+  for (const m of finals) {
+    const d = derived.get(m.id);
+    if (!d || !m.code || m.status !== 'unscheduled') continue;
+    if (d.teamA === m.teamA && d.teamB === m.teamB) continue;
+    out.push({ code: m.code, team_a: d.teamA, team_b: d.teamB });
   }
   return out;
 }
@@ -352,100 +341,100 @@ export function aggiornamentiTabellone(
  * Blocks of teams tied after the whole tie-break chain (computed without any draw),
  * as lists of team ids in standing order. Adjacent tied rows with the same totals form one block.
  */
-export function blocchiPari(righe: RigaClassifica[]): string[][] {
-  const chiave = (r: RigaClassifica) =>
-    [r.punti, r.setVinti - r.setPersi, r.gameVinti - r.gamePersi, r.setVinti, r.gameVinti, r.giocate].join('|');
+export function tiedBlocks(rows: StandingsRow[]): string[][] {
+  const key = (r: StandingsRow) =>
+    [r.points, r.setsWon - r.setsLost, r.gamesWon - r.gamesLost, r.setsWon, r.gamesWon, r.played].join('|');
   const out: string[][] = [];
-  let corrente: RigaClassifica[] = [];
-  const chiudi = () => {
-    if (corrente.length > 1) out.push(corrente.map((r) => r.squadraId));
-    corrente = [];
+  let current: StandingsRow[] = [];
+  const close = () => {
+    if (current.length > 1) out.push(current.map((r) => r.teamId));
+    current = [];
   };
-  for (const r of righe) {
-    if (!r.pariMerito) {
-      chiudi();
+  for (const r of rows) {
+    if (!r.tied) {
+      close();
       continue;
     }
-    if (corrente.length && chiave(corrente[0]) !== chiave(r)) chiudi();
-    corrente.push(r);
+    if (current.length && key(current[0]) !== key(r)) close();
+    current.push(r);
   }
-  chiudi();
+  close();
   return out;
 }
 
 /** Moves one team within its tied block; returns the new block order. */
-export function spostaNelBlocco(blocco: string[], id: string, dir: -1 | 1): string[] {
-  const i = blocco.indexOf(id);
+export function moveInBlock(block: string[], id: string, dir: -1 | 1): string[] {
+  const i = block.indexOf(id);
   const j = i + dir;
-  if (i < 0 || j < 0 || j >= blocco.length) return blocco;
-  const out = [...blocco];
+  if (i < 0 || j < 0 || j >= block.length) return block;
+  const out = [...block];
   [out[i], out[j]] = [out[j], out[i]];
   return out;
 }
 
 /** Writes a block order into the draw map (lower = better), keeping the other entries. */
-export function sorteggioConBlocco(sorteggio: Record<string, number>, blocco: string[]): Record<string, number> {
-  const out = { ...sorteggio };
-  blocco.forEach((id, i) => (out[id] = i + 1));
+export function drawWithBlock(draw: Record<string, number>, block: string[]): Record<string, number> {
+  const out = { ...draw };
+  block.forEach((id, i) => (out[id] = i + 1));
   return out;
 }
 
-export function stessoSorteggio(a: Record<string, number> = {}, b: Record<string, number> = {}): boolean {
+export function sameDraw(a: Record<string, number> = {}, b: Record<string, number> = {}): boolean {
   const ka = Object.keys(a);
   return ka.length === Object.keys(b).length && ka.every((k) => a[k] === b[k]);
 }
 
 // ------------------------------------------------------------------ monitoring
 
-export interface Eccezioni {
-  contestate: Partita[];
-  inRitardo: Partita[];
-  daConfermare: Partita[];
-  inScadenza: Partita[];
+export interface Exceptions {
+  disputed: Match[];
+  late: Match[];
+  toConfirm: Match[];
+  endingSoon: Match[];
 }
 
-const chiusa = (p: Partita) => p.stato === 'giocata' || p.stato === 'tavolino';
+const closed = (m: Match) => m.status === 'played' || m.status === 'forfeit';
 
 /**
  * Exceptions for the organizer: disputes; late matches (period ended, not played);
- * results entered and not confirmed; matches still to schedule whose period ends within `giorniScadenza` days.
+ * results entered and not confirmed; matches still to schedule whose period ends within `daysAhead` days.
  */
-export function eccezioni(partite: Partita[], periodi: Periodo[], oggi: string, giorniScadenza = 7): Eccezioni {
-  const per = new Map(periodi.map((p) => [p.id, p]));
-  const limite = addDays(oggi, giorniScadenza);
-  const fine = (p: Partita) => (p.periodoId ? per.get(p.periodoId)?.fine : undefined);
+export function exceptions(matches: Match[], periods: Period[], today: string, daysAhead = 7): Exceptions {
+  const per = new Map(periods.map((p) => [p.id, p]));
+  const limit = addDays(today, daysAhead);
+  const end = (m: Match) => (m.periodId ? per.get(m.periodId)?.endsOn : undefined);
   return {
-    contestate: partite.filter((p) => p.stato === 'contestata'),
-    inRitardo: partite.filter((p) => {
-      const f = fine(p);
-      return !chiusa(p) && p.stato !== 'contestata' && !!f && f < oggi;
+    disputed: matches.filter((m) => m.status === 'disputed'),
+    late: matches.filter((m) => {
+      const e = end(m);
+      return !closed(m) && m.status !== 'disputed' && !!e && e < today;
     }),
-    daConfermare: partite.filter((p) => !!p.risultato && !risultatoUfficiale(p) && p.stato !== 'contestata'),
-    inScadenza: partite.filter((p) => {
-      const f = fine(p);
-      return p.stato === 'da programmare' && !!f && f >= oggi && f <= limite && !!p.squadraA && !!p.squadraB;
+    toConfirm: matches.filter((m) => !!m.result && !hasOfficialResult(m) && m.status !== 'disputed'),
+    endingSoon: matches.filter((m) => {
+      const e = end(m);
+      return m.status === 'unscheduled' && !!e && e >= today && e <= limit && !!m.teamA && !!m.teamB;
     }),
   };
 }
 
-export function contaRisultati(partite: Partita[]): number {
-  return partite.filter((p) => !!p.risultato?.set?.length).length;
+export function countResults(matches: Match[]): number {
+  return matches.filter((m) => !!m.result?.sets?.length).length;
 }
 
 /** ASSUNZIONE H6: an unconfirmed result needs the organizer after 48 hours. */
-export const ORE_PROMEMORIA_RISULTATO = 48;
+export const RESULT_REMINDER_HOURS = 48;
 
 /** Whole hours elapsed since an ISO instant; null if unknown. */
-export function oreDa(iso: string | null | undefined, now: number = Date.now()): number | null {
+export function hoursSince(iso: string | null | undefined, now: number = Date.now()): number | null {
   if (!iso) return null;
   const t = Date.parse(iso);
   return Number.isNaN(t) ? null : Math.max(0, Math.floor((now - t) / 3_600_000));
 }
 
-/** "da meno di un'ora", "da 5 ore", "da 1 giorno", "da 3 giorni". */
-export function testoEta(ore: number): string {
-  if (ore < 1) return 'da meno di un’ora';
-  if (ore < 24) return `da ${ore} ${ore === 1 ? 'ora' : 'ore'}`;
-  const g = Math.floor(ore / 24);
-  return `da ${g} ${g === 1 ? 'giorno' : 'giorni'}`;
+/** Italian age text: "da meno di un'ora", "da 5 ore", "da 1 giorno", "da 3 giorni". */
+export function ageText(hours: number): string {
+  if (hours < 1) return 'da meno di un’ora';
+  if (hours < 24) return `da ${hours} ${hours === 1 ? 'ora' : 'ore'}`;
+  const d = Math.floor(hours / 24);
+  return `da ${d} ${d === 1 ? 'giorno' : 'giorni'}`;
 }

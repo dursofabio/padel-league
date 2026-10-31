@@ -1,94 +1,118 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/atkinson-hyperlegible-next';
+@import '@fontsource/anton/latin-400.css';
 
 /* Dark theme: follows the system unless the user has picked a theme ([data-theme]). */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
- * "Righe del campo" (court lines): turf blue for the shell, white court lines as the only dividers,
- * ball yellow-lime only for the primary action, selection and focus.
- * Light = court in daylight; dark = court at night under the floodlights.
+ * "Manifesto": the app is the tournament's poster. Warm paper ground, ink-black text and 2px ink
+ * borders, Anton for the big statements. Colour roles: ball lime = the one thing to do now
+ * (primary block, primary action, selection); clay coral = availability and time windows;
+ * paper = everything else. The bar (tab bar, sidebar) is ink black in both themes.
+ * Light = the printed poster; dark = the poster in negative.
+ * Token names predate the redesign: `court` is now the ink fill (selected, today), not turf blue.
  */
 :root {
   color-scheme: light;
-  --bg: oklch(0.975 0.006 250);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.955 0.01 250);
-  --ink: oklch(0.23 0.035 258);
-  --ink-muted: oklch(0.45 0.03 258);
-  --line: oklch(0.885 0.014 250);
-  --line-strong: oklch(0.6 0.025 252);
+  --bg: oklch(0.955 0.013 85);
+  --surface: oklch(0.99 0.005 85);
+  --surface-2: oklch(0.925 0.016 85);
+  --ink: oklch(0.2 0.006 80);
+  --ink-muted: oklch(0.43 0.014 75);
+  --line: oklch(0.85 0.014 85);
+  --line-strong: oklch(0.2 0.006 80);
 
-  --court: oklch(0.46 0.135 256);
-  --court-deep: oklch(0.38 0.115 258);
-  --court-ink: oklch(0.99 0.004 250);
-  --court-ink-muted: oklch(0.88 0.03 250);
-  --court-line: oklch(1 0 0 / 0.55);
+  --court: oklch(0.2 0.006 80);
+  --court-deep: oklch(0.12 0.004 80);
+  --court-ink: oklch(0.97 0.01 85);
+  --court-ink-muted: oklch(0.8 0.012 85);
+  --court-line: oklch(1 0 0 / 0.22);
 
-  --ball: oklch(0.91 0.19 120);
-  --ball-strong: oklch(0.86 0.2 122);
-  --ball-ink: oklch(0.24 0.05 140);
+  --bar: oklch(0.17 0.005 80);
+  --bar-ink: oklch(0.97 0.01 85);
+  --bar-ink-muted: oklch(0.78 0.012 85);
+  --bar-line: oklch(1 0 0 / 0.16);
 
-  --ok: oklch(0.52 0.13 150);
-  --ok-soft: oklch(0.95 0.045 150);
-  --ok-ink: oklch(0.37 0.1 150);
+  --ball: oklch(0.92 0.2 122);
+  --ball-strong: oklch(0.88 0.21 124);
+  --ball-ink: oklch(0.2 0.006 80);
+
+  --clay: oklch(0.77 0.14 42);
+  --clay-strong: oklch(0.72 0.15 40);
+  --clay-ink: oklch(0.2 0.006 80);
+
+  --ok: oklch(0.5 0.13 150);
+  --ok-soft: oklch(0.93 0.05 150);
+  --ok-ink: oklch(0.36 0.1 150);
   --warn: oklch(0.7 0.15 75);
-  --warn-soft: oklch(0.96 0.06 90);
-  --warn-ink: oklch(0.44 0.1 65);
-  --danger: oklch(0.55 0.19 27);
-  --danger-soft: oklch(0.95 0.035 25);
-  --danger-ink: oklch(0.46 0.17 27);
+  --warn-soft: oklch(0.94 0.07 90);
+  --warn-ink: oklch(0.42 0.1 65);
+  --danger: oklch(0.55 0.2 27);
+  --danger-soft: oklch(0.93 0.04 25);
+  --danger-ink: oklch(0.45 0.17 27);
   --info: oklch(0.5 0.14 258);
-  --info-soft: oklch(0.945 0.035 258);
-  --info-ink: oklch(0.42 0.13 258);
-  --idle-soft: oklch(0.94 0.008 250);
-  --idle-ink: oklch(0.42 0.02 258);
+  --info-soft: oklch(0.93 0.035 258);
+  --info-ink: oklch(0.4 0.13 258);
+  --idle-soft: oklch(0.91 0.012 85);
+  --idle-ink: oklch(0.38 0.014 75);
 
-  --focus: oklch(0.38 0.115 258);
-  --shadow: 0 1px 2px oklch(0.23 0.035 258 / 0.08), 0 8px 24px -8px oklch(0.23 0.035 258 / 0.18);
+  --focus: oklch(0.2 0.006 80);
+  --shadow: 0 2px 4px oklch(0.2 0.006 80 / 0.08), 0 14px 32px -12px oklch(0.2 0.006 80 / 0.28);
 }
 
 [data-theme='dark'] {
   color-scheme: dark;
-  --bg: oklch(0.17 0.03 260);
-  --surface: oklch(0.215 0.035 260);
-  --surface-2: oklch(0.195 0.032 260);
-  --ink: oklch(0.95 0.01 250);
-  --ink-muted: oklch(0.76 0.025 250);
-  --line: oklch(0.32 0.035 260);
-  --line-strong: oklch(0.55 0.04 256);
+  --bg: oklch(0.16 0.006 80);
+  --surface: oklch(0.21 0.007 80);
+  --surface-2: oklch(0.25 0.008 80);
+  --ink: oklch(0.95 0.012 85);
+  --ink-muted: oklch(0.78 0.014 85);
+  --line: oklch(0.34 0.008 80);
+  --line-strong: oklch(0.95 0.012 85);
 
-  --court: oklch(0.31 0.09 258);
-  --court-deep: oklch(0.25 0.075 260);
-  --court-ink: oklch(0.97 0.006 250);
-  --court-ink-muted: oklch(0.84 0.03 250);
-  --court-line: oklch(1 0 0 / 0.4);
+  --court: oklch(0.95 0.012 85);
+  --court-deep: oklch(0.85 0.014 85);
+  --court-ink: oklch(0.17 0.005 80);
+  --court-ink-muted: oklch(0.35 0.01 80);
+  --court-line: oklch(0 0 0 / 0.25);
 
-  --ball: oklch(0.9 0.19 120);
-  --ball-strong: oklch(0.94 0.17 118);
-  --ball-ink: oklch(0.22 0.05 140);
+  --bar: oklch(0.11 0.004 80);
+  --bar-ink: oklch(0.95 0.012 85);
+  --bar-ink-muted: oklch(0.76 0.012 85);
+  --bar-line: oklch(1 0 0 / 0.14);
 
-  --ok: oklch(0.72 0.14 150);
+  --ball: oklch(0.92 0.2 122);
+  --ball-strong: oklch(0.95 0.17 120);
+  --ball-ink: oklch(0.17 0.005 80);
+
+  --clay: oklch(0.77 0.14 42);
+  --clay-strong: oklch(0.82 0.12 45);
+  --clay-ink: oklch(0.17 0.005 80);
+
+  --ok: oklch(0.74 0.14 150);
   --ok-soft: oklch(0.3 0.06 152);
-  --ok-ink: oklch(0.87 0.1 150);
+  --ok-ink: oklch(0.88 0.1 150);
   --warn: oklch(0.8 0.14 80);
   --warn-soft: oklch(0.32 0.06 75);
   --warn-ink: oklch(0.9 0.1 85);
-  --danger: oklch(0.7 0.16 27);
+  --danger: oklch(0.7 0.17 27);
   --danger-soft: oklch(0.31 0.07 25);
   --danger-ink: oklch(0.88 0.08 25);
-  --info: oklch(0.72 0.12 255);
-  --info-soft: oklch(0.3 0.07 258);
+  --info: oklch(0.74 0.12 255);
+  --info-soft: oklch(0.3 0.06 258);
   --info-ink: oklch(0.88 0.06 255);
-  --idle-soft: oklch(0.27 0.025 258);
-  --idle-ink: oklch(0.8 0.02 250);
+  --idle-soft: oklch(0.27 0.008 80);
+  --idle-ink: oklch(0.82 0.012 85);
 
-  --focus: oklch(0.9 0.19 120);
-  --shadow: 0 1px 2px oklch(0 0 0 / 0.4), 0 10px 30px -10px oklch(0 0 0 / 0.6);
+  --focus: oklch(0.92 0.2 122);
+  --shadow: 0 2px 4px oklch(0 0 0 / 0.4), 0 14px 32px -12px oklch(0 0 0 / 0.7);
 }
 
 @theme inline {
   --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Display: titles, team names in blocks, big numerals. Never for running text. */
+  --font-display: 'Anton', 'Atkinson Hyperlegible Next Variable', ui-sans-serif, sans-serif;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -105,6 +129,16 @@
   --color-ball: var(--ball);
   --color-ball-strong: var(--ball-strong);
   --color-ball-ink: var(--ball-ink);
+  --color-clay: var(--clay);
+  --color-clay-strong: var(--clay-strong);
+  --color-clay-ink: var(--clay-ink);
+  /* Edge of lime and clay fills: always ink, in both themes (the fills don't invert). */
+  --color-edge: oklch(0.17 0.005 80);
+  --color-paper: oklch(0.97 0.01 85);
+  --color-bar: var(--bar);
+  --color-bar-ink: var(--bar-ink);
+  --color-bar-ink-muted: var(--bar-ink-muted);
+  --color-bar-line: var(--bar-line);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-ok-ink: var(--ok-ink);
@@ -122,8 +156,8 @@
   --color-focus: var(--focus);
 
   --shadow-raised: var(--shadow);
-  --radius-control: 0.5rem;
-  --radius-panel: 0.875rem;
+  --radius-control: 0.75rem;
+  --radius-panel: 1.125rem;
 
   /* Product type scale (ratio ~1.18), fixed rem: no fluid sizes in a working UI. */
   --text-xs: 0.8125rem;
@@ -138,6 +172,17 @@
   --text-xl--line-height: 1.95rem;
   --text-2xl: 1.875rem;
   --text-2xl--line-height: 2.3rem;
+  /* Poster steps (Anton, uppercase): section titles, page titles, the next-match time, wide page titles. */
+  --text-poster-sm: 1.75rem;
+  --text-poster-sm--line-height: 1.05;
+  --text-poster: 2.75rem;
+  --text-poster--line-height: 0.95;
+  --text-poster-lg: 3.25rem;
+  --text-poster-lg--line-height: 0.95;
+  --text-poster-xl: 3.5rem;
+  --text-poster-xl--line-height: 0.95;
+  --text-poster-2xl: 4.5rem;
+  --text-poster-2xl--line-height: 0.9;
 }
 
 @layer base {
@@ -158,10 +203,16 @@
     background: var(--ball);
     color: var(--ball-ink);
   }
-  /* on blue court surfaces focus becomes the ball (lime): blue on blue would be invisible */
+  /* on ink fills and the bar, focus becomes the ball (lime): ink on ink would be invisible */
   .bg-court,
-  .bg-court-deep {
+  .bg-court-deep,
+  .bg-bar {
     --focus: var(--ball);
+  }
+  /* on lime and clay blocks the focus ring is always ink, also in the dark theme */
+  .bg-ball,
+  .bg-clay {
+    --focus: var(--color-edge);
   }
   html {
     /* focused elements must not end up under the fixed bars (WCAG 2.4.11) */
@@ -174,18 +225,19 @@
     }
   }
   :focus-visible {
-    outline: 2px solid var(--focus);
+    outline: 3px solid var(--focus);
     outline-offset: 2px;
     border-radius: 4px;
   }
   input,
   textarea,
   select {
-    caret-color: var(--court);
-    accent-color: var(--court);
+    caret-color: var(--ink);
+    accent-color: var(--ink);
   }
   a {
     text-underline-offset: 0.2em;
+    text-decoration-thickness: 2px;
   }
   h1,
   h2,
@@ -198,6 +250,22 @@
 }
 
 @layer utilities {
+  /* Poster type: Anton has one weight, so never fake-bold it. */
+  .poster {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  /* Highlighter on a word inside a poster headline (lime, ink text). */
+  /* inline-block so the fill follows the line box, not Anton's tall content area. */
+  .mark {
+    display: inline-block;
+    background: var(--ball);
+    color: var(--ball-ink);
+    padding: 0.04em 0.12em 0;
+    line-height: 0.96;
+  }
   .tabular {
     font-variant-numeric: tabular-nums;
   }

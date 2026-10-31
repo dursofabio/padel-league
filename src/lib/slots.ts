@@ -1,188 +1,188 @@
-import type { Campo, Fasce, Occupazione, Richiesta } from '../types';
-import { addMin, covers, dateKey, overlaps, parseFascia, timeKey, toMin, weekday } from './time';
+import type { Booking, Court, MatchRequest, Windows } from '../types';
+import { addMin, covers, dateKey, overlaps, parseWindow, timeKey, toMin, weekday } from './time';
 
 export interface Slot {
-  campoId: string;
-  data: string;
-  inizio: string;
-  fine: string;
+  courtId: string;
+  date: string;
+  start: string;
+  end: string;
 }
 
-/** ID deterministico della richiesta: fa da lock sullo slot. */
-export function richiestaId(campoId: string, data: string, inizio: string): string {
-  return `${campoId}_${dateKey(data)}_${timeKey(inizio)}`;
+/** Deterministic request id: acts as a lock on the slot. */
+export function requestId(courtId: string, date: string, start: string): string {
+  return `${courtId}_${dateKey(date)}_${timeKey(start)}`;
 }
 
-export function occupazioniId(campoId: string, data: string): string {
-  return `${campoId}_${dateKey(data)}`;
+/** Key of a court's bookings on a day (see `bookingsByCourtDay` in src/data/adapters). */
+export function courtDayId(courtId: string, date: string): string {
+  return `${courtId}_${dateKey(date)}`;
 }
 
-export function campoAttivo(campo: Campo, data: string): boolean {
-  return campo.giorniAttivi.includes(weekday(data)) && !(campo.eccezioni ?? []).includes(data);
+export function courtOpen(court: Court, date: string): boolean {
+  return court.activeDays.includes(weekday(date)) && !(court.closedDates ?? []).includes(date);
 }
 
-/** Gli slot non si salvano: si generano dalla regola del campo. `ultimoSlot` è l'ultimo orario di inizio. */
-export function slotGriglia(campo: Campo, data: string): Slot[] {
-  if (!campoAttivo(campo, data)) return [];
+/** Slots are not stored: they are generated from the court's rule. `lastSlot` is the last start time. */
+export function gridSlots(court: Court, date: string): Slot[] {
+  if (!courtOpen(court, date)) return [];
   const out: Slot[] = [];
-  for (let t = toMin(campo.primoSlot); t <= toMin(campo.ultimoSlot); t += campo.durata) {
-    const inizio = addMin('00:00', t);
-    out.push({ campoId: campo.id, data, inizio, fine: addMin(inizio, campo.durata) });
+  for (let t = toMin(court.firstSlot); t <= toMin(court.lastSlot); t += court.slotMinutes) {
+    const start = addMin('00:00', t);
+    out.push({ courtId: court.id, date, start, end: addMin(start, court.slotMinutes) });
   }
   return out;
 }
 
-export function isSlotDiGriglia(campo: Campo, data: string, inizio: string): boolean {
-  return slotGriglia(campo, data).some((s) => s.inizio === inizio);
+export function isGridSlot(court: Court, date: string, start: string): boolean {
+  return gridSlots(court, date).some((s) => s.start === start);
 }
 
-export function occupazioniSovrapposte(
-  items: Record<string, Occupazione> | undefined,
-  inizio: string,
-  fine: string,
-): [string, Occupazione][] {
-  return Object.entries(items ?? {}).filter(([, o]) => overlaps(o.inizio, o.fine, inizio, fine));
+export function overlappingBookings(
+  items: Record<string, Booking> | undefined,
+  start: string,
+  end: string,
+): [string, Booking][] {
+  return Object.entries(items ?? {}).filter(([, b]) => overlaps(b.start, b.end, start, end));
 }
 
-export function fasciaCopre(fasce: Fasce | undefined, data: string, inizio: string, fine: string): boolean {
-  return (fasce?.[data] ?? []).some((f) => {
-    const [a, b] = parseFascia(f);
-    return covers(a, b, inizio, fine);
+export function windowsCover(windows: Windows | undefined, date: string, start: string, end: string): boolean {
+  return (windows?.[date] ?? []).some((w) => {
+    const [a, b] = parseWindow(w);
+    return covers(a, b, start, end);
   });
 }
 
-/** Una richiesta "attiva" occupa lo slot: in attesa e non scaduta, oppure confermata. */
-export function richiestaAttiva(r: Pick<Richiesta, 'stato' | 'scadenza'>, now = Date.now()): boolean {
-  if (r.stato === 'confermata') return true;
-  if (r.stato !== 'attesa') return false;
-  return !r.scadenza || r.scadenza.toMillis() > now;
+/** An "active" request holds the slot: pending and not expired, or confirmed. */
+export function isRequestActive(r: Pick<MatchRequest, 'status' | 'expiresAt'>, now = Date.now()): boolean {
+  if (r.status === 'confirmed') return true;
+  if (r.status !== 'pending') return false;
+  return !r.expiresAt || r.expiresAt.toMillis() > now;
 }
 
-export type ColoreSlot = 'verde' | 'giallo' | 'grigio' | 'rosso' | 'blu';
+export type SlotColor = 'green' | 'yellow' | 'grey' | 'red' | 'blue';
 
-export interface StatoSlot {
+export interface SlotState {
   slot: Slot;
-  colore: ColoreSlot;
-  liberi: string[];
-  mancanti: string[];
-  occupazioni: Occupazione[];
-  richiesta?: Richiesta;
+  color: SlotColor;
+  /** Players whose windows cover the slot. */
+  free: string[];
+  /** Players whose windows don't cover the slot. */
+  missing: string[];
+  bookings: Booking[];
+  request?: MatchRequest;
 }
 
 /**
- * Incrocio (§7.1): campo libero, nessuna richiesta attiva sovrapposta,
- * e tutti i giocatori con una fascia che copre l'intero slot.
+ * Cross-check (§7.1): court free, no overlapping active request,
+ * and every player with a window that covers the whole slot.
  */
-export function classificaSlot(
+export function classifySlot(
   slot: Slot,
-  giocatori: string[],
-  disponibilita: Record<string, Fasce | undefined>,
-  occupazioni: Record<string, Occupazione> | undefined,
-  richieste: Richiesta[],
+  players: string[],
+  availability: Record<string, Windows | undefined>,
+  bookings: Record<string, Booking> | undefined,
+  requests: MatchRequest[],
   now = Date.now(),
-): StatoSlot {
-  const occ = occupazioniSovrapposte(occupazioni, slot.inizio, slot.fine).map(([, o]) => o);
-  const liberi = giocatori.filter((g) => fasciaCopre(disponibilita[g], slot.data, slot.inizio, slot.fine));
-  const mancanti = giocatori.filter((g) => !liberi.includes(g));
-  const richiesta = richieste.find(
+): SlotState {
+  const busy = overlappingBookings(bookings, slot.start, slot.end).map(([, b]) => b);
+  const free = players.filter((p) => windowsCover(availability[p], slot.date, slot.start, slot.end));
+  const missing = players.filter((p) => !free.includes(p));
+  const request = requests.find(
     (r) =>
-      r.campoId === slot.campoId &&
-      r.data === slot.data &&
-      richiestaAttiva(r, now) &&
-      overlaps(r.inizio, r.fine, slot.inizio, slot.fine),
+      r.courtId === slot.courtId &&
+      r.date === slot.date &&
+      isRequestActive(r, now) &&
+      overlaps(r.start, r.end, slot.start, slot.end),
   );
-  let colore: ColoreSlot;
-  if (occ.length) colore = 'rosso';
-  else if (richiesta) colore = 'blu';
-  else if (mancanti.length === 0) colore = 'verde';
-  else if (mancanti.length === 1) colore = 'giallo';
-  else colore = 'grigio';
-  return { slot, colore, liberi, mancanti, occupazioni: occ, richiesta };
+  let color: SlotColor;
+  if (busy.length) color = 'red';
+  else if (request) color = 'blue';
+  else if (missing.length === 0) color = 'green';
+  else if (missing.length === 1) color = 'yellow';
+  else color = 'grey';
+  return { slot, color, free, missing, bookings: busy, request };
 }
 
-/** Slot di griglia resi inutilizzabili da un intervallo (impatto di una richiesta fuori griglia). */
-export function slotImpattati(campo: Campo, data: string, inizio: string, fine: string): Slot[] {
-  return slotGriglia(campo, data).filter(
-    (s) => overlaps(s.inizio, s.fine, inizio, fine) && !(s.inizio === inizio && s.fine === fine),
-  );
+/** Grid slots made unusable by an interval (impact of an off-grid request). */
+export function impactedSlots(court: Court, date: string, start: string, end: string): Slot[] {
+  return gridSlots(court, date).filter((s) => overlaps(s.start, s.end, start, end) && !(s.start === start && s.end === end));
 }
 
-export interface VerificaFuoriGriglia {
-  bloccanti: Occupazione[];
-  richiesteSovrapposte: Richiesta[];
-  fuoriOrario: boolean;
+export interface OffGridCheck {
+  blocking: Booking[];
+  overlappingRequests: MatchRequest[];
+  outsideHours: boolean;
 }
 
-export function verificaFuoriGriglia(
-  campo: Campo,
-  data: string,
-  inizio: string,
-  occupazioni: Record<string, Occupazione> | undefined,
-  richieste: Richiesta[],
+export function checkOffGrid(
+  court: Court,
+  date: string,
+  start: string,
+  bookings: Record<string, Booking> | undefined,
+  requests: MatchRequest[],
   now = Date.now(),
-): VerificaFuoriGriglia {
-  const fine = addMin(inizio, campo.durata);
+): OffGridCheck {
+  const end = addMin(start, court.slotMinutes);
   return {
-    bloccanti: occupazioniSovrapposte(occupazioni, inizio, fine).map(([, o]) => o),
-    richiesteSovrapposte: richieste.filter(
+    blocking: overlappingBookings(bookings, start, end).map(([, b]) => b),
+    overlappingRequests: requests.filter(
       (r) =>
-        r.campoId === campo.id &&
-        r.data === data &&
-        r.stato === 'attesa' &&
-        richiestaAttiva(r, now) &&
-        overlaps(r.inizio, r.fine, inizio, fine),
+        r.courtId === court.id &&
+        r.date === date &&
+        r.status === 'pending' &&
+        isRequestActive(r, now) &&
+        overlaps(r.start, r.end, start, end),
     ),
-    fuoriOrario: !campoAttivo(campo, data) || toMin(fine) > 24 * 60,
+    outsideHours: !courtOpen(court, date) || toMin(end) > 24 * 60,
   };
 }
 
 /**
- * Controproposta: lo slot di griglia libero più vicino a quello richiesto,
- * cercando nei giorni candidati (in ordine di vicinanza) su tutti i campi.
+ * Counter-proposal: the free grid slot closest to the requested one,
+ * searching the candidate days (in order of proximity) on every court.
  */
-export function slotLiberoPiuVicino(
-  origine: Slot,
-  campi: Campo[],
-  giorni: string[],
-  occupazioniPerId: Record<string, Record<string, Occupazione> | undefined>,
-  richieste: Richiesta[],
+export function nearestFreeSlot(
+  origin: Slot,
+  courts: Court[],
+  days: string[],
+  bookingsByCourtDay: Record<string, Record<string, Booking> | undefined>,
+  requests: MatchRequest[],
   now = Date.now(),
 ): Slot | null {
-  const ref = (s: Slot) => Math.abs(dayDiff(s.data, origine.data)) * 24 * 60 + Math.abs(toMin(s.inizio) - toMin(origine.inizio));
-  const candidati: Slot[] = [];
-  for (const data of giorni) {
-    for (const campo of campi) {
-      for (const s of slotGriglia(campo, data)) {
-        if (s.campoId === origine.campoId && s.data === origine.data && s.inizio === origine.inizio) continue;
-        const occ = occupazioniPerId[occupazioniId(campo.id, data)];
-        if (occupazioniSovrapposte(occ, s.inizio, s.fine).length) continue;
-        const busy = richieste.some(
-          (r) =>
-            r.campoId === s.campoId && r.data === s.data && richiestaAttiva(r, now) && overlaps(r.inizio, r.fine, s.inizio, s.fine),
+  const distance = (s: Slot) => Math.abs(dayDiff(s.date, origin.date)) * 24 * 60 + Math.abs(toMin(s.start) - toMin(origin.start));
+  const candidates: Slot[] = [];
+  for (const date of days) {
+    for (const court of courts) {
+      for (const s of gridSlots(court, date)) {
+        if (s.courtId === origin.courtId && s.date === origin.date && s.start === origin.start) continue;
+        const bk = bookingsByCourtDay[courtDayId(court.id, date)];
+        if (overlappingBookings(bk, s.start, s.end).length) continue;
+        const busy = requests.some(
+          (r) => r.courtId === s.courtId && r.date === s.date && isRequestActive(r, now) && overlaps(r.start, r.end, s.start, s.end),
         );
         if (busy) continue;
-        candidati.push(s);
+        candidates.push(s);
       }
     }
   }
-  candidati.sort((a, b) => ref(a) - ref(b));
-  return candidati[0] ?? null;
+  candidates.sort((a, b) => distance(a) - distance(b));
+  return candidates[0] ?? null;
 }
 
 function dayDiff(a: string, b: string): number {
   return Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
 }
 
-/** Capienza (§5.3): slot di griglia disponibili nel periodo al netto delle occupazioni note. */
-export function contaSlot(
-  campi: Campo[],
-  giorni: string[],
-  occupazioniPerId: Record<string, Record<string, Occupazione> | undefined> = {},
+/** Capacity (§5.3): grid slots available in the period, net of the known bookings. */
+export function countSlots(
+  courts: Court[],
+  days: string[],
+  bookingsByCourtDay: Record<string, Record<string, Booking> | undefined> = {},
 ): number {
   let n = 0;
-  for (const data of giorni)
-    for (const campo of campi)
-      for (const s of slotGriglia(campo, data))
-        if (!occupazioniSovrapposte(occupazioniPerId[occupazioniId(campo.id, data)], s.inizio, s.fine).length) n++;
+  for (const date of days)
+    for (const court of courts)
+      for (const s of gridSlots(court, date))
+        if (!overlappingBookings(bookingsByCourtDay[courtDayId(court.id, date)], s.start, s.end).length) n++;
   return n;
 }

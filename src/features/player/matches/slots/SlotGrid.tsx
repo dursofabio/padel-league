@@ -8,232 +8,232 @@
  */
 import { CalendarRange, Check, ChevronLeft, ChevronRight, Clock3, Info, UserRoundX } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { CourtLanes, LaneBlock, scalaDaCampi, type LanesScala } from '../../../../components/CourtLanes';
+import { Link } from 'react-router';
+import { CourtLanes, LaneBlock, scaleFromCourts, type LaneScale } from '../../../../components/CourtLanes';
 import { ErrorState } from '../../../../components/states';
 import { WhatsAppButton } from '../../../../components/WhatsAppButton';
-import { useDisponibilita, useOccupazioni, useRichiesteFinestra } from '../../../../data/queries';
-import { campoAttivo, classificaSlot, occupazioniId, slotGriglia, type StatoSlot } from '../../../../lib/slots';
+import { useAvailability, useBookings, useRequestsInRange } from '../../../../data/queries';
+import { classifySlot, courtDayId, courtOpen, gridSlots, type SlotState } from '../../../../lib/slots';
 import { labelDate, toMin, today } from '../../../../lib/time';
 import { appUrl } from '../../../../lib/whatsapp';
-import type { Campo, Fasce } from '../../../../types';
+import type { Court, Windows } from '../../../../types';
 import { Button, cn, Skeleton } from '../../../../ui';
-import type { ContestoPartita } from '../contesto';
+import type { MatchContext } from '../context';
 import {
-  ariaSlot,
-  elencoNomi,
-  etichettaSlot,
-  finestraSettimana,
-  muoviFocus,
-  scalaRitagliata,
-  slotUtile,
-  type CellaNav,
-  type TastoNav,
-} from '../logica';
-import { Avviso, SLOT_UI, useOra } from '../parti';
+  croppedScale,
+  isSlotUsable,
+  moveFocus,
+  nameList,
+  slotAriaLabel,
+  slotLabel,
+  weekWindow,
+  type NavCell,
+  type NavKey,
+} from '../logic';
+import { Notice, SLOT_UI, useNowTick } from '../parts';
 import { OffGrid } from './OffGrid';
 import { SlotSheet } from './SlotSheet';
 
-const TASTI: TastoNav[] = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'];
-const chiave = (s: StatoSlot) => `${s.slot.data}|${s.slot.campoId}|${s.slot.inizio}`;
-const LINK = 'inline-flex min-h-11 items-center text-base font-semibold text-court underline dark:text-info-ink';
+const NAV_KEYS: NavKey[] = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'];
+const slotKey = (s: SlotState) => `${s.slot.date}|${s.slot.courtId}|${s.slot.start}`;
+const LINK = 'inline-flex min-h-11 items-center text-base font-semibold text-ink underline';
 
-type Vista = 'chiuso' | 'nessuno' | 'compresso' | 'utili' | 'tutti';
+type DayView = 'closed' | 'none' | 'collapsed' | 'useful' | 'all';
 
-interface Giorno {
-  data: string;
-  vista: Vista;
+interface Day {
+  date: string;
+  view: DayView;
   /** Slots drawn, per court. */
-  perCampo: Record<string, StatoSlot[]>;
+  byCourt: Record<string, SlotState[]>;
   /** Slots drawn, in time order (both courts): keyboard order. */
-  ordinati: StatoSlot[];
-  scala: LanesScala;
+  ordered: SlotState[];
+  scale: LaneScale;
   /** Expanded by hand (shows "Nascondi"). */
-  espanso: boolean;
+  expanded: boolean;
 }
 
-export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
-  const { partita, campi: tuttiCampi, tid, nome } = ctx;
-  const giocatori = partita.giocatori;
-  const now = useOra();
-  const oggi = today();
-  const [settimana, setSettimana] = useState(0);
-  const f = finestraSettimana(ctx.periodo, oggi, settimana);
-  const disp = useDisponibilita(tid, giocatori);
-  const occ = useOccupazioni(f.from, f.to);
-  const ric = useRichiesteFinestra(f.from, f.to);
-  const [mostraTutti, setMostraTutti] = useState(false);
-  const [espansi, setEspansi] = useState<Set<string>>(new Set());
-  const [sel, setSel] = useState<StatoSlot | null>(null);
-  const [fuori, setFuori] = useState<{ open: boolean; campoId?: string; data?: string }>({ open: false });
-  const [attivo, setAttivo] = useState<string | null>(null);
+export function SlotGrid({ ctx }: { ctx: MatchContext }) {
+  const { match, courts: allCourts, tid, name } = ctx;
+  const players = match.players;
+  const now = useNowTick();
+  const todayDate = today();
+  const [week, setWeek] = useState(0);
+  const f = weekWindow(ctx.period, todayDate, week);
+  const avail = useAvailability(tid, players);
+  const bookings = useBookings(f.from, f.to);
+  const reqs = useRequestsInRange(f.from, f.to);
+  const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [sel, setSel] = useState<SlotState | null>(null);
+  const [offGrid, setOffGrid] = useState<{ open: boolean; courtId?: string; date?: string }>({ open: false });
+  const [active, setActive] = useState<string | null>(null);
   const refs = useRef(new Map<string, HTMLButtonElement>());
-  const campi = useMemo(() => [...tuttiCampi].sort((a, b) => (a.ordine ?? 0) - (b.ordine ?? 0)), [tuttiCampi]);
+  const courts = useMemo(() => [...allCourts].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)), [allCourts]);
   // lanes grow with the user's text size, so slot labels are never clipped at 200% text (WCAG 1.4.4)
   const rem = useRemPx();
-  const scala = useMemo(() => scalaDaCampi(campi, 0.8 * (rem / 16)), [campi, rem]);
+  const scale = useMemo(() => scaleFromCourts(courts, 0.8 * (rem / 16)), [courts, rem]);
 
-  const fasce = useMemo(
-    () => Object.fromEntries(giocatori.map((g) => [g, disp.data?.[g]?.fasce])) as Record<string, Fasce | undefined>,
-    [disp.data, giocatori],
+  const windows = useMemo(
+    () => Object.fromEntries(players.map((p) => [p, avail.data?.[p]?.windows])) as Record<string, Windows | undefined>,
+    [avail.data, players],
   );
-  const richieste = useMemo(() => (ric.data ?? []).filter((r) => r.partitaId !== partita.id), [ric.data, partita.id]);
-  const minutoOra = new Date(now).getHours() * 60 + new Date(now).getMinutes();
+  const requests = useMemo(() => (reqs.data ?? []).filter((r) => r.matchId !== match.id), [reqs.data, match.id]);
+  const nowMinute = new Date(now).getHours() * 60 + new Date(now).getMinutes();
 
   // every future slot of the week, classified once
-  const settimanaSlot = useMemo(
+  const weekSlots = useMemo(
     () =>
-      f.giorni.map((data) => {
-        const perCampo: Record<string, StatoSlot[]> = {};
-        for (const c of campi)
-          perCampo[c.id] = slotGriglia(c, data)
-            .filter((s) => data > oggi || (data === oggi && toMin(s.inizio) > minutoOra))
-            .map((s) => classificaSlot(s, giocatori, fasce, occ.perGiorno[occupazioniId(c.id, data)], richieste, now));
-        return { data, aperto: campi.some((c) => campoAttivo(c, data)), perCampo };
+      f.days.map((date) => {
+        const byCourt: Record<string, SlotState[]> = {};
+        for (const c of courts)
+          byCourt[c.id] = gridSlots(c, date)
+            .filter((s) => date > todayDate || (date === todayDate && toMin(s.start) > nowMinute))
+            .map((s) => classifySlot(s, players, windows, bookings.byCourtDay[courtDayId(c.id, date)], requests, now));
+        return { date, open: courts.some((c) => courtOpen(c, date)), byCourt };
       }),
-    // f.giorni is derived from f.from / f.to
-    [f.from, f.to, campi, giocatori, fasce, occ.perGiorno, richieste, oggi, minutoOra, now],
+    // f.days is derived from f.from / f.to
+    [f.from, f.to, courts, players, windows, bookings.byCourtDay, requests, todayDate, nowMinute, now],
   );
-  const tuttiSlot = settimanaSlot.flatMap((g) => Object.values(g.perCampo).flat());
-  const verdi = tuttiSlot.filter((s) => s.colore === 'verde').length;
-  const utili = tuttiSlot.filter(slotUtile).length;
-  const filtro = utili > 0 && !mostraTutti;
-  const grigliaVisibile = utili > 0 || mostraTutti;
+  const allSlots = weekSlots.flatMap((d) => Object.values(d.byCourt).flat());
+  const greens = allSlots.filter((s) => s.color === 'green').length;
+  const useful = allSlots.filter(isSlotUsable).length;
+  const filtered = useful > 0 && !showAll;
+  const gridVisible = useful > 0 || showAll;
 
-  const giorni: Giorno[] = useMemo(
+  const days: Day[] = useMemo(
     () =>
-      settimanaSlot.map(({ data, aperto, perCampo: tutti }) => {
-        const espanso = espansi.has(data);
-        const pieno = !filtro || espanso;
-        const perCampo: Record<string, StatoSlot[]> = {};
-        for (const c of campi) perCampo[c.id] = pieno ? tutti[c.id] : tutti[c.id].filter(slotUtile);
-        const ordinati = Object.values(perCampo)
+      weekSlots.map(({ date, open, byCourt: all }) => {
+        const isExpanded = expanded.has(date);
+        const full = !filtered || isExpanded;
+        const byCourt: Record<string, SlotState[]> = {};
+        for (const c of courts) byCourt[c.id] = full ? all[c.id] : all[c.id].filter(isSlotUsable);
+        const ordered = Object.values(byCourt)
           .flat()
           .sort(
             (a, b) =>
-              toMin(a.slot.inizio) - toMin(b.slot.inizio) ||
-              campi.findIndex((c) => c.id === a.slot.campoId) - campi.findIndex((c) => c.id === b.slot.campoId),
+              toMin(a.slot.start) - toMin(b.slot.start) ||
+              courts.findIndex((c) => c.id === a.slot.courtId) - courts.findIndex((c) => c.id === b.slot.courtId),
           );
-        const vista: Vista = !aperto ? 'chiuso' : pieno ? (ordinati.length ? 'tutti' : 'nessuno') : ordinati.length ? 'utili' : 'compresso';
-        const scalaGiorno = vista === 'utili' ? scalaRitagliata(ordinati.map((s) => s.slot), scala) : scala;
-        return { data, vista, perCampo, ordinati, scala: scalaGiorno, espanso };
+        const view: DayView = !open ? 'closed' : full ? (ordered.length ? 'all' : 'none') : ordered.length ? 'useful' : 'collapsed';
+        const dayScale = view === 'useful' ? croppedScale(ordered.map((s) => s.slot), scale) : scale;
+        return { date, view, byCourt, ordered, scale: dayScale, expanded: isExpanded };
       }),
-    [settimanaSlot, espansi, filtro, campi, scala],
+    [weekSlots, expanded, filtered, courts, scale],
   );
 
   // players with no availability at all in the period (or in the window when there is no open period)
-  const senzaDisponibilita = useMemo(() => {
-    const da = ctx.periodo && !f.periodoFinito ? ctx.periodo.inizio : f.from;
-    const a = ctx.periodo && !f.periodoFinito ? ctx.periodo.fine : f.to;
-    return giocatori.filter((g) => !Object.entries(fasce[g] ?? {}).some(([d, v]) => d >= da && d <= a && v.length > 0));
-  }, [giocatori, fasce, ctx.periodo, f.from, f.to, f.periodoFinito]);
+  const withoutAvailability = useMemo(() => {
+    const from = ctx.period && !f.periodOver ? ctx.period.startsOn : f.from;
+    const to = ctx.period && !f.periodOver ? ctx.period.endsOn : f.to;
+    return players.filter((p) => !Object.entries(windows[p] ?? {}).some(([d, v]) => d >= from && d <= to && v.length > 0));
+  }, [players, windows, ctx.period, f.from, f.to, f.periodOver]);
 
-  const celle: CellaNav[][] = useMemo(
+  const cells: NavCell[][] = useMemo(
     () =>
-      grigliaVisibile
-        ? giorni.map((g) => g.ordinati.map((s) => ({ key: chiave(s), campoId: s.slot.campoId, inizio: s.slot.inizio })))
+      gridVisible
+        ? days.map((d) => d.ordered.map((s) => ({ key: slotKey(s), courtId: s.slot.courtId, start: s.slot.start })))
         : [],
-    [giorni, grigliaVisibile],
+    [days, gridVisible],
   );
-  const tutte = celle.flat();
-  const focusKey = attivo && tutte.some((c) => c.key === attivo) ? attivo : (tutte[0]?.key ?? null);
+  const flatCells = cells.flat();
+  const focusKey = active && flatCells.some((c) => c.key === active) ? active : (flatCells[0]?.key ?? null);
 
   const onKey = useCallback(
     (e: KeyboardEvent<HTMLButtonElement>, key: string) => {
-      if (!TASTI.includes(e.key as TastoNav)) return;
-      const next = muoviFocus(
-        celle,
+      if (!NAV_KEYS.includes(e.key as NavKey)) return;
+      const next = moveFocus(
+        cells,
         key,
-        e.key as TastoNav,
-        campi.map((c) => c.id),
+        e.key as NavKey,
+        courts.map((c) => c.id),
       );
       e.preventDefault();
       if (!next) return;
-      setAttivo(next);
+      setActive(next);
       refs.current.get(next)?.focus();
     },
-    [celle, campi],
+    [cells, courts],
   );
 
-  const alterna = (data: string) =>
-    setEspansi((s) => {
+  const toggle = (date: string) =>
+    setExpanded((s) => {
       const n = new Set(s);
-      if (n.has(data)) n.delete(data);
-      else n.add(data);
+      if (n.has(date)) n.delete(date);
+      else n.add(date);
       return n;
     });
 
-  const caricamento = disp.isPending || occ.isPending || ric.isPending;
-  const errore = disp.error || occ.error || ric.error;
-  const consenti = ctx.torneo.config.consentiFuoriGriglia;
-  const giocatore = !!ctx.mioLato;
-  const nomiSenza = senzaDisponibilita.map((g) => nome(g));
-  const linkDisp = appUrl(`/t/${tid}/disponibilita`);
-  const gialli = utili - verdi;
+  const loading = avail.isPending || bookings.isPending || reqs.isPending;
+  const error = avail.error || bookings.error || reqs.error;
+  const allowOffGrid = ctx.tournament.config.allowOffGrid;
+  const isPlayer = !!ctx.mySide;
+  const namesWithout = withoutAvailability.map((p) => name(p));
+  const availabilityLink = appUrl(`/t/${tid}/disponibilita`);
+  const yellows = useful - greens;
 
   return (
     <div className="grid gap-4">
-      {f.periodoFinito && ctx.periodo && (
-        <Avviso icona={Info} tono="danger">
-          Periodo terminato il {labelDate(ctx.periodo.fine)}: puoi ancora programmarla finché l’organizzatore non decide.
-        </Avviso>
+      {f.periodOver && ctx.period && (
+        <Notice icon={Info} tone="danger">
+          Periodo terminato il {labelDate(ctx.period.endsOn)}: puoi ancora programmarla finché l’organizzatore non decide.
+        </Notice>
       )}
 
       <nav aria-label="Settimane" className="flex items-center justify-between gap-2">
-        <Button variant="ghost" size="icon" aria-label="Settimana precedente" disabled={!f.haPrecedente} onClick={() => setSettimana(f.settimana - 1)}>
+        <Button variant="secondary" size="icon" aria-label="Settimana precedente" disabled={!f.hasPrevious} onClick={() => setWeek(f.week - 1)}>
           <ChevronLeft aria-hidden />
         </Button>
         <p className="tabular flex flex-wrap items-center justify-center gap-x-2 text-center text-base font-semibold" aria-live="polite">
           <CalendarRange className="size-5 text-ink-muted" aria-hidden />
           {labelDate(f.from)} – {labelDate(f.to)}
         </p>
-        <Button variant="ghost" size="icon" aria-label="Settimana successiva" disabled={!f.haSuccessiva} onClick={() => setSettimana(f.settimana + 1)}>
+        <Button variant="secondary" size="icon" aria-label="Settimana successiva" disabled={!f.hasNext} onClick={() => setWeek(f.week + 1)}>
           <ChevronRight aria-hidden />
         </Button>
       </nav>
 
-      {errore ? (
+      {error ? (
         <ErrorState
-          errore={errore}
-          onRiprova={() => {
-            disp.refetch();
-            occ.refetch();
-            ric.refetch();
+          error={error}
+          onRetry={() => {
+            avail.refetch();
+            bookings.refetch();
+            reqs.refetch();
           }}
         />
-      ) : caricamento ? (
+      ) : loading ? (
         <SkeletonLanes />
       ) : (
         <>
           <div className="grid gap-3">
             <p className="text-lg font-bold" aria-live="polite">
-              {verdi > 0
-                ? `${verdi} ${verdi === 1 ? 'orario va' : 'orari vanno'} bene per tutti e 4 questa settimana${gialli > 0 ? `, ${gialli} per 3 su 4` : ''}.`
-                : gialli > 0
-                  ? `Nessun orario per tutti e 4 questa settimana: ${gialli} ${gialli === 1 ? 'va' : 'vanno'} bene a 3 su 4.`
+              {greens > 0
+                ? `${greens} ${greens === 1 ? 'orario va' : 'orari vanno'} bene per tutti e 4 questa settimana${yellows > 0 ? `, ${yellows} per 3 su 4` : ''}.`
+                : yellows > 0
+                  ? `Nessun orario per tutti e 4 questa settimana: ${yellows} ${yellows === 1 ? 'va' : 'vanno'} bene a 3 su 4.`
                   : 'Nessun orario buono questa settimana.'}
             </p>
 
-            {senzaDisponibilita.length > 0 && (
+            {withoutAvailability.length > 0 && (
               <div className="grid gap-2">
-                <Avviso icona={UserRoundX} tono="warn">
-                  {elencoNomi(nomiSenza)} {senzaDisponibilita.length === 1 ? 'non ha' : 'non hanno'} ancora segnato le disponibilità.
-                </Avviso>
+                <Notice icon={UserRoundX} tone="warn">
+                  {nameList(namesWithout)} {withoutAvailability.length === 1 ? 'non ha' : 'non hanno'} ancora segnato le disponibilità.
+                </Notice>
                 <div className="flex flex-wrap items-center gap-2">
-                  {giocatore &&
-                    senzaDisponibilita
-                      .filter((g) => g !== ctx.uid)
-                      .map((g) => (
+                  {isPlayer &&
+                    withoutAvailability
+                      .filter((p) => p !== ctx.uid)
+                      .map((p) => (
                         <WhatsAppButton
-                          key={g}
+                          key={p}
                           className="whitespace-normal"
-                          telefono={ctx.telefono(g)}
-                          testo={`${nome(g)}, per programmare ${ctx.titolo} mancano le tue disponibilità: segnale qui → ${linkDisp}`}
+                          phone={ctx.phone(p)}
+                          text={`${name(p)}, per programmare ${ctx.title} mancano le tue disponibilità: segnale qui → ${availabilityLink}`}
                         >
-                          Chiedi a {nome(g)}
+                          Chiedi a {name(p)}
                         </WhatsAppButton>
                       ))}
-                  {senzaDisponibilita.includes(ctx.uid ?? '') && (
+                  {withoutAvailability.includes(ctx.uid ?? '') && (
                     <Link to={`/t/${tid}/disponibilita`} className={LINK}>
                       Segna le tue disponibilità
                     </Link>
@@ -241,69 +241,68 @@ export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
                 </div>
               </div>
             )}
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              {utili > 0 && (
-                <p className="flex flex-wrap items-center gap-x-2">
-                  <span>{filtro ? 'Mostro solo gli orari buoni (4/4 e 3/4).' : 'Mostro tutti gli orari.'}</span>
-                  <Button variant="link" className="min-h-11 text-base" onClick={() => setMostraTutti(filtro)}>
-                    {filtro ? 'Mostra tutti' : 'Mostra solo quelli buoni'}
-                  </Button>
-                </p>
-              )}
-              {utili === 0 && (
-                <Button variant="secondary" className="whitespace-normal" aria-expanded={mostraTutti} onClick={() => setMostraTutti((v) => !v)}>
-                  {mostraTutti ? 'Nascondi la griglia' : 'Mostra la griglia completa'}
-                </Button>
-              )}
-              {giocatore && (verdi > 0 || senzaDisponibilita.length === 0) && (
-                <WhatsAppButton
-                  className="whitespace-normal"
-                  testo={
-                    verdi > 0
-                      ? `Abbiamo ${verdi} ${verdi === 1 ? 'orario che va' : 'orari che vanno'} bene a tutti e 4, scegliamo? → ${ctx.link}`
-                      : `Non abbiamo ancora un orario in comune per ${ctx.titolo}: segnate le disponibilità qui → ${linkDisp}`
-                  }
-                />
-              )}
-              {giocatore && !senzaDisponibilita.includes(ctx.uid ?? '') && (
-                <Link to={`/t/${tid}/disponibilita`} className={LINK}>
-                  Modifica le tue disponibilità
-                </Link>
-              )}
-            </div>
           </div>
 
-          {grigliaVisibile && (
-            <>
-              <Legenda />
-              <div className="grid items-start gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
-                {giorni.map((g) => (
-                  <GiornoLanes
-                    key={g.data}
-                    giorno={g}
-                    oggi={oggi}
-                    ctx={ctx}
-                    campi={campi}
-                    focusKey={focusKey}
-                    sel={sel ? chiave(sel) : null}
-                    refs={refs.current}
-                    onKey={onKey}
-                    onAlterna={() => alterna(g.data)}
-                    filtro={filtro}
-                    stretto={rem >= 24}
-                    onScegli={(s) => {
-                      setAttivo(chiave(s));
-                      setSel(s);
-                    }}
-                  />
-                ))}
-              </div>
-            </>
+          {gridVisible && (
+            <div className="grid items-start gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
+              {days.map((d) => (
+                <DayLanes
+                  key={d.date}
+                  day={d}
+                  today={todayDate}
+                  ctx={ctx}
+                  courts={courts}
+                  focusKey={focusKey}
+                  sel={sel ? slotKey(sel) : null}
+                  refs={refs.current}
+                  onKey={onKey}
+                  onToggle={() => toggle(d.date)}
+                  filtered={filtered}
+                  narrow={rem >= 24}
+                  onPick={(s) => {
+                    setActive(slotKey(s));
+                    setSel(s);
+                  }}
+                />
+              ))}
+            </div>
           )}
 
-          {consenti && giocatore && (
-            <Button variant="link" className="min-h-11 justify-self-start text-base whitespace-normal" onClick={() => setFuori({ open: true })}>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {useful > 0 && (
+              <p className="flex flex-wrap items-center gap-x-2">
+                <span>{filtered ? 'Mostro solo gli orari buoni (4/4 e 3/4).' : 'Mostro tutti gli orari.'}</span>
+                <Button variant="link" className="min-h-11 text-base" onClick={() => setShowAll(filtered)}>
+                  {filtered ? 'Mostra tutti' : 'Mostra solo quelli buoni'}
+                </Button>
+              </p>
+            )}
+            {useful === 0 && (
+              <Button variant="secondary" className="whitespace-normal" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+                {showAll ? 'Nascondi la griglia' : 'Mostra la griglia completa'}
+              </Button>
+            )}
+            {isPlayer && (greens > 0 || withoutAvailability.length === 0) && (
+              <WhatsAppButton
+                className="whitespace-normal"
+                text={
+                  greens > 0
+                    ? `Abbiamo ${greens} ${greens === 1 ? 'orario che va' : 'orari che vanno'} bene a tutti e 4, scegliamo? → ${ctx.link}`
+                    : `Non abbiamo ancora un orario in comune per ${ctx.title}: segnate le disponibilità qui → ${availabilityLink}`
+                }
+              />
+            )}
+            {isPlayer && !withoutAvailability.includes(ctx.uid ?? '') && (
+              <Link to={`/t/${tid}/disponibilita`} className={LINK}>
+                Modifica le tue disponibilità
+              </Link>
+            )}
+          </div>
+
+          {gridVisible && <Legend />}
+
+          {allowOffGrid && isPlayer && (
+            <Button variant="link" className="min-h-11 justify-self-start text-base whitespace-normal" onClick={() => setOffGrid({ open: true })}>
               <Clock3 aria-hidden /> Proponi un orario fuori griglia
             </Button>
           )}
@@ -311,29 +310,29 @@ export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
           {sel && (
             <SlotSheet
               ctx={ctx}
-              stato={sel}
+              state={sel}
               onClose={() => setSel(null)}
-              onProponi={
-                consenti && giocatore
+              onPropose={
+                allowOffGrid && isPlayer
                   ? () => {
                       const s = sel;
                       setSel(null);
-                      setFuori({ open: true, campoId: s.slot.campoId, data: s.slot.data });
+                      setOffGrid({ open: true, courtId: s.slot.courtId, date: s.slot.date });
                     }
                   : undefined
               }
             />
           )}
-          {fuori.open && (
+          {offGrid.open && (
             <OffGrid
               ctx={ctx}
-              giorni={f.giorni}
-              campi={campi}
-              occupazioni={occ.perGiorno}
-              richieste={richieste}
-              fasce={fasce}
-              iniziale={{ campoId: fuori.campoId, data: fuori.data }}
-              onClose={() => setFuori({ open: false })}
+              days={f.days}
+              courts={courts}
+              bookings={bookings.byCourtDay}
+              requests={requests}
+              windows={windows}
+              initial={{ courtId: offGrid.courtId, date: offGrid.date }}
+              onClose={() => setOffGrid({ open: false })}
             />
           )}
         </>
@@ -342,110 +341,112 @@ export function SlotGrid({ ctx }: { ctx: ContestoPartita }) {
   );
 }
 
-function GiornoLanes({
-  giorno,
-  oggi,
+function DayLanes({
+  day,
+  today,
   ctx,
-  campi,
+  courts,
   focusKey,
   sel,
   refs,
   onKey,
-  onAlterna,
-  filtro,
-  stretto,
-  onScegli,
+  onToggle,
+  filtered,
+  narrow,
+  onPick,
 }: {
-  giorno: Giorno;
-  oggi: string;
-  ctx: ContestoPartita;
-  campi: Campo[];
+  day: Day;
+  today: string;
+  ctx: MatchContext;
+  courts: Court[];
   focusKey: string | null;
   sel: string | null;
   refs: Map<string, HTMLButtonElement>;
   onKey: (e: KeyboardEvent<HTMLButtonElement>, key: string) => void;
-  onAlterna: () => void;
-  filtro: boolean;
-  stretto: boolean;
-  onScegli: (s: StatoSlot) => void;
+  onToggle: () => void;
+  filtered: boolean;
+  narrow: boolean;
+  onPick: (s: SlotState) => void;
 }) {
   const id = useId();
-  const tot = ctx.partita.giocatori.length;
-  const giorno_ = labelDate(giorno.data);
-  const titolo = (
+  const total = ctx.match.players.length;
+  const dayLabel = labelDate(day.date);
+  const title = (
     <h3
       id={id}
-      className={cn('tabular inline-flex flex-wrap items-center gap-x-2 text-base font-bold', giorno.data === oggi && 'rounded-control bg-court px-2.5 py-1 text-court-ink')}
+      className={cn('tabular inline-flex flex-wrap items-center gap-x-2 text-base font-bold', day.date === today && 'rounded-control bg-court px-2.5 py-1 text-court-ink')}
     >
-      {giorno_}
-      {giorno.data === oggi && <span className="font-semibold">· oggi</span>}
+      {dayLabel}
+      {day.date === today && <span className="font-semibold">· oggi</span>}
     </h3>
   );
-  const alterna = (
+  const toggle = (
     <Button
-      variant="ghost"
+      variant="secondary"
       size="sm"
-      className="text-base whitespace-normal text-court dark:text-info-ink"
-      aria-expanded={giorno.espanso}
-      aria-label={giorno.espanso ? `Nascondi gli altri orari di ${giorno_}` : `Mostra tutti gli orari di ${giorno_}`}
-      onClick={onAlterna}
+      className="shrink-0 text-base whitespace-normal"
+      aria-expanded={day.expanded}
+      aria-label={day.expanded ? `Nascondi gli altri orari di ${dayLabel}` : `Mostra tutti gli orari di ${dayLabel}`}
+      onClick={onToggle}
     >
-      {giorno.espanso ? 'Nascondi' : 'Mostra'}
+      {day.expanded ? 'Nascondi' : 'Mostra'}
     </Button>
   );
 
-  if (giorno.vista === 'chiuso' || giorno.vista === 'nessuno' || giorno.vista === 'compresso')
+  if (day.view === 'closed' || day.view === 'none' || day.view === 'collapsed')
     return (
-      <div role="group" aria-labelledby={id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-2">
-        {titolo}
-        <span className="text-ink-muted">
-          {giorno.vista === 'chiuso' ? 'Campi chiusi' : giorno.vista === 'nessuno' ? 'Nessun orario ancora disponibile' : 'Nessun orario buono'}
+      <div role="group" aria-labelledby={id} className="flex items-center justify-between gap-3 border-t border-line pt-2">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          {title}
+          <span className="text-ink-muted">
+            {day.view === 'closed' ? 'Campi chiusi' : day.view === 'none' ? 'Nessun orario ancora disponibile' : 'Nessun orario buono'}
+          </span>
         </span>
-        {giorno.vista === 'compresso' && alterna}
-        {giorno.vista === 'nessuno' && giorno.espanso && alterna}
+        {day.view === 'collapsed' && toggle}
+        {day.view === 'none' && day.expanded && toggle}
       </div>
     );
 
   return (
     <div role="group" aria-labelledby={id} className="grid content-start gap-2">
       <div className="flex flex-wrap items-center justify-between gap-x-3">
-        {titolo}
-        {filtro && (giorno.espanso || giorno.vista === 'utili') && alterna}
+        {title}
+        {filtered && (day.expanded || day.view === 'useful') && toggle}
       </div>
       {/* large text (≥ 150%): one court per row, so the lanes keep a readable width */}
-      {(stretto ? campi.map((c) => [c]) : [campi]).map((gruppo) => (
-        <div key={gruppo.map((c) => c.id).join()}>
+      {(narrow ? courts.map((c) => [c]) : [courts]).map((group) => (
+        <div key={group.map((c) => c.id).join()}>
           <CourtLanes
-            campi={gruppo}
-            scala={giorno.scala}
+            courts={group}
+            scale={day.scale}
             stickyTop="0px"
             renderLane={(c) =>
-              !campoAttivo(c, giorno.data) ? (
+              !courtOpen(c, day.date) ? (
                 <p role="listitem" className="absolute inset-x-1 top-2 text-center text-base text-ink-muted">
                   Chiuso
                 </p>
               ) : (
-                giorno.perCampo[c.id]?.map((s) => {
-                  const ui = SLOT_UI[s.colore];
-                  const Icona = ui.icona;
-                  const k = chiave(s);
-                  const selezionato = sel === k;
-                  const piatto = s.colore === 'grigio';
+                day.byCourt[c.id]?.map((s) => {
+                  const ui = SLOT_UI[s.color];
+                  const Icon = ui.icon;
+                  const k = slotKey(s);
+                  const selected = sel === k;
+                  const flat = s.color === 'grey';
                   return (
                     <LaneBlock
                       key={k}
-                      scala={giorno.scala}
-                      inizio={s.slot.inizio}
-                      fine={s.slot.fine}
-                      tono={ui.tono}
+                      scale={day.scale}
+                      start={s.slot.start}
+                      end={s.slot.end}
+                      tone={ui.tone}
                       pattern={ui.pattern}
-                      selezionato={selezionato}
-                      onClick={() => onScegli(s)}
-                      ariaLabel={ariaSlot(s, c.nome, ctx.nome)}
+                      selected={selected}
+                      onClick={() => onPick(s)}
+                      ariaLabel={slotAriaLabel(s, c.name, ctx.name)}
                       className={cn(
                         'relative flex flex-col items-start justify-center gap-0.5 px-1.5 text-base',
                         // ≤ 2/4: flat, borderless, so it does not read as a primary target (it still explains itself)
-                        piatto && 'border-transparent bg-transparent text-ink-muted',
+                        flat && 'border-transparent bg-transparent text-ink-muted',
                       )}
                       buttonProps={{
                         ref: (el: HTMLButtonElement | null) => {
@@ -456,12 +457,12 @@ function GiornoLanes({
                         onKeyDown: (e) => onKey(e, k),
                       }}
                     >
-                      <span className={cn('tabular leading-tight', piatto ? 'font-semibold' : 'font-bold')}>{s.slot.inizio}</span>
+                      <span className={cn('tabular leading-tight', flat ? 'font-semibold' : 'font-bold')}>{s.slot.start}</span>
                       <span className="flex items-center gap-1 leading-tight font-semibold">
-                        <Icona className="size-4 shrink-0" aria-hidden />
-                        {etichettaSlot(s, tot)}
+                        <Icon className="size-4 shrink-0" aria-hidden />
+                        {slotLabel(s, total)}
                       </span>
-                      {selezionato && <Check className="absolute top-1 right-1 size-4" strokeWidth={3} aria-hidden />}
+                      {selected && <Check className="absolute top-1 right-1 size-4" strokeWidth={3} aria-hidden />}
                     </LaneBlock>
                   );
                 })
@@ -474,7 +475,7 @@ function GiornoLanes({
   );
 }
 
-const TONI_LEGENDA = {
+const LEGEND_TONES = {
   ok: 'border-ok bg-ok-soft text-ok-ink',
   warn: 'border-warn bg-warn-soft text-warn-ink',
   idle: 'border-transparent bg-surface-2 text-ink-muted',
@@ -483,23 +484,23 @@ const TONI_LEGENDA = {
 } as const;
 
 /** Always visible; collapsible with the native disclosure. */
-function Legenda() {
+function Legend() {
   return (
     <details open>
-      <summary className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-base font-semibold text-court dark:text-info-ink">Legenda</summary>
+      <summary className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-base font-semibold text-ink">Legenda</summary>
       <ul className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
         {(Object.keys(SLOT_UI) as (keyof typeof SLOT_UI)[]).map((k) => {
           const ui = SLOT_UI[k];
-          const Icona = ui.icona;
+          const Icon = ui.icon;
           return (
             <li key={k} className="flex items-center gap-2 text-base">
               <span
                 aria-hidden
-                className={cn('grid size-7 shrink-0 place-items-center rounded-[6px] border', TONI_LEGENDA[ui.tono as keyof typeof TONI_LEGENDA], ui.pattern === 'hatch' && 'pattern-hatch')}
+                className={cn('grid size-7 shrink-0 place-items-center rounded-[6px] border', LEGEND_TONES[ui.tone as keyof typeof LEGEND_TONES], ui.pattern === 'hatch' && 'pattern-hatch')}
               >
-                <Icona className="size-4" />
+                <Icon className="size-4" />
               </span>
-              {ui.nome}
+              {ui.name}
             </li>
           );
         })}
@@ -516,12 +517,12 @@ function Legenda() {
 
 /** Root font size in px (user text-size preference), refreshed on resize / zoom. */
 function useRemPx(): number {
-  const leggi = () => (typeof window === 'undefined' ? 16 : parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-  const [rem, setRem] = useState(leggi);
+  const read = () => (typeof window === 'undefined' ? 16 : parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+  const [rem, setRem] = useState(read);
   useEffect(() => {
-    const aggiorna = () => setRem(leggi());
-    window.addEventListener('resize', aggiorna);
-    return () => window.removeEventListener('resize', aggiorna);
+    const update = () => setRem(read());
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   }, []);
   return rem;
 }

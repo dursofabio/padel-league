@@ -1,16 +1,15 @@
 import { Fragment } from 'react';
-import type { FaseFinaleConfig } from '../types';
-import type { RigaClassifica } from '../lib/standings';
-import { nomeSquadra } from '../lib/torneo';
-import type { Squadra } from '../types';
+import type { StandingsRow } from '../lib/standings';
+import { teamName } from '../lib/tournament';
+import type { FinalPhaseConfig, Team } from '../types';
 import { cn } from '../ui/cn';
 
-/** Qualification zone by position: Gold for the first N per group, then Silver, … (perPosizione). */
-export function zonaQualificazione(fasi: FaseFinaleConfig[], posizione: number, nGironi: number): string | null {
-  let soglia = 0;
-  for (const f of fasi) {
-    soglia += f.posti / Math.max(1, nGironi);
-    if (posizione <= Math.floor(soglia)) return f.nome;
+/** Qualification zone by position: Gold for the first N per group, then Silver, … (byPosition). */
+export function qualificationZone(phases: FinalPhaseConfig[], position: number, groupCount: number): string | null {
+  let threshold = 0;
+  for (const f of phases) {
+    threshold += f.spots / Math.max(1, groupCount);
+    if (position <= Math.floor(threshold)) return f.name;
   }
   return null;
 }
@@ -20,26 +19,26 @@ export function zonaQualificazione(fasi: FaseFinaleConfig[], posizione: number, 
  * secondary columns (W, L, ±Game) are hidden on narrow screens.
  */
 export function StandingsTable({
-  girone,
-  righe,
-  squadraById,
-  fasi,
-  nGironi,
-  evidenzia,
+  group,
+  rows,
+  teamById,
+  phases,
+  groupCount,
+  highlight,
 }: {
-  girone: string;
-  righe: RigaClassifica[];
-  squadraById: Map<string, Squadra>;
-  fasi: FaseFinaleConfig[];
-  nGironi: number;
-  evidenzia?: string | null;
+  group: string;
+  rows: StandingsRow[];
+  teamById: Map<string, Team>;
+  phases: FinalPhaseConfig[];
+  groupCount: number;
+  highlight?: string | null;
 }) {
-  const pari = righe.some((r) => r.pariMerito);
+  const tied = rows.some((r) => r.tied);
   return (
     <div className="grid gap-2">
       <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
         <table className="tabular w-full border-collapse text-base">
-          <caption className="sr-only">Classifica girone {girone}</caption>
+          <caption className="sr-only">Classifica girone {group}</caption>
           <thead>
             <tr className="border-b-2 border-line-strong text-left text-sm text-ink-muted">
               <th scope="col" className="w-10 py-2 pr-2 text-right font-semibold">
@@ -67,50 +66,46 @@ export function StandingsTable({
             </tr>
           </thead>
           <tbody>
-            {righe.map((r, i) => {
-              const zona = zonaQualificazione(fasi, r.posizione, nGironi);
-              const zonaPrima = i > 0 ? zonaQualificazione(fasi, righe[i - 1].posizione, nGironi) : null;
-              const mia = evidenzia === r.squadraId;
+            {rows.map((r, i) => {
+              const zone = qualificationZone(phases, r.position, groupCount);
+              const prevZone = i > 0 ? qualificationZone(phases, rows[i - 1].position, groupCount) : null;
+              const mine = highlight === r.teamId;
               return (
-                <Fragment key={r.squadraId}>
-                {zona !== zonaPrima && i > 0 && (
+                <Fragment key={r.teamId}>
+                {zone !== prevZone && i > 0 && (
                   <tr aria-hidden>
-                    <td colSpan={8} className="border-t-2 border-court py-1 text-xs font-semibold text-ink-muted dark:border-line-strong">
-                      {zonaPrima ? `${zonaPrima} sopra questa linea` : ''}
-                      {zonaPrima ? ' · ' : ''}
-                      {zona ? `${zona} sotto` : zonaPrima ? 'sotto: fuori dalle fasi finali' : 'Sotto questa linea: fuori dalle fasi finali'}
+                    <td colSpan={8} className="border-t-4 border-line-strong py-1.5 text-sm font-bold">
+                      {prevZone ? `${prevZone} sopra questa linea` : ''}
+                      {prevZone ? ' · ' : ''}
+                      {zone ? `${zone} sotto` : prevZone ? 'sotto: fuori dalle fasi finali' : 'Sotto questa linea: fuori dalle fasi finali'}
                     </td>
                   </tr>
                 )}
-                <tr
-                  className={cn(
-                    'border-b border-line',
-                    mia && 'bg-info-soft',
-                  )}
-                >
-                  <td className="py-2.5 pr-2 text-right font-bold">
-                    {r.posizione}
-                    {r.pariMerito && (
-                      <span className="text-warn-ink" title="Pari merito da risolvere">
+                <tr className={cn('border-b border-line', mine && 'border-edge bg-ball text-ball-ink')}>
+                  <td className="py-2.5 pr-2 text-right">
+                    <span className="poster text-poster-sm">{r.position}</span>
+                    {r.tied && (
+                      <span className={cn('font-bold', mine ? 'text-ball-ink' : 'text-warn-ink')} title="Pari merito da risolvere">
                         *
                       </span>
                     )}
                   </td>
                   <th scope="row" className="py-2.5 pr-3 text-left font-normal">
-                    <span className={cn(mia && 'font-bold')}>{nomeSquadra(squadraById, r.squadraId)}</span>
-                    {zona && zona !== zonaPrima && <span className="sr-only">, inizio zona {zona}</span>}
-                    {zona && zona !== zonaPrima && (
-                      <span className="ml-2 rounded-full border border-line-strong px-1.5 text-xs font-semibold text-ink-muted">
-                        {zona}
+                    <span className={cn(mine && 'font-bold')}>{teamName(teamById, r.teamId)}</span>
+                    {mine && <span className="text-sm font-bold"> (tu)</span>}
+                    {zone && zone !== prevZone && <span className="sr-only">, inizio zona {zone}</span>}
+                    {zone && zone !== prevZone && (
+                      <span className="ml-2 rounded-full border-2 border-current px-2 text-xs font-bold">
+                        {zone}
                       </span>
                     )}
                   </th>
-                  <td className="py-2.5 pr-3 text-right font-bold">{r.punti}</td>
-                  <td className="py-2.5 pr-3 text-right">{r.giocate}</td>
-                  <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.vinte}</td>
-                  <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.perse}</td>
-                  <td className="py-2.5 pr-3 text-right">{segno(r.setVinti - r.setPersi)}</td>
-                  <td className="hidden py-2.5 text-right md:table-cell">{segno(r.gameVinti - r.gamePersi)}</td>
+                  <td className="poster py-2.5 pr-3 text-right text-poster-sm">{r.points}</td>
+                  <td className="py-2.5 pr-3 text-right">{r.played}</td>
+                  <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.won}</td>
+                  <td className="hidden py-2.5 pr-3 text-right sm:table-cell">{r.lost}</td>
+                  <td className="py-2.5 pr-3 text-right">{signed(r.setsWon - r.setsLost)}</td>
+                  <td className="hidden py-2.5 text-right md:table-cell">{signed(r.gamesWon - r.gamesLost)}</td>
                 </tr>
                 </Fragment>
               );
@@ -118,11 +113,11 @@ export function StandingsTable({
           </tbody>
         </table>
       </div>
-      {pari && <p className="text-sm text-ink-muted">* Pari merito non ancora risolto: lo decide il sorteggio dell’organizzatore.</p>}
+      {tied && <p className="text-sm text-ink-muted">* Pari merito non ancora risolto: lo decide il sorteggio dell’organizzatore.</p>}
     </div>
   );
 }
 
-function segno(n: number) {
+function signed(n: number) {
   return n > 0 ? `+${n}` : String(n);
 }

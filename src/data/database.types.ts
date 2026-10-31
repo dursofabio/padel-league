@@ -1,6 +1,6 @@
 /**
  * Database types in the format produced by `supabase gen types typescript`.
- * Written by hand from docs/contratto-api.md: regenerate them from the real
+ * Written by hand from docs/api-contract.md: regenerate them from the real
  * project (`npx supabase gen types typescript --project-id <ref>`) and keep
  * the two in sync.
  */
@@ -8,43 +8,47 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 type Rel = [];
 
-export type AppRole = 'admin' | 'organizzatore' | 'gestore' | 'giocatore';
-export type StatoTorneo = 'iscrizioni' | 'gironi' | 'fasiFinali' | 'concluso';
-export type StatoSquadra = 'in attesa partner' | 'da approvare' | 'approvata' | 'ritirata';
-export type StatoPartita = 'da programmare' | 'richiesta' | 'programmata' | 'giocata' | 'contestata' | 'tavolino';
-export type StatoRichiesta = 'attesa' | 'confermata' | 'rifiutata' | 'annullata' | 'conflitto' | 'scaduta';
-export type TipoOccupazione = 'esterno' | 'lezione' | 'chiusura' | 'campionato';
+export type AppRole = 'admin' | 'organizer' | 'manager' | 'player';
+export type TournamentStatus = 'registration' | 'groups' | 'finals' | 'completed';
+export type TeamStatus = 'awaiting_partner' | 'pending_approval' | 'approved' | 'withdrawn';
+export type MatchStatus = 'unscheduled' | 'requested' | 'scheduled' | 'played' | 'disputed' | 'forfeit';
+export type RequestStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'conflict' | 'expired';
+export type BookingType = 'external' | 'lesson' | 'closure' | 'match';
 
-type ProfilesRow = { id: string; nome: string; email: string; telefono: string | null; roles: AppRole[]; created_at: string }
-type TorneiRow = { id: string; nome: string; stato: StatoTorneo; config: Json; sorteggio: Json; fasi_generate: string[]; created_at: string }
-type PeriodiRow = { id: string; torneo_id: string; fase: string; turno: number | null; inizio: string; fine: string; etichetta: string }
-type SquadreRow = { id: string; torneo_id: string; nome: string; girone: string | null; stato: StatoSquadra; creato_da: string; created_at: string }
-type SquadraGiocatoriRow = { squadra_id: string; torneo_id: string; user_id: string; ordine: number }
-type InvitiRow = { token: string; squadra_id: string; torneo_id: string; creato_da: string }
-type PartiteRow = {
-  id: string; torneo_id: string; codice: string; fase: string; girone: string | null; turno: number | null; posizione: number | null;
-  prossima_codice: string | null; lato: string | null; squadra_a: string | null; squadra_b: string | null; periodo_id: string | null;
-  stato: StatoPartita; richiesta_id: string | null; set: Json | null; inserito_da: string | null; confermato_da: string | null;
-  contestato_da: string | null; nota_risultato: string | null; updated_at: string;
+type ProfilesRow = { id: string; name: string; email: string; phone: string | null; roles: AppRole[]; created_at: string }
+type TournamentsRow = { id: string; name: string; status: TournamentStatus; config: Json; draw: Json; generated_phases: string[]; created_at: string }
+type PeriodsRow = { id: string; tournament_id: string; phase: string; round: number | null; starts_on: string; ends_on: string; label: string }
+type TeamsRow = { id: string; tournament_id: string; name: string; group_name: string | null; status: TeamStatus; created_by: string; created_at: string }
+type TeamPlayersRow = { team_id: string; tournament_id: string; user_id: string; position: number }
+type InvitesRow = { token: string; team_id: string; tournament_id: string; created_by: string }
+type MatchesRow = {
+  id: string; tournament_id: string; code: string; phase: string; group_name: string | null; round: number | null; position: number | null;
+  next_code: string | null; side: string | null; team_a: string | null; team_b: string | null; period_id: string | null;
+  status: MatchStatus; request_id: string | null; sets: Json | null; entered_by: string | null; confirmed_by: string | null;
+  disputed_by: string | null; result_note: string | null; updated_at: string;
 }
-type PartiteVRow = PartiteRow & {
-  giocatori_a: string[]; giocatori_b: string[]; giocatori: string[];
-  prog_campo_id: string | null; prog_data: string | null; prog_inizio: string | null; prog_fine: string | null;
+type MatchesVRow = MatchesRow & {
+  players_a: string[]; players_b: string[]; players: string[];
+  sched_court_id: string | null; sched_date: string | null; sched_start: string | null; sched_end: string | null;
 }
-type CampiRow = { id: string; nome: string; primo_slot: string; ultimo_slot: string; durata: number; giorni_attivi: number[]; eccezioni: string[]; ordine: number }
-type RicorrenzeRow = { id: string; campo_id: string; giorno_settimana: number; inizio: string; fine: string; tipo: TipoOccupazione; nota: string; dal: string; al: string }
-type OccupazioniRow = {
-  id: string; campo_id: string; data: string; inizio: string; fine: string; tipo: TipoOccupazione; nota: string | null;
-  partita_id: string | null; richiesta_id: string | null; torneo_id: string | null; ricorrenza_id: string | null; creato_da: string | null;
+type CourtsRow = {
+  id: string; name: string; first_slot: string; last_slot: string; slot_minutes: number; active_days: number[]; closed_dates: string[]; sort_order: number;
 }
-type RichiesteRow = {
-  id: string; torneo_id: string; partita_id: string; campo_id: string; data: string; inizio: string; fine: string;
-  fuori_griglia: boolean; controproposta: boolean; stato: StatoRichiesta; scadenza: string; creato_da: string;
-  gestito_da: string | null; nota: string | null; created_at: string;
+type RecurrencesRow = {
+  id: string; court_id: string; weekday: number; start_time: string; end_time: string; type: BookingType; note: string; valid_from: string; valid_to: string;
 }
-type RichiestaGiocatoriRow = { richiesta_id: string; user_id: string; accettata_at: string | null }
-type DisponibilitaRow = { torneo_id: string; user_id: string; fasce: Json; updated_at: string }
-type LogRow = { id: number; chi: string | null; cosa: string; riferimento: string; quando: string }
+type BookingsRow = {
+  id: string; court_id: string; date: string; start_time: string; end_time: string; time_range: string; type: BookingType; note: string | null;
+  match_id: string | null; request_id: string | null; tournament_id: string | null; recurrence_id: string | null; created_by: string | null;
+}
+type RequestsRow = {
+  id: string; tournament_id: string; match_id: string; court_id: string; date: string; start_time: string; end_time: string; time_range: string;
+  off_grid: boolean; counter_proposal: boolean; status: RequestStatus; expires_at: string; created_by: string;
+  handled_by: string | null; note: string | null; created_at: string;
+}
+type RequestPlayersRow = { request_id: string; user_id: string; accepted_at: string | null }
+type AvailabilityRow = { tournament_id: string; user_id: string; windows: Json; updated_at: string }
+type AuditLogRow = { id: number; actor_id: string | null; action: string; target: string; created_at: string }
 
 type Table<R, I = Partial<R>> = { Row: R; Insert: I; Update: Partial<R>; Relationships: Rel };
 type View<R> = { Row: R; Relationships: Rel };
@@ -54,60 +58,61 @@ export type Database = {
   public: {
     Tables: {
       profiles: Table<ProfilesRow>;
-      tornei: Table<TorneiRow>;
-      periodi: Table<PeriodiRow>;
-      squadre: Table<SquadreRow>;
-      squadra_giocatori: Table<SquadraGiocatoriRow>;
-      inviti: Table<InvitiRow>;
-      partite: Table<PartiteRow>;
-      campi: Table<CampiRow>;
-      ricorrenze: Table<RicorrenzeRow>;
-      occupazioni: Table<OccupazioniRow>;
-      richieste: Table<RichiesteRow>;
-      richiesta_giocatori: Table<RichiestaGiocatoriRow>;
-      disponibilita: Table<DisponibilitaRow>;
-      log: Table<LogRow>;
+      tournaments: Table<TournamentsRow>;
+      periods: Table<PeriodsRow>;
+      teams: Table<TeamsRow>;
+      team_players: Table<TeamPlayersRow>;
+      invites: Table<InvitesRow>;
+      matches: Table<MatchesRow>;
+      courts: Table<CourtsRow>;
+      recurrences: Table<RecurrencesRow>;
+      bookings: Table<BookingsRow>;
+      requests: Table<RequestsRow>;
+      request_players: Table<RequestPlayersRow>;
+      availability: Table<AvailabilityRow>;
+      audit_log: Table<AuditLogRow>;
     };
     Views: {
-      partite_v: View<PartiteVRow>;
-      giocatori_pubblici: View<{ id: string; nome: string }>;
+      matches_v: View<MatchesVRow>;
+      public_players: View<{ id: string; name: string }>;
     };
     Functions: {
-      create_request: Fn<{ p_partita: string; p_campo: string; p_data: string; p_inizio: string; p_nota?: string | null }, string>;
-      accept_request: Fn<{ p_richiesta: string }, undefined>;
-      cancel_request: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
-      confirm_request: Fn<{ p_richiesta: string }, Json>;
-      reject_request: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
-      cancel_confirmed: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
-      player_cancel_confirmed: Fn<{ p_richiesta: string; p_nota?: string | null }, undefined>;
-      counter_propose: Fn<{ p_richiesta: string; p_campo: string; p_data: string; p_inizio: string; p_nota?: string | null }, string>;
-      add_occupation: Fn<{ p_campo: string; p_data: string; p_inizio: string; p_fine: string; p_tipo: TipoOccupazione; p_nota?: string | null }, Json>;
+      create_request: Fn<{ p_match: string; p_court: string; p_date: string; p_start: string; p_note?: string | null }, string>;
+      accept_request: Fn<{ p_request: string }, undefined>;
+      cancel_request: Fn<{ p_request: string; p_note?: string | null }, undefined>;
+      confirm_request: Fn<{ p_request: string }, Json>;
+      reject_request: Fn<{ p_request: string; p_note?: string | null }, undefined>;
+      cancel_confirmed: Fn<{ p_request: string; p_note?: string | null }, undefined>;
+      player_cancel_confirmed: Fn<{ p_request: string; p_note?: string | null }, undefined>;
+      counter_propose: Fn<{ p_request: string; p_court: string; p_date: string; p_start: string; p_note?: string | null }, string>;
+      add_occupation: Fn<{ p_court: string; p_date: string; p_start: string; p_end: string; p_type: BookingType; p_note?: string | null }, Json>;
       remove_occupation: Fn<{ p_id: string }, undefined>;
-      close_day: Fn<{ p_data: string; p_nota: string }, Json>;
-      materialize_recurrence: Fn<{ p_ricorrenza: string; p_giorni?: number }, Json>;
-      submit_result: Fn<{ p_partita: string; p_set: Json }, undefined>;
-      confirm_result: Fn<{ p_partita: string }, undefined>;
-      contest_result: Fn<{ p_partita: string; p_nota: string }, undefined>;
-      set_official_result: Fn<{ p_partita: string; p_set: Json; p_nota?: string | null }, undefined>;
-      assign_forfeit: Fn<{ p_partita: string; p_vincente: string; p_nota?: string | null }, undefined>;
-      clear_result: Fn<{ p_partita: string }, undefined>;
-      create_team: Fn<{ p_torneo: string; p_nome: string }, Json>;
+      close_day: Fn<{ p_date: string; p_note: string }, Json>;
+      materialize_recurrence: Fn<{ p_recurrence: string; p_days?: number }, Json>;
+      submit_result: Fn<{ p_match: string; p_sets: Json }, undefined>;
+      confirm_result: Fn<{ p_match: string }, undefined>;
+      contest_result: Fn<{ p_match: string; p_note: string }, undefined>;
+      set_official_result: Fn<{ p_match: string; p_sets: Json; p_note?: string | null }, undefined>;
+      assign_forfeit: Fn<{ p_match: string; p_winner: string; p_note?: string | null }, undefined>;
+      clear_result: Fn<{ p_match: string }, undefined>;
+      create_team: Fn<{ p_tournament: string; p_name: string }, Json>;
       get_invite: Fn<{ p_token: string }, Json>;
       join_team: Fn<{ p_token: string }, string>;
-      my_invite_token: Fn<{ p_squadra: string }, string | null>;
-      generate_calendar: Fn<{ p_torneo: string; p_partite: Json }, number>;
-      generate_finals: Fn<{ p_torneo: string; p_fase: string; p_partite: Json }, number>;
-      sync_bracket: Fn<{ p_torneo: string; p_updates: Json }, number>;
-      set_tournament_state: Fn<{ p_torneo: string; p_stato: StatoTorneo }, undefined>;
+      my_invite_token: Fn<{ p_team: string }, string | null>;
+      generate_calendar: Fn<{ p_tournament: string; p_matches: Json }, number>;
+      generate_finals: Fn<{ p_tournament: string; p_phase: string; p_matches: Json }, number>;
+      sync_bracket: Fn<{ p_tournament: string; p_updates: Json }, number>;
+      set_tournament_state: Fn<{ p_tournament: string; p_status: TournamentStatus }, undefined>;
       set_roles: Fn<{ p_user: string; p_roles: AppRole[] }, undefined>;
+      reminder_emails: Fn<Record<string, never>, Json>;
     };
     Enums: {
       app_role: AppRole;
-      stato_torneo: StatoTorneo;
-      stato_squadra: StatoSquadra;
-      stato_partita: StatoPartita;
-      stato_richiesta: StatoRichiesta;
-      tipo_occupazione: TipoOccupazione;
+      tournament_status: TournamentStatus;
+      team_status: TeamStatus;
+      match_status: MatchStatus;
+      request_status: RequestStatus;
+      booking_type: BookingType;
     };
     CompositeTypes: Record<string, never>;
   };

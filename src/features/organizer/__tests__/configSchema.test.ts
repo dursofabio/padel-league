@@ -1,32 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { CONFIG_DEFAULT } from '../../../lib/config';
-import { configDaForm, formDaTorneo, schemaConfig, spostaSpareggio } from '../configSchema';
+import { DEFAULT_CONFIG } from '../../../lib/config';
+import { configFromForm, configSchema, formFromTournament, moveTiebreaker } from '../configSchema';
 
-describe('schemaConfig', () => {
+describe('configSchema', () => {
   it('accepts the default configuration and round-trips it', () => {
-    const f = formDaTorneo('Torneo', CONFIG_DEFAULT);
-    expect(schemaConfig.safeParse(f).success).toBe(true);
-    expect(configDaForm(f, CONFIG_DEFAULT)).toEqual({ nome: 'Torneo', config: CONFIG_DEFAULT });
+    const f = formFromTournament('Torneo', DEFAULT_CONFIG);
+    expect(configSchema.safeParse(f).success).toBe(true);
+    expect(configFromForm(f, DEFAULT_CONFIG)).toEqual({ name: 'Torneo', config: DEFAULT_CONFIG });
   });
   it('rejects invalid values with Italian messages', () => {
-    const f = formDaTorneo('', CONFIG_DEFAULT);
-    const r = schemaConfig.safeParse({ ...f, spareggi: ['diffSet', 'punti'], fasiFinali: [{ nome: 'Gold', posti: 8 }, { nome: 'gold', posti: 4 }] });
+    const f = formFromTournament('', DEFAULT_CONFIG);
+    const r = configSchema.safeParse({ ...f, tiebreakers: ['setDiff', 'points'], finals: [{ name: 'Gold', spots: 8 }, { name: 'gold', spots: 4 }] });
     expect(r.success).toBe(false);
     const msgs = r.error!.issues.map((i) => i.message);
     expect(msgs).toContain('Dai un nome al torneo');
     expect(msgs).toContain('«Punti» deve restare il primo criterio');
     expect(msgs).toContain('Due fasi non possono avere lo stesso nome');
   });
-  it('puts punti first when the stored chain lacks it', () => {
-    expect(formDaTorneo('T', { ...CONFIG_DEFAULT, spareggi: ['diffSet'] }).spareggi).toEqual(['punti', 'diffSet']);
+  it('puts points first when the stored chain lacks it', () => {
+    expect(formFromTournament('T', { ...DEFAULT_CONFIG, tiebreakers: ['setDiff'] }).tiebreakers).toEqual(['points', 'setDiff']);
   });
 });
 
-describe('spostaSpareggio', () => {
-  it('never moves punti', () => {
-    expect(spostaSpareggio(['punti', 'diffSet', 'diffGame'], 2, -1)).toEqual(['punti', 'diffGame', 'diffSet']);
-    expect(spostaSpareggio(['punti', 'diffSet'], 1, -1)).toEqual(['punti', 'diffSet']);
-    expect(spostaSpareggio(['punti', 'diffSet'], 0, 1)).toEqual(['punti', 'diffSet']);
-    expect(spostaSpareggio(['punti', 'diffSet'], 1, 1)).toEqual(['punti', 'diffSet']);
+describe('moveTiebreaker', () => {
+  it('never moves points', () => {
+    expect(moveTiebreaker(['points', 'setDiff', 'gameDiff'], 2, -1)).toEqual(['points', 'gameDiff', 'setDiff']);
+    expect(moveTiebreaker(['points', 'setDiff'], 1, -1)).toEqual(['points', 'setDiff']);
+    expect(moveTiebreaker(['points', 'setDiff'], 0, 1)).toEqual(['points', 'setDiff']);
+    expect(moveTiebreaker(['points', 'setDiff'], 1, 1)).toEqual(['points', 'setDiff']);
   });
 });

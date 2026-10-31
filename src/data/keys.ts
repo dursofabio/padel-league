@@ -1,28 +1,28 @@
-/** Query keys: realtime invalidates by prefix (e.g. ['richieste']). */
+/** Query keys: realtime invalidates by prefix (e.g. ['requests']). */
 export const qk = {
-  tornei: () => ['tornei'] as const,
-  torneo: (tid: string) => ['tornei', tid] as const,
-  periodi: (tid: string) => ['periodi', tid] as const,
-  squadre: (tid: string) => ['squadre', tid] as const,
-  partite: (tid: string) => ['partite', tid] as const,
-  campi: () => ['campi'] as const,
-  ricorrenze: () => ['ricorrenze'] as const,
-  occupazioni: (from: string, to: string) => ['occupazioni', from, to] as const,
-  richieste: (scope: string, ...args: (string | undefined)[]) => ['richieste', scope, ...args] as const,
-  disponibilita: (tid: string, uids: string[]) => ['disponibilita', tid, ...uids] as const,
-  profili: () => ['profili'] as const,
-  nomi: () => ['nomi'] as const,
-  me: (uid: string) => ['profili', 'me', uid] as const,
-  invito: (squadraId: string) => ['inviti', squadraId] as const,
-  log: () => ['log'] as const,
+  tournaments: () => ['tournaments'] as const,
+  tournament: (tid: string) => ['tournaments', tid] as const,
+  periods: (tid: string) => ['periods', tid] as const,
+  teams: (tid: string) => ['teams', tid] as const,
+  matches: (tid: string) => ['matches', tid] as const,
+  courts: () => ['courts'] as const,
+  recurrences: () => ['recurrences'] as const,
+  bookings: (from: string, to: string) => ['bookings', from, to] as const,
+  requests: (scope: string, ...args: (string | undefined)[]) => ['requests', scope, ...args] as const,
+  availability: (tid: string, uids: string[]) => ['availability', tid, ...uids] as const,
+  profiles: () => ['profiles'] as const,
+  names: () => ['names'] as const,
+  me: (uid: string) => ['profiles', 'me', uid] as const,
+  invite: (teamId: string) => ['invites', teamId] as const,
+  auditLog: () => ['audit_log'] as const,
 };
 
 /** Table → prefixes to invalidate when a realtime event arrives. */
-export const INVALIDA_PER_TABELLA: Record<string, (readonly string[])[]> = {
-  richieste: [['richieste'], ['partite']],
-  richiesta_giocatori: [['richieste']],
-  partite: [['partite']],
-  occupazioni: [['occupazioni']],
-  squadre: [['squadre']],
-  disponibilita: [['disponibilita']],
+export const INVALIDATE_BY_TABLE: Record<string, (readonly string[])[]> = {
+  requests: [['requests'], ['matches']],
+  request_players: [['requests']],
+  matches: [['matches']],
+  bookings: [['bookings']],
+  teams: [['teams']],
+  availability: [['availability']],
 };

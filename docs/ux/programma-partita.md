@@ -46,7 +46,7 @@ Effective state is derived client-side: a `richiesta` match whose request is not
 | — | Any | non-player logged in | Read-only version of the current block, no actions | — |
 | — | Any | organizer | Same as above + "Strumenti organizzatore" section (risultato brief) | — |
 
-Transitions arrive via Realtime (`partite`, `richieste`, `richiesta_giocatori`); a change re-renders the primary block and announces it politely ("Marta ha accettato: 4 su 4").
+Transitions arrive via Realtime (`partite`, `richieste`, `request_players`); a change re-renders the primary block and announces it politely ("Marta ha accettato: 4 su 4").
 
 ## 6. Slot grid (S1)
 
