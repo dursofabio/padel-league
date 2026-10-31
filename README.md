@@ -99,7 +99,7 @@ SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SECRET_KEY=<service_role key printe
 VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=<publishable key> npm run dev
 ```
 
-The demo creates the users `admin@`, `org@`, `gestore@` and `p1@`…`p8@` `demo.it` (password `password` locally, `DEMO_PASSWORD` elsewhere), a tournament with 4 pairs, availability windows and a lesson. On the hosted project use *Actions → Dati di prova* (secret `DEMO_PASSWORD`); the `rimuovi` option deletes the demo users and every tournament they play in. Reminder emails are never sent to `@demo.it` addresses. The `/#/_kit` page (development only) shows the design system.
+The demo creates the users `admin@`, `org@`, `gestore@` and `p1@`…`p40@` `demo.it` (password `password` locally, `DEMO_PASSWORD` elsewhere), a tournament with 20 pairs in 2 groups of 10 and 3 periods, two weeks of varied availability and a lesson. On the hosted project use *Actions → Dati di prova* (secret `DEMO_PASSWORD`); the `rimuovi` option deletes the demo users and every tournament they play in. Reminder emails are never sent to `@demo.it` addresses. The `/#/_kit` page (development only) shows the design system.
 
 Tests:
 

@@ -1,7 +1,7 @@
 name: Dati di prova
 
 # Loads or removes the demo data (scripts/seed-demo.mjs) on the hosted project.
-# Users admin@, org@, gestore@, p1@…p8@ demo.it with password secrets.DEMO_PASSWORD.
+# Users admin@, org@, gestore@, p1@…p40@ demo.it with password secrets.DEMO_PASSWORD.
 # Reminder emails are never sent to @demo.it addresses.
 # Settings: vars.VITE_SUPABASE_URL (or vars.SUPABASE_URL), secrets.SUPABASE_SECRET_KEY, secrets.DEMO_PASSWORD.
 
