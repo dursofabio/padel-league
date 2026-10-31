@@ -22,7 +22,6 @@
       "Read(./.env.example)"
     ],
     "deny": [
-      "Bash(git push*)",
       "Bash(git reset --hard*)",
       "Bash(rm -rf *)",
       "Bash(docker compose down -v*)",
