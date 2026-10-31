@@ -8,7 +8,7 @@
  */
 import { CalendarRange, Check, ChevronLeft, ChevronRight, Clock3, Info, UserRoundX } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { CourtLanes, LaneBlock, scalaDaCampi, type LanesScala } from '../../../../components/CourtLanes';
 import { ErrorState } from '../../../../components/states';
 import { WhatsAppButton } from '../../../../components/WhatsAppButton';

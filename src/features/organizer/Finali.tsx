@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowRight, ArrowUp, Equal, Monitor, RefreshCw, RotateCcw, Trophy } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Bracket } from '../../components/Bracket';
 import { Sezione } from '../../components/PageHeader';
 import { EmptyState } from '../../components/states';

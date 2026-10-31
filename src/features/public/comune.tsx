@@ -1,6 +1,6 @@
 import { ChevronRight, LogIn, Trophy, WifiOff } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../components/states';
 import { dataOraRoma } from '../../lib/attention';

@@ -1,6 +1,6 @@
 import { LogIn } from 'lucide-react';
 import { lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, QueryState, SkeletonRighe } from '../../components/states';

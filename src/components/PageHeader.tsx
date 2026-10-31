@@ -1,6 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 /** Page heading: a single h1, an optional back link and actions. No kicker above it. */
 export function PageHeader({

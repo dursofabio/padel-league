@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { MatchRow } from '../../components/MatchRow';
 import { PageHeader } from '../../components/PageHeader';

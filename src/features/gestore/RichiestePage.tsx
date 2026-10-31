@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 import { scalaDaCampi } from '../../components/CourtLanes';
 import { PageHeader, Sezione } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../components/states';

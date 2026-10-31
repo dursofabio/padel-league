@@ -1,6 +1,6 @@
 import { CalendarDays, Inbox, Repeat, SlidersHorizontal, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router';
 import { cn } from '../../ui';
 
 const VOCI: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [

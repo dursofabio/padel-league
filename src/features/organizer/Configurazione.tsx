@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDown, ArrowUp, Monitor, Plus, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Sezione } from '../../components/PageHeader';
 import { azioni, useAzione } from '../../data/mutations';
 import type { Spareggio } from '../../types';

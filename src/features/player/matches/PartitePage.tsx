@@ -4,7 +4,7 @@
  */
 import { AlarmClock, CircleCheck, Hourglass, PenLine } from 'lucide-react';
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { MatchRow } from '../../../components/MatchRow';
 import { StatoPartitaBadge } from '../../../components/StatusBadge';
 import { PageHeader, Sezione } from '../../../components/PageHeader';

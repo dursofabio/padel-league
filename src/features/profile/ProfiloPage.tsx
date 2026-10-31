@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTema, type Tema } from '../../app/theme';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader, Sezione } from '../../components/PageHeader';

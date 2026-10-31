@@ -1,6 +1,6 @@
 import { Medal, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/states';
 import { StandingsTable } from '../../components/StandingsTable';

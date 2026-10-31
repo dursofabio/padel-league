@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { Bracket } from '../../components/Bracket';
 import { PageHeader } from '../../components/PageHeader';

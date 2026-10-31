@@ -1,6 +1,6 @@
 import { CalendarDays, CalendarRange, LayoutDashboard, ListChecks, Settings2, Trophy, Users, type LucideIcon } from 'lucide-react';
 import { lazy, Suspense, useEffect, useMemo, useRef, type ComponentType } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../components/states';
 import { useTorneoData } from '../../data/queries';

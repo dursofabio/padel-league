@@ -4,7 +4,7 @@
  */
 import { ArrowRight, Ban, CircleX, TimerOff, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router';
 import { PageHeader, Sezione } from '../../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../../components/states';
 import { StatoPartitaBadge } from '../../../components/StatusBadge';

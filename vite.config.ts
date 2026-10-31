@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // Relative base: works on GitHub Pages as a user or project site. Hash routing (/#/...): no 404 on refresh.
@@ -38,7 +38,16 @@ export default defineConfig({
     }),
   ],
   build: {
-    rollupOptions: { output: { manualChunks: { react: ['react', 'react-dom', 'react-dom/client', 'react-router-dom'], supabase: ['@supabase/supabase-js'] } } },
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/ },
+            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/ },
+          ],
+        },
+      },
+    },
   },
   test: { environment: 'node' },
-} as never);
+});

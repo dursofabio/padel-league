@@ -1,6 +1,6 @@
 import { CalendarRange, List, Plus, TriangleAlert, WifiOff } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { useBlocker, useParams } from 'react-router-dom';
+import { useBlocker, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { useAuth } from '../../../auth/AuthProvider';
 import { PageHeader } from '../../../components/PageHeader';

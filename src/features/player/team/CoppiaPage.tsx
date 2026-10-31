@@ -1,6 +1,6 @@
 import { BadgeCheck, CalendarRange, Check, Copy, Hourglass, Pencil, Trash2, UserMinus, UserPlus, type LucideIcon } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { useAuth } from '../../../auth/AuthProvider';
 import { PageHeader, Sezione } from '../../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonRighe } from '../../../components/states';

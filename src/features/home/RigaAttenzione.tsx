@@ -1,6 +1,6 @@
 import { AlarmClock, Check } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { WhatsAppButton } from '../../components/WhatsAppButton';
 import { messaggioErrore } from '../../data/errors';
 import { azioni, useAzione, type EsitoConferma } from '../../data/mutations';

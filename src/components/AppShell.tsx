@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { Toaster } from 'sonner';
 import { useTorneoCorrente } from '../app/torneo-corrente';
 import { useAuth } from '../auth/AuthProvider';

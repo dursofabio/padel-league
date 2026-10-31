@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createHashRouter, Navigate } from 'react-router-dom';
+import { createHashRouter, Navigate } from 'react-router';
 import { AppShell } from '../components/AppShell';
 import { RequireAuth, RequireRole } from './guards';
 

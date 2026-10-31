@@ -1,6 +1,6 @@
 import { ArrowRight, Check, CircleCheck, Flag } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Sezione } from '../../components/PageHeader';
 import { azioni, useAzione } from '../../data/mutations';
 import { prossimoPasso } from '../../lib/prossimoPasso';

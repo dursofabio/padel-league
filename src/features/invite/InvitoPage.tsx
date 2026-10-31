@@ -1,6 +1,6 @@
 import { LogIn, TriangleAlert, UserPlus, UsersRound } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader } from '../../components/PageHeader';
 import { ErrorState, SkeletonRighe } from '../../components/states';

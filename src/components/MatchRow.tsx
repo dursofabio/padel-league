@@ -1,5 +1,5 @@
 import { Check, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { formatRisultato, risultatoUfficiale } from '../lib/results';
 import { labelDate } from '../lib/time';
 import { nomeSquadra } from '../lib/torneo';
