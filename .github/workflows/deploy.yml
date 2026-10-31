@@ -30,6 +30,7 @@ jobs:
           # public configuration: set it in the repository "Variables"
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_GOOGLE_LOGIN: ${{ vars.VITE_GOOGLE_LOGIN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

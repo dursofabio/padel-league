@@ -58,7 +58,7 @@ docs/           API contract, UX briefs, reviews
    **Without a local checkout:** use the `.github/workflows/migrations.yml` workflow. Set the variable `SUPABASE_PROJECT_REF` and the secrets `SUPABASE_ACCESS_TOKEN` (Supabase account → Access Tokens) and `SUPABASE_DB_PASSWORD`, then run *Actions → Migrazioni database → Run workflow* (tick the option to load the sample courts). It also runs on every push to `main` that changes a migration.
 4. **Authentication**
    - **URL Configuration:** set Site URL to `https://<user>.github.io/padel-league/` and add the redirect URL `https://<user>.github.io/padel-league/**`. The app uses the PKCE flow, so login links come back as `?code=` and don't clash with hash routing.
-   - **Google:** create an OAuth client in Google Cloud with redirect URI `https://<ref>.supabase.co/auth/v1/callback` and enter its ID and secret in Supabase.
+   - **Google (optional):** create an OAuth client in Google Cloud with redirect URI `https://<ref>.supabase.co/auth/v1/callback`, enter its ID and secret in Supabase, then set the Actions variable `VITE_GOOGLE_LOGIN=true` so the "Continua con Google" button appears. Without it the app offers email and password only.
    - **SMTP:** set up a custom SMTP server. Without it, Supabase's built-in email reaches only the project team, so sign-up confirmations and password resets won't arrive for other users.
 5. **First admin:** sign up in the app, then run in the SQL Editor:
    `update public.profiles set roles = '{admin,giocatore}' where email = '<your-email>';`

@@ -11,6 +11,9 @@ import { Button, Field, Input, Segmented } from '../../ui';
 
 type Modo = 'accedi' | 'registrati' | 'reset';
 
+// Google sign-in shows only when the provider is enabled in Supabase (VITE_GOOGLE_LOGIN=true at build time).
+const googleAttivo = import.meta.env.VITE_GOOGLE_LOGIN === 'true';
+
 const schema = z.object({
   nome: z.string().optional(),
   email: z.string().email('Inserisci un’email valida'),
@@ -107,7 +110,7 @@ export default function AccediPage() {
           </Button>
         </form>
       )}
-      {modo !== 'reset' && (
+      {googleAttivo && modo !== 'reset' && (
         <>
           <div className="flex items-center gap-3 text-sm text-ink-muted" aria-hidden>
             <span className="h-px flex-1 bg-line" />
