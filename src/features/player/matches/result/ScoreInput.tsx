@@ -145,9 +145,10 @@ function Stepper({
         type="button"
         className={btn}
         aria-label={`${label}: meno uno`}
-        disabled={disabled || !valore}
+        disabled={disabled || valore === 0}
         onClick={() => {
-          onChange(Math.max(0, (valore ?? 0) - 1));
+          // from empty, − writes 0 (a set lost 6-0); + writes 1
+          onChange(valore === null ? 0 : Math.max(0, valore - 1));
           onBlur();
         }}
       >
@@ -182,7 +183,7 @@ function Stepper({
         aria-label={`${label}: più uno`}
         disabled={disabled || (valore ?? 0) >= max}
         onClick={() => {
-          onChange(Math.min(max, (valore ?? -1) + 1));
+          onChange(Math.min(max, (valore ?? 0) + 1));
           onBlur();
         }}
       >

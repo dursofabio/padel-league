@@ -24,7 +24,7 @@ export function InserisciRisultato({ ctx, iniziale, onFatto, onAnnulla }: { ctx:
         Scrivi i game nell’ordine: prima {ctx.nomeA}, poi {ctx.nomeB}. Vale dopo la conferma di un avversario.
       </p>
       <ScoreInput valori={valori} onChange={setValori} formato={formato} nomeA={ctx.nomeA} nomeB={ctx.nomeB} disabled={invia.isPending} />
-      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+4rem)] z-10 -mx-1 flex flex-wrap gap-2 bg-bg px-1 py-2 lg:static lg:bg-transparent">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant="primary"
           size="lg"

@@ -284,7 +284,10 @@ export function deriveAttention(input: AttentionInput): AttentionItem[] {
       const da = per.inizio > today ? per.inizio : today;
       const coperto = Object.entries(mieFasce ?? {}).some(([d, f]) => d >= da && d <= per.fine && f.length > 0);
       if (coperto) continue;
-      out.push({ id: `segna-disponibilita:${per.id}`, kind: 'segna-disponibilita', role: 'giocatore', priority: 1,
+      // a period that starts more than a week from now is not urgent yet: it must not push down
+      // results to confirm or requests to accept
+      const futuro = Date.parse(per.inizio) - now > 7 * GIORNO;
+      out.push({ id: `segna-disponibilita:${per.id}`, kind: 'segna-disponibilita', role: 'giocatore', priority: futuro ? 2 : 1,
         deadline: iso(fineGiorno(per.fine)), refs: { torneoId: tid, periodoId: per.id },
         action: { type: 'navigate', to: `/t/${tid}/disponibilita?periodo=${per.id}` } });
     }

@@ -77,8 +77,8 @@ export function StandingsTable({
                   <tr aria-hidden>
                     <td colSpan={8} className="border-t-2 border-court py-1 text-xs font-semibold text-ink-muted dark:border-line-strong">
                       {zonaPrima ? `${zonaPrima} sopra questa linea` : ''}
-                      {zonaPrima && zona ? ' · ' : ''}
-                      {zona ? `${zona} sotto` : 'Sotto questa linea: fuori dalle fasi finali'}
+                      {zonaPrima ? ' · ' : ''}
+                      {zona ? `${zona} sotto` : zonaPrima ? 'sotto: fuori dalle fasi finali' : 'Sotto questa linea: fuori dalle fasi finali'}
                     </td>
                   </tr>
                 )}

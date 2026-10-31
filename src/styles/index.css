@@ -246,3 +246,10 @@
 @keyframes sheet-left {
   from { transform: translateX(100%); }
 }
+
+/* Sonner close button: 20px by default, too small to tap. Invisible 44px hit area around it. */
+[data-sonner-toast] [data-close-button]::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}

@@ -136,6 +136,27 @@ describe('deriveAttention', () => {
     expect(kinds(input({ partite: [], mieFasce: null }))).toEqual([]);
   });
 
+  it('segna-disponibilita for a period far ahead is not urgent and stays below a result to confirm', () => {
+    const PFUTURO: Periodo = { id: 'p3', fase: 'gironi', inizio: '2026-12-01', fine: '2026-12-20', etichetta: 'Periodo 3' };
+    const PVICINO: Periodo = { id: 'p4', fase: 'gironi', inizio: '2026-11-18', fine: '2026-11-30', etichetta: 'Periodo 4' };
+    const items = deriveAttention(
+      input({
+        periodi: [P1, PFUTURO, PVICINO],
+        mieFasce: null,
+        partite: [
+          partita({ id: 'm1', stato: 'programmata', risultato: { set: [{ a: 6, b: 3 }, { a: 6, b: 4 }], inseritoDa: 'u3', confermatoDa: null } }),
+          partita({ id: 'm2', periodoId: 'p3' }),
+          partita({ id: 'm3', periodoId: 'p4' }),
+        ],
+      }),
+    );
+    expect(items.find((x) => x.id === 'segna-disponibilita:p3')).toMatchObject({ priority: 2 });
+    expect(items.find((x) => x.id === 'segna-disponibilita:p4')).toMatchObject({ priority: 1 });
+    const pos = (id: string) => items.findIndex((x) => x.id === id);
+    expect(pos('conferma-risultato:m1')).toBeGreaterThanOrEqual(0);
+    expect(pos('conferma-risultato:m1')).toBeLessThan(pos('segna-disponibilita:p3'));
+  });
+
   it('completa-coppia and coppia-da-approvare', () => {
     const mie: Squadra[] = [{ id: 's1', nome: 'X', giocatori: [ME], stato: 'in attesa partner', creatoDa: ME }];
     expect(deriveAttention(input({ squadre: mie }))[0]).toMatchObject({ kind: 'completa-coppia', priority: 1 });
