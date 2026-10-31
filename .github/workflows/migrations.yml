@@ -16,6 +16,12 @@ on:
         description: Also load the sample courts (supabase/seed.sql)
         type: boolean
         default: false
+      reset:
+        description: >-
+          AZZERA il database: cancella TUTTI i dati, utenti compresi, e riapplica da zero migrazioni e campi.
+          Per confermare scrivi qui il project ref; lascia vuoto per il normale aggiornamento.
+        type: string
+        default: ''
   push:
     branches: [main]
     paths: ['supabase/migrations/**']
@@ -47,4 +53,16 @@ jobs:
       - name: Pending migrations
         run: supabase migration list --linked
       - name: Apply the migrations
+        if: ${{ inputs.reset == '' || inputs.reset == null }}
         run: supabase db push --linked --yes ${{ inputs.seed && '--include-seed' || '' }}
+      - name: Reset the database (all data and users wiped)
+        if: ${{ inputs.reset != '' && inputs.reset != null }}
+        env:
+          CONFERMA: ${{ inputs.reset }}
+        run: |
+          if [ "$CONFERMA" != "$SUPABASE_PROJECT_REF" ]; then
+            echo "::error::Conferma errata: per azzerare scrivi esattamente il project ref ($SUPABASE_PROJECT_REF)"
+            exit 1
+          fi
+          # wipes the project data (auth users included) and migration history, re-applies every migration and supabase/seed.sql
+          supabase db reset --linked --yes
