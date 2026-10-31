@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const envUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+// Local development opened from a phone on the same Wi-Fi (http://<computer-ip>:5173):
+// "127.0.0.1" would point at the phone itself, so use the computer's address instead.
+const url =
+  import.meta.env.DEV && envUrl && typeof location !== 'undefined' && /^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(envUrl) && !['localhost', '127.0.0.1'].includes(location.hostname)
+    ? envUrl.replace(/(127\.0\.0\.1|localhost)/, location.hostname)
+    : envUrl;
 const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
 
 /** The publishable key is public by design: security lives in RLS policies and RPC functions. */

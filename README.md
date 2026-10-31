@@ -89,15 +89,22 @@ Request expiry, recurrence materialisation and unplayed-match reports run in **p
 
 ## Local development
 
-```bash
-npm install && (cd scripts && npm install)
+Requirements: Docker Desktop (running), Node.js 22, Git. Same commands on Mac, Windows and Linux:
 
-# Full stack with Docker (Supabase CLI). Where the default registry is not reachable,
-# add SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io
-npx supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta
-SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SECRET_KEY=<service_role key printed by start> npm run seed:demo
-VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=<publishable key> npm run dev
+```bash
+npm install
+npm run locale
 ```
+
+`npm run locale` starts Supabase in Docker with the migrations, writes `.env.local`, loads the demo data the first time and opens the app on http://localhost:5173 (also reachable from a phone on the same Wi-Fi at `http://<computer-ip>:5173`). Emails sent by the local auth land in the mail catcher at http://127.0.0.1:54324.
+
+| Command | What it does |
+|---|---|
+| `npm run locale -- --demo` | start and reload the demo tournament from scratch |
+| `npm run locale:stop` | stop the containers (data are kept) |
+| `npm run locale:reset` | wipe the local database, re-apply migrations and courts |
+
+Where the default image registry is not reachable, set `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`.
 
 The demo creates the users `admin@`, `org@`, `gestore@` and `p1@`…`p40@` `demo.it` (password `password` locally, `DEMO_PASSWORD` elsewhere), a tournament with 20 pairs in 2 groups of 10 and 3 periods, two weeks of varied availability and a lesson. On the hosted project use *Actions → Dati di prova* (secret `DEMO_PASSWORD`); the `rimuovi` option deletes the demo users and every tournament they play in. Reminder emails are never sent to `@demo.it` addresses. The `/#/_kit` page (development only) shows the design system.
 

@@ -10,6 +10,9 @@
     "test": "vitest run src",
     "typecheck": "tsc -b",
     "seed:demo": "node scripts/seed-demo.mjs",
+    "locale": "node scripts/locale.mjs",
+    "locale:stop": "node scripts/locale.mjs --stop",
+    "locale:reset": "node scripts/locale.mjs --reset",
     "test:db": "bash scripts/db-test.sh"
   },
   "dependencies": {
@@ -51,6 +54,7 @@
     "axe-core": "^4.14.0",
     "jsdom": "^29.1.1",
     "pg": "^8.23.1",
+    "supabase": "^2.122.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.8",
     "vite": "^6.4.5",
