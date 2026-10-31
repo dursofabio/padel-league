@@ -14,19 +14,19 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { Toaster } from 'sonner';
-import { useTorneoCorrente } from '../app/torneo-corrente';
+import { useCurrentTournament } from '../app/current-tournament';
 import { useAuth } from '../auth/AuthProvider';
-import { useRichiesteGiocatore, useRichiesteInAttesa } from '../data/queries';
+import { usePendingRequests, usePlayerRequests } from '../data/queries';
 import { useRealtime } from '../data/realtime';
-import { richiestaAttiva } from '../lib/slots';
+import { isRequestActive } from '../lib/slots';
 import { Sheet } from '../ui/sheet';
 import { cn } from '../ui/cn';
 
-interface Voce {
+interface NavEntry {
   to: string;
   label: string;
   /** Shorter label for the mobile tab bar (5 items in 390px). */
-  breve?: string;
+  short?: string;
   icon: LucideIcon;
   badge?: number;
   end?: boolean;
@@ -39,106 +39,106 @@ interface Voce {
  */
 export function AppShell() {
   const { user, profile, hasRole } = useAuth();
-  const { tid, torneo } = useTorneoCorrente();
+  const { tid, tournament } = useCurrentTournament();
   const loc = useLocation();
-  const [altro, setAltro] = useState(false);
-  const [annuncio, setAnnuncio] = useState('');
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
 
-  const gestore = hasRole('gestore');
-  const mie = useRichiesteGiocatore(user?.id);
-  const inAttesa = useRichiesteInAttesa(gestore);
-  const daAccettare = (mie.data ?? []).filter((r) => r.stato === 'attesa' && richiestaAttiva(r) && !r.accettazioni[user!.id]).length;
-  const daConfermare = (inAttesa.data ?? []).filter((r) => richiestaAttiva(r)).length;
+  const isManager = hasRole('manager');
+  const mine = usePlayerRequests(user?.id);
+  const pending = usePendingRequests(isManager);
+  const toAccept = (mine.data ?? []).filter((r) => r.status === 'pending' && isRequestActive(r) && !r.acceptances[user!.id]).length;
+  const toConfirm = (pending.data ?? []).filter((r) => isRequestActive(r)).length;
 
-  const onEvento = useCallback(
-    (tabella: string) => {
-      if (tabella === 'richieste') setAnnuncio(gestore ? 'Le richieste sono state aggiornate.' : 'Una tua partita è stata aggiornata.');
+  const onEvent = useCallback(
+    (table: string) => {
+      if (table === 'requests') setAnnouncement(isManager ? 'Le richieste sono state aggiornate.' : 'Una tua partita è stata aggiornata.');
     },
-    [gestore],
+    [isManager],
   );
-  useRealtime(!!user, onEvento);
+  useRealtime(!!user, onEvent);
 
   // Title per page (WCAG 2.4.2) and announcement of the new page: pages load lazily, so wait for the h1.
-  const [pagina, setPagina] = useState('');
+  const [pageTitle, setPageTitle] = useState('');
   useEffect(() => {
-    let tentativi = 0;
+    let attempts = 0;
     const t = setInterval(() => {
       const h1 = document.querySelector('main h1')?.textContent?.trim();
-      if (h1 || ++tentativi > 30) {
+      if (h1 || ++attempts > 30) {
         clearInterval(t);
         document.title = h1 ? `${h1} · Padel League` : 'Padel League';
-        if (h1) setPagina(h1);
+        if (h1) setPageTitle(h1);
       }
     }, 100);
     return () => clearInterval(t);
   }, [loc.pathname]);
 
-  const voci: Voce[] = [];
-  if (user) voci.push({ to: '/', label: 'Da fare', icon: ListTodo, end: true, badge: daAccettare || undefined });
-  if (user && tid && hasRole('giocatore')) {
-    voci.push({ to: `/t/${tid}/partite`, label: 'Partite', icon: CalendarDays });
-    voci.push({ to: `/t/${tid}/disponibilita`, label: 'Disponibilità', breve: 'Orari', icon: CalendarRange });
+  const entries: NavEntry[] = [];
+  if (user) entries.push({ to: '/', label: 'Da fare', icon: ListTodo, end: true, badge: toAccept || undefined });
+  if (user && tid && hasRole('player')) {
+    entries.push({ to: `/t/${tid}/partite`, label: 'Partite', icon: CalendarDays });
+    entries.push({ to: `/t/${tid}/disponibilita`, label: 'Disponibilità', short: 'Orari', icon: CalendarRange });
   }
-  if (gestore) {
-    // one entry: Richieste / Giornata / Ricorrenze / Campi are in the court area's own navigation
-    voci.push({ to: '/campo', label: 'Campo', icon: Inbox, badge: daConfermare || undefined });
+  if (isManager) {
+    // one entry: requests / day / recurrences / courts are in the court area's own navigation
+    entries.push({ to: '/campo', label: 'Campo', icon: Inbox, badge: toConfirm || undefined });
   }
-  if (tid) voci.push({ to: `/t/${tid}`, label: 'Torneo', icon: Trophy, end: true });
-  if (tid && hasRole('organizzatore')) voci.push({ to: `/t/${tid}/organizza`, label: 'Organizza', icon: Settings2 });
-  if (hasRole('admin')) voci.push({ to: '/admin/utenti', label: 'Utenti', icon: Users });
+  if (tid) entries.push({ to: `/t/${tid}`, label: 'Torneo', icon: Trophy, end: true });
+  if (tid && hasRole('organizer')) entries.push({ to: `/t/${tid}/organizza`, label: 'Organizza', icon: Settings2 });
+  if (hasRole('admin')) entries.push({ to: '/admin/utenti', label: 'Utenti', icon: Users });
 
-  const inBarra = voci.length > 5 ? voci.slice(0, 4) : voci;
-  const inAltro = voci.length > 5 ? voci.slice(4) : [];
+  const inBar = entries.length > 5 ? entries.slice(0, 4) : entries;
+  const inMore = entries.length > 5 ? entries.slice(4) : [];
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-      <a href="#contenuto" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-ball focus:px-3 focus:py-2 focus:text-ball-ink">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-ball focus:px-3 focus:py-2 focus:text-ball-ink">
         Vai al contenuto
       </a>
 
       {/* Sidebar (desktop) */}
       <aside className="sticky top-0 hidden h-dvh flex-col bg-court-deep text-court-ink lg:flex">
-        <Brand torneo={torneo?.nome} />
+        <Brand tournament={tournament?.name} />
         <nav aria-label="Principale" className="flex-1 overflow-y-auto px-3 py-2">
           <ul className="grid gap-0.5">
-            {voci.map((v) => (
+            {entries.map((v) => (
               <li key={v.to}>
-                <NavItem v={v} variante="sidebar" />
+                <NavItem v={v} variant="sidebar" />
               </li>
             ))}
           </ul>
         </nav>
         <div className="border-t border-court-line px-3 py-3">
-          <ProfiloLink nome={profile?.nome} loggato={!!user} variante="sidebar" />
+          <ProfileLink name={profile?.name} signedIn={!!user} variant="sidebar" />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-col">
         {/* Top bar (mobile/tablet) */}
         <header className="z-30 flex items-center justify-between gap-3 bg-court px-4 text-court-ink md:sticky md:top-0 lg:hidden">
-          <Brand torneo={torneo?.nome} compatto />
+          <Brand tournament={tournament?.name} compact />
           <div className="shrink-0">
-            <ProfiloLink nome={profile?.nome} loggato={!!user} variante="topbar" />
+            <ProfileLink name={profile?.name} signedIn={!!user} variant="topbar" />
           </div>
         </header>
 
-        <main id="contenuto" key={loc.pathname} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-5 pb-28 md:px-6 lg:px-10 lg:pt-8 lg:pb-12">
+        <main id="main-content" key={loc.pathname} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-5 pb-28 md:px-6 lg:px-10 lg:pt-8 lg:pb-12">
           <Outlet />
         </main>
 
         {/* Tab bar (mobile/tablet) */}
-        {voci.length > 1 && (
+        {entries.length > 1 && (
           <nav aria-label="Principale" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface lg:hidden">
-            <ul className="mx-auto grid max-w-xl" style={{ gridTemplateColumns: `repeat(${inBarra.length + (inAltro.length ? 1 : 0)}, minmax(0,1fr))` }}>
-              {inBarra.map((v) => (
+            <ul className="mx-auto grid max-w-xl" style={{ gridTemplateColumns: `repeat(${inBar.length + (inMore.length ? 1 : 0)}, minmax(0,1fr))` }}>
+              {inBar.map((v) => (
                 <li key={v.to}>
-                  <NavItem v={v} variante="tab" />
+                  <NavItem v={v} variant="tab" />
                 </li>
               ))}
-              {inAltro.length > 0 && (
+              {inMore.length > 0 && (
                 <li>
                   <button
-                    onClick={() => setAltro(true)}
+                    onClick={() => setMoreOpen(true)}
                     className="flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold text-ink-muted"
                   >
                     <Menu className="size-6" aria-hidden />
@@ -151,11 +151,11 @@ export function AppShell() {
         )}
       </div>
 
-      <Sheet open={altro} onOpenChange={setAltro} title="Altro">
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen} title="Altro">
         <ul className="court-rule">
-          {[...inAltro, { to: '/profilo', label: 'Profilo', icon: UserRound }].map((v) => (
+          {[...inMore, { to: '/profilo', label: 'Profilo', icon: UserRound }].map((v) => (
             <li key={v.to}>
-              <NavLink to={v.to} onClick={() => setAltro(false)} className="flex min-h-12 items-center gap-3 text-base font-semibold">
+              <NavLink to={v.to} onClick={() => setMoreOpen(false)} className="flex min-h-12 items-center gap-3 text-base font-semibold">
                 <v.icon className="size-5 text-court dark:text-info-ink" aria-hidden />
                 {v.label}
               </NavLink>
@@ -165,10 +165,10 @@ export function AppShell() {
       </Sheet>
 
       <p aria-live="polite" className="sr-only">
-        {annuncio}
+        {announcement}
       </p>
       <p aria-live="polite" className="sr-only">
-        {pagina && `Pagina: ${pagina}`}
+        {pageTitle && `Pagina: ${pageTitle}`}
       </p>
       <Toaster
         position="bottom-center"
@@ -182,13 +182,13 @@ export function AppShell() {
   );
 }
 
-function Brand({ torneo, compatto }: { torneo?: string; compatto?: boolean }) {
+function Brand({ tournament, compact }: { tournament?: string; compact?: boolean }) {
   return (
-    <Link to="/" className={cn('flex min-h-14 min-w-0 items-center gap-2.5', !compatto && 'px-5 py-4')}>
+    <Link to="/" className={cn('flex min-h-14 min-w-0 items-center gap-2.5', !compact && 'px-5 py-4')}>
       <CourtMark />
       <span className="grid min-w-0 leading-tight">
         <span className="text-base font-bold">Padel League</span>
-        {torneo && <span className="truncate text-sm text-court-ink-muted">{torneo}</span>}
+        {tournament && <span className="truncate text-sm text-court-ink-muted">{tournament}</span>}
       </span>
     </Link>
   );
@@ -205,9 +205,9 @@ function CourtMark() {
   );
 }
 
-function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
+function NavItem({ v, variant }: { v: NavEntry; variant: 'tab' | 'sidebar' }) {
   const Icon = v.icon;
-  if (variante === 'tab')
+  if (variant === 'tab')
     return (
       <NavLink
         to={v.to}
@@ -224,9 +224,9 @@ function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
             {isActive && <span aria-hidden className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-court dark:bg-ball" />}
             <span className="relative">
               <Icon className="size-6" aria-hidden />
-              {v.badge ? <Contatore n={v.badge} /> : null}
+              {v.badge ? <Counter n={v.badge} /> : null}
             </span>
-            <span className="max-w-full text-center leading-tight">{v.breve ?? v.label}</span>
+            <span className="max-w-full text-center leading-tight">{v.short ?? v.label}</span>
           </>
         )}
       </NavLink>
@@ -251,7 +251,7 @@ function NavItem({ v, variante }: { v: Voce; variante: 'tab' | 'sidebar' }) {
   );
 }
 
-function Contatore({ n }: { n: number }) {
+function Counter({ n }: { n: number }) {
   return (
     <span className="tabular absolute -top-1.5 -right-2.5 min-w-5 rounded-full bg-danger px-1 text-center text-xs leading-5 text-white">
       {n}
@@ -260,15 +260,15 @@ function Contatore({ n }: { n: number }) {
   );
 }
 
-function ProfiloLink({ nome, loggato, variante }: { nome?: string; loggato: boolean; variante: 'topbar' | 'sidebar' }) {
-  if (!loggato)
+function ProfileLink({ name, signedIn, variant }: { name?: string; signedIn: boolean; variant: 'topbar' | 'sidebar' }) {
+  if (!signedIn)
     return (
       <Link to="/accedi" className="inline-flex min-h-11 items-center gap-2 rounded-control px-2 font-semibold">
         <LogIn className="size-5" aria-hidden />
         Accedi
       </Link>
     );
-  const iniziali = (nome ?? '?')
+  const initials = (name ?? '?')
     .split(/\s+/)
     .slice(0, 2)
     .map((s) => s[0]?.toUpperCase())
@@ -276,11 +276,11 @@ function ProfiloLink({ nome, loggato, variante }: { nome?: string; loggato: bool
   return (
     <Link
       to="/profilo"
-      className={cn('flex min-h-11 items-center gap-2.5 rounded-control', variante === 'sidebar' && 'px-2 hover:bg-court')}
+      className={cn('flex min-h-11 items-center gap-2.5 rounded-control', variant === 'sidebar' && 'px-2 hover:bg-court')}
     >
-      {variante === 'topbar' && <span className="sr-only">Profilo di {nome}</span>}
-      <span aria-hidden className="grid size-11 place-items-center rounded-full bg-court-ink text-sm font-bold text-court-deep">{iniziali}</span>
-      {variante === 'sidebar' && <span className="truncate font-semibold">{nome}</span>}
+      {variant === 'topbar' && <span className="sr-only">Profilo di {name}</span>}
+      <span aria-hidden className="grid size-11 place-items-center rounded-full bg-court-ink text-sm font-bold text-court-deep">{initials}</span>
+      {variant === 'sidebar' && <span className="truncate font-semibold">{name}</span>}
     </Link>
   );
 }

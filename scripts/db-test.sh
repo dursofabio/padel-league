@@ -39,7 +39,7 @@ if [[ -z "${DATABASE_URL:-}" ]]; then
       PG_BIN=/usr/lib/postgresql/16/bin
     fi
   fi
-  [[ -x "$PG_BIN/initdb" ]] || { echo "initdb non trovato (imposta PG_BIN o DATABASE_URL)" >&2; exit 1; }
+  [[ -x "$PG_BIN/initdb" ]] || { echo "initdb not found (set PG_BIN or DATABASE_URL)" >&2; exit 1; }
   PG_CTL="$PG_BIN/pg_ctl"
   PSQL_BIN="$PG_BIN/psql"
   [[ -x "$PSQL_BIN" ]] || PSQL_BIN="$(command -v psql)"
@@ -67,7 +67,7 @@ if [[ -z "${DATABASE_URL:-}" ]]; then
       if ! (exec 3<>"/dev/tcp/127.0.0.1/$p") 2>/dev/null; then PORT=$p; break; fi
     done
   fi
-  [[ -n "$PORT" ]] || { echo "nessuna porta libera" >&2; exit 1; }
+  [[ -n "$PORT" ]] || { echo "no free port" >&2; exit 1; }
 
   (cd "$TMP" && "${RUN_AS[@]}" "$PG_BIN/initdb" -D "$TMP/data" -U postgres -A trust -E UTF8 --no-locale >/dev/null)
   (cd "$TMP" && "${RUN_AS[@]}" "$PG_CTL" -D "$TMP/data" -w -l "$TMP/postgres.log" \
@@ -82,7 +82,7 @@ apply() {
   PGOPTIONS="-c client_min_messages=warning" "$PSQL_BIN" "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -X -f "$1" >/dev/null
 }
 
-echo "→ stub Supabase"
+echo "→ Supabase stub"
 apply supabase/tests/00_supabase_stub.sql
 for f in supabase/migrations/*.sql; do
   echo "→ $(basename "$f")"

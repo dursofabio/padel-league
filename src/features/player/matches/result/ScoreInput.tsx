@@ -1,42 +1,42 @@
 /**
  * Score table: one row per set, two columns headed by the pair names, separated by a vertical court line
  * like the net. Each cell is a stepper (− number +) whose number is also a numeric input.
- * Live validation with validaRisultato, messages under the row, winner preview in a polite live region.
+ * Live validation with validateResult, messages under the row, winner preview in a polite live region.
  */
 import { Minus, Plus, Trophy, TriangleAlert } from 'lucide-react';
 import { useId, useState } from 'react';
-import type { FormatoSet } from '../../../../types';
+import type { SetFormat } from '../../../../types';
 import { cn } from '../../../../ui';
-import { controllaRisultato, maxGame, nomeSet, righeVisibili, type ControlloRisultato, type ValoreSet } from '../logica';
+import { checkResult, maxGame, setName, visibleRows, type ResultCheck, type SetValue } from '../logic';
 
 export function ScoreInput({
-  valori,
+  values,
   onChange,
-  formato,
-  nomeA,
-  nomeB,
+  format,
+  nameA,
+  nameB,
   disabled,
 }: {
-  valori: ValoreSet[];
-  onChange: (v: ValoreSet[]) => void;
-  formato: FormatoSet;
-  nomeA: string;
-  nomeB: string;
+  values: SetValue[];
+  onChange: (v: SetValue[]) => void;
+  format: SetFormat;
+  nameA: string;
+  nameB: string;
   disabled?: boolean;
 }) {
   const id = useId();
-  const [toccate, setToccate] = useState<Set<number>>(new Set());
-  const n = righeVisibili(valori, formato);
-  const ctrl = controllaRisultato(valori, formato);
-  const set = (i: number, lato: 'a' | 'b', v: number | null) => {
-    const next = valori.map((x) => ({ ...x }));
-    next[i] = { ...next[i], [lato]: v };
+  const [touched, setTouched] = useState<Set<number>>(new Set());
+  const n = visibleRows(values, format);
+  const check = checkResult(values, format);
+  const set = (i: number, side: 'a' | 'b', v: number | null) => {
+    const next = values.map((x) => ({ ...x }));
+    next[i] = { ...next[i], [side]: v };
     // rows that are no longer visible are cleared, so they never reach the server
-    const vis = righeVisibili(next, formato);
+    const vis = visibleRows(next, format);
     for (let j = vis; j < next.length; j++) next[j] = { a: null, b: null };
     onChange(next);
   };
-  const tocca = (i: number) => setToccate((s) => (s.has(i) ? s : new Set(s).add(i)));
+  const touch = (i: number) => setTouched((s) => (s.has(i) ? s : new Set(s).add(i)));
 
   return (
     <div className="grid w-full max-w-md gap-3">
@@ -44,74 +44,74 @@ export function ScoreInput({
         <legend className="sr-only">Risultato per set</legend>
         <div aria-hidden className="grid grid-cols-2 items-end gap-x-2 border-b border-line pb-2 sm:grid-cols-[6.5rem_1fr_1fr]">
           <span className="hidden sm:block" />
-          <span className="text-center text-base font-bold break-words">{nomeA}</span>
-          <span className="border-l border-line pl-2 text-center text-base font-bold break-words">{nomeB}</span>
+          <span className="text-center text-base font-bold break-words">{nameA}</span>
+          <span className="border-l border-line pl-2 text-center text-base font-bold break-words">{nameB}</span>
         </div>
         {Array.from({ length: n }, (_, i) => {
-          const errore = ctrl.perRiga[i] && (toccate.has(i) || (valori[i]?.a !== null && valori[i]?.b !== null)) ? ctrl.perRiga[i] : undefined;
+          const error = check.byRow[i] && (touched.has(i) || (values[i]?.a !== null && values[i]?.b !== null)) ? check.byRow[i] : undefined;
           const errId = `${id}-err-${i}`;
-          const v = valori[i] ?? { a: null, b: null };
-          const vinceA = v.a !== null && v.b !== null && v.a > v.b;
-          const vinceB = v.a !== null && v.b !== null && v.b > v.a;
+          const v = values[i] ?? { a: null, b: null };
+          const winsA = v.a !== null && v.b !== null && v.a > v.b;
+          const winsB = v.a !== null && v.b !== null && v.b > v.a;
           return (
             <div key={i} className="grid grid-cols-2 items-center gap-x-2 gap-y-1 border-b border-line py-2 sm:grid-cols-[6.5rem_1fr_1fr]">
               <span className="col-span-2 text-sm font-semibold sm:col-span-1">
-                {nomeSet(i, formato)}
+                {setName(i, format)}
               </span>
               <span>
                 <Stepper
-                  label={`${nomeSet(i, formato)}, game di ${nomeA}`}
-                  valore={v.a}
-                  max={maxGame(i, formato)}
-                  forte={vinceA}
+                  label={`${setName(i, format)}, game di ${nameA}`}
+                  value={v.a}
+                  max={maxGame(i, format)}
+                  strong={winsA}
                   disabled={disabled}
-                  describedBy={errore ? errId : undefined}
+                  describedBy={error ? errId : undefined}
                   onChange={(x) => set(i, 'a', x)}
-                  onBlur={() => tocca(i)}
+                  onBlur={() => touch(i)}
                 />
               </span>
               <span className="border-l border-line pl-2">
                 <Stepper
-                  label={`${nomeSet(i, formato)}, game di ${nomeB}`}
-                  valore={v.b}
-                  max={maxGame(i, formato)}
-                  forte={vinceB}
+                  label={`${setName(i, format)}, game di ${nameB}`}
+                  value={v.b}
+                  max={maxGame(i, format)}
+                  strong={winsB}
                   disabled={disabled}
-                  describedBy={errore ? errId : undefined}
+                  describedBy={error ? errId : undefined}
                   onChange={(x) => set(i, 'b', x)}
-                  onBlur={() => tocca(i)}
+                  onBlur={() => touch(i)}
                 />
               </span>
-              {errore && (
+              {error && (
                 <p id={errId} className="col-span-2 flex sm:col-span-3 items-start gap-1.5 text-sm font-semibold text-danger-ink">
                   <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-                  {errore}
+                  {error}
                 </p>
               )}
             </div>
           );
         })}
       </fieldset>
-      <Riepilogo ctrl={ctrl} nomeA={nomeA} nomeB={nomeB} />
+      <ScoreSummary check={check} nameA={nameA} nameB={nameB} />
     </div>
   );
 }
 
 /** "Vincono Rossi/Bianchi 2 set a 1": the last thing read before the button. */
-export function Riepilogo({ ctrl, nomeA, nomeB }: { ctrl: ControlloRisultato; nomeA: string; nomeB: string }) {
+export function ScoreSummary({ check, nameA, nameB }: { check: ResultCheck; nameA: string; nameB: string }) {
   return (
     <p aria-live="polite" className="min-h-7 text-base">
-      {ctrl.vincitore ? (
+      {check.winner ? (
         <span className="flex items-center gap-2 font-bold">
           <Trophy className="size-5 shrink-0" aria-hidden />
           <span className="tabular">
-            Vincono {ctrl.vincitore === 'A' ? nomeA : nomeB} {Math.max(ctrl.setA, ctrl.setB)} set a {Math.min(ctrl.setA, ctrl.setB)}
+            Vincono {check.winner === 'A' ? nameA : nameB} {Math.max(check.setsA, check.setsB)} set a {Math.min(check.setsA, check.setsB)}
           </span>
         </span>
-      ) : ctrl.globale ? (
+      ) : check.global ? (
         <span className="flex items-center gap-2 text-ink-muted">
           <TriangleAlert className="size-5 shrink-0" aria-hidden />
-          {ctrl.globale}
+          {check.global}
         </span>
       ) : null}
     </p>
@@ -120,18 +120,18 @@ export function Riepilogo({ ctrl, nomeA, nomeB }: { ctrl: ControlloRisultato; no
 
 function Stepper({
   label,
-  valore,
+  value,
   max,
-  forte,
+  strong,
   disabled,
   describedBy,
   onChange,
   onBlur,
 }: {
   label: string;
-  valore: number | null;
+  value: number | null;
   max: number;
-  forte: boolean;
+  strong: boolean;
   disabled?: boolean;
   describedBy?: string;
   onChange: (v: number | null) => void;
@@ -145,10 +145,10 @@ function Stepper({
         type="button"
         className={btn}
         aria-label={`${label}: meno uno`}
-        disabled={disabled || valore === 0}
+        disabled={disabled || value === 0}
         onClick={() => {
           // from empty, − writes 0 (a set lost 6-0); + writes 1
-          onChange(valore === null ? 0 : Math.max(0, valore - 1));
+          onChange(value === null ? 0 : Math.max(0, value - 1));
           onBlur();
         }}
       >
@@ -161,9 +161,9 @@ function Stepper({
         autoComplete="off"
         aria-label={label}
         aria-describedby={describedBy}
-        aria-invalid={valore !== null && valore > max ? true : undefined}
+        aria-invalid={value !== null && value > max ? true : undefined}
         disabled={disabled}
-        value={valore ?? ''}
+        value={value ?? ''}
         placeholder="–"
         onFocus={(e) => e.currentTarget.select()}
         onBlur={onBlur}
@@ -174,16 +174,16 @@ function Stepper({
         className={cn(
           'tabular h-11 w-12 rounded-control border border-line-strong bg-surface text-center text-xl text-ink placeholder:text-ink-muted',
           'focus-visible:border-court focus-visible:outline-3 focus-visible:outline-offset-0 focus-visible:outline-ball aria-[invalid=true]:border-danger',
-          forte ? 'font-bold' : 'font-normal',
+          strong ? 'font-bold' : 'font-normal',
         )}
       />
       <button
         type="button"
         className={btn}
         aria-label={`${label}: più uno`}
-        disabled={disabled || (valore ?? 0) >= max}
+        disabled={disabled || (value ?? 0) >= max}
         onClick={() => {
-          onChange(Math.min(max, (valore ?? 0) + 1));
+          onChange(Math.min(max, (value ?? 0) + 1));
           onBlur();
         }}
       >

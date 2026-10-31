@@ -1,232 +1,214 @@
-/** Istante assoluto (scadenze, accettazioni): gli adapter convertono le stringhe ISO del database. */
+/** Absolute instant (expiries, acceptances): the adapters convert the database's ISO strings. */
 export interface Instant {
   toMillis(): number;
 }
 
-export type Role = 'admin' | 'organizzatore' | 'gestore' | 'giocatore';
+export type Role = 'admin' | 'organizer' | 'manager' | 'player';
 
 export interface UserProfile {
   id: string;
-  nome: string;
+  name: string;
   email: string;
-  telefono?: string | null;
-  /** Ruoli multipli: un gestore può anche giocare. */
+  phone?: string | null;
+  /** Multiple roles: a court manager can also play. */
   roles: Role[];
 }
 
-export type Spareggio =
-  | 'punti'
-  | 'scontroDiretto'
-  | 'diffSet'
-  | 'diffGame'
-  | 'setVinti'
-  | 'gameVinti'
-  | 'sorteggio';
+export type Tiebreaker = 'points' | 'headToHead' | 'setDiff' | 'gameDiff' | 'setsWon' | 'gamesWon' | 'draw';
 
-export interface FormatoSet {
-  /** Set necessari per vincere (2 = due set su tre). */
-  setPerVincere: number;
-  /** Il set decisivo si gioca come super tie-break a 10. */
+export interface SetFormat {
+  /** Sets needed to win (2 = best of three). */
+  setsToWin: number;
+  /** The deciding set is played as a super tie-break to 10. */
   superTieBreak: boolean;
 }
 
-export interface FaseFinaleConfig {
-  nome: string; // "Gold", "Silver"
-  posti: number;
+export interface FinalPhaseConfig {
+  name: string; // "Gold", "Silver"
+  spots: number;
 }
 
-export interface TorneoConfig {
-  puntiVittoria: number;
-  puntiSconfitta: number;
-  /** Punti aggiuntivi alla perdente quando la partita arriva al set decisivo. */
-  puntiSconfittaSetDecisivo: number;
-  formatoSet: FormatoSet;
-  spareggi: Spareggio[];
-  criterioQualificazione: 'perPosizione' | 'avulsa';
-  fasiFinali: FaseFinaleConfig[];
-  consentiFuoriGriglia: boolean;
-  passoFuoriGriglia: 15 | 30;
-  scadenzaRichiesteOre: number;
-  /** Ore prima dell'inizio entro cui un giocatore può annullare una partita confermata. */
-  annullamentoGiocatoreOre: number;
+export type QualificationRule = 'byPosition' | 'crossGroup';
+
+export interface TournamentConfig {
+  pointsWin: number;
+  pointsLoss: number;
+  /** Extra points for the loser when the match goes to the deciding set. */
+  pointsLossDecidingSet: number;
+  setFormat: SetFormat;
+  tiebreakers: Tiebreaker[];
+  qualificationRule: QualificationRule;
+  finals: FinalPhaseConfig[];
+  allowOffGrid: boolean;
+  offGridStep: 15 | 30;
+  requestExpiryHours: number;
+  /** Hours before the start within which a player can cancel a confirmed match. */
+  playerCancelHours: number;
 }
 
-export type StatoTorneo = 'iscrizioni' | 'gironi' | 'fasiFinali' | 'concluso';
+export type TournamentStatus = 'registration' | 'groups' | 'finals' | 'completed';
 
-export interface Torneo {
+export interface Tournament {
   id: string;
-  nome: string;
-  stato: StatoTorneo;
-  config: TorneoConfig;
-  /** Ordine da sorteggio per i pari merito non risolti: squadraId -> posizione (più basso = meglio). */
-  sorteggio?: Record<string, number>;
-  /** Fasi finali già generate (nomi in minuscolo). */
-  fasiGenerate?: string[];
+  name: string;
+  status: TournamentStatus;
+  config: TournamentConfig;
+  /** Draw order for unresolved ties: teamId -> position (lower = better). */
+  draw?: Record<string, number>;
+  /** Final phases already generated (lowercase names). */
+  generatedPhases?: string[];
 }
 
-export type StatoSquadra = 'in attesa partner' | 'da approvare' | 'approvata' | 'ritirata';
+export type TeamStatus = 'awaiting_partner' | 'pending_approval' | 'approved' | 'withdrawn';
 
-export interface Squadra {
+export interface Team {
   id: string;
-  nome: string;
-  giocatori: string[];
-  girone?: string | null;
-  stato: StatoSquadra;
-  creatoDa: string;
+  name: string;
+  players: string[];
+  group?: string | null;
+  status: TeamStatus;
+  createdBy: string;
 }
 
-export interface Periodo {
+export interface Period {
   id: string;
-  fase: string; // "gironi" | "gold" | "silver"
-  turno?: number | null; // per le fasi finali: turno a eliminazione
-  inizio: string; // yyyy-mm-dd
-  fine: string; // yyyy-mm-dd
-  etichetta: string;
+  phase: string; // "groups" | "gold" | "silver"
+  round?: number | null; // final phases: knockout round
+  startsOn: string; // yyyy-mm-dd
+  endsOn: string; // yyyy-mm-dd
+  label: string;
 }
 
-export type StatoPartita =
-  | 'da programmare'
-  | 'richiesta'
-  | 'programmata'
-  | 'giocata'
-  | 'contestata'
-  | 'tavolino';
+export type MatchStatus = 'unscheduled' | 'requested' | 'scheduled' | 'played' | 'disputed' | 'forfeit';
 
-/** Firestore non ammette array annidati: un set è una mappa { a: game coppia A, b: game coppia B }. */
+/** One set: { a: games of team A, b: games of team B }. */
 export interface SetScore {
   a: number;
   b: number;
 }
 
-export interface Risultato {
-  set: SetScore[];
-  inseritoDa: string;
-  confermatoDa?: string | null;
-  contestatoDa?: string | null;
-  nota?: string | null;
+export interface MatchResult {
+  sets: SetScore[];
+  enteredBy: string;
+  confirmedBy?: string | null;
+  disputedBy?: string | null;
+  note?: string | null;
 }
 
-export interface Programmazione {
-  campoId: string;
-  data: string; // yyyy-mm-dd
-  inizio: string;
-  fine: string;
+export interface Schedule {
+  courtId: string;
+  date: string; // yyyy-mm-dd
+  start: string;
+  end: string;
 }
 
-export interface Partita {
+export interface Match {
   id: string;
-  /** Codice leggibile e stabile (es. "gA-01-1", "gold-t1-p0"): collega le partite del tabellone. */
-  codice?: string;
-  fase: string; // "gironi" | "gold" | "silver"
-  girone?: string | null;
-  turno?: number | null;
-  posizione?: number | null;
-  prossimaPartita?: string | null;
-  lato?: 'A' | 'B' | null;
-  squadraA: string | null;
-  squadraB: string | null;
-  giocatoriA: string[];
-  giocatoriB: string[];
-  giocatori: string[];
-  periodoId?: string | null;
-  stato: StatoPartita;
-  richiestaId?: string | null;
-  programmazione?: Programmazione | null;
-  risultato?: Risultato | null;
-  /** Ultima modifica (ISO): serve a segnalare i risultati non confermati da troppo tempo. */
+  /** Readable, stable code (e.g. "gA-01-1", "gold-t1-p0"): links the bracket matches. */
+  code?: string;
+  phase: string; // "groups" | "gold" | "silver"
+  group?: string | null;
+  round?: number | null;
+  position?: number | null;
+  /** Id of the next bracket match (resolved from `next_code` by the adapter). */
+  nextCode?: string | null;
+  side?: 'A' | 'B' | null;
+  teamA: string | null;
+  teamB: string | null;
+  playersA: string[];
+  playersB: string[];
+  players: string[];
+  periodId?: string | null;
+  status: MatchStatus;
+  requestId?: string | null;
+  schedule?: Schedule | null;
+  result?: MatchResult | null;
+  /** Last change (ISO): flags results left unconfirmed for too long. */
   updatedAt?: string;
 }
 
-export interface Campo {
+export interface Court {
   id: string;
-  nome: string;
-  primoSlot: string;
-  ultimoSlot: string;
-  durata: number;
-  /** 0 = domenica … 6 = sabato */
-  giorniAttivi: number[];
-  /** Date (yyyy-mm-dd) in cui il campo è chiuso. */
-  eccezioni: string[];
-  ordine?: number;
+  name: string;
+  firstSlot: string;
+  /** Last start time of the grid. */
+  lastSlot: string;
+  slotMinutes: number;
+  /** 0 = Sunday … 6 = Saturday */
+  activeDays: number[];
+  /** Dates (yyyy-mm-dd) when the court is closed. */
+  closedDates: string[];
+  sortOrder?: number;
 }
 
-export type TipoOccupazione = 'esterno' | 'lezione' | 'chiusura' | 'campionato';
+export type BookingType = 'external' | 'lesson' | 'closure' | 'match';
 
-export interface Occupazione {
-  inizio: string;
-  fine: string;
-  tipo: TipoOccupazione;
-  nota?: string | null;
-  partitaId?: string | null;
-  richiestaId?: string | null;
-  torneoId?: string | null;
-  ricorrenzaId?: string | null;
-  creatoDa?: string | null;
+export interface Booking {
+  start: string;
+  end: string;
+  type: BookingType;
+  note?: string | null;
+  matchId?: string | null;
+  requestId?: string | null;
+  tournamentId?: string | null;
+  recurrenceId?: string | null;
+  createdBy?: string | null;
 }
 
-/** Occupazione con il suo ID e la sua posizione (campo, giorno). */
-export interface OccupazioneRiga extends Occupazione {
+/** Booking with its id and its position (court, day). */
+export interface BookingRow extends Booking {
   id: string;
-  campoId: string;
-  data: string;
+  courtId: string;
+  date: string;
 }
 
-export interface OccupazioniGiorno {
+export interface CourtDayBookings {
   id: string;
-  campoId: string;
-  data: string;
-  items: Record<string, Occupazione>;
+  courtId: string;
+  date: string;
+  items: Record<string, Booking>;
 }
 
-export interface Ricorrenza {
+export interface Recurrence {
   id: string;
-  campoId: string;
-  giornoSettimana: number;
-  inizio: string;
-  fine: string;
-  tipo: TipoOccupazione;
-  nota: string;
-  dal: string;
-  al: string;
+  courtId: string;
+  weekday: number;
+  start: string;
+  end: string;
+  type: BookingType;
+  note: string;
+  validFrom: string;
+  validTo: string;
 }
 
-export type StatoRichiesta =
-  | 'attesa'
-  | 'confermata'
-  | 'rifiutata'
-  | 'annullata'
-  | 'conflitto'
-  | 'scaduta';
+export type RequestStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'conflict' | 'expired';
 
-export interface Richiesta {
+export interface MatchRequest {
   id: string;
-  torneoId: string;
-  partitaId: string;
-  campoId: string;
-  data: string;
-  inizio: string;
-  fine: string;
-  fuoriGriglia: boolean;
-  controproposta?: boolean;
-  giocatori: string[];
-  accettazioni: Record<string, Instant | null>;
-  stato: StatoRichiesta;
-  scadenza: Instant;
-  creatoDa: string;
-  nota?: string | null;
-  /** Creazione (ISO). */
+  tournamentId: string;
+  matchId: string;
+  courtId: string;
+  date: string;
+  start: string;
+  end: string;
+  offGrid: boolean;
+  counterProposal?: boolean;
+  players: string[];
+  acceptances: Record<string, Instant | null>;
+  status: RequestStatus;
+  expiresAt: Instant;
+  createdBy: string;
+  note?: string | null;
+  /** Creation (ISO). */
   createdAt?: string;
 }
 
-/**
- * fasce: data (yyyy-mm-dd) -> lista di intervalli "hh:mm-hh:mm".
- * (Firestore non ammette array annidati, quindi l'intervallo è una stringa.)
- */
-export type Fasce = Record<string, string[]>;
+/** Availability windows: date (yyyy-mm-dd) -> list of "hh:mm-hh:mm" intervals. */
+export type Windows = Record<string, string[]>;
 
-export interface Disponibilita {
+export interface Availability {
   id: string;
-  torneoId: string;
+  tournamentId: string;
   uid: string;
-  fasce: Fasce;
+  windows: Windows;
 }

@@ -1,6 +1,6 @@
 # UX briefs: Padel League
 
-Impeccable "shape" briefs (Phase 3) for the rebuild of every screen, inside the approved direction "Righe del campo" (`.impeccable/surfaces/src-components-appshell-tsx.md`). Product truth: `PRODUCT.md`. Data and server rules: `docs/contratto-api.md`. No interview was possible: every open choice is marked **ASSUNZIONE** and collected at the end of this file so the lead can confirm them with the user in one round.
+Impeccable "shape" briefs (Phase 3) for the rebuild of every screen, inside the approved direction "Righe del campo" (`.impeccable/surfaces/src-components-appshell-tsx.md`). Product truth: `PRODUCT.md`. Data and server rules: `docs/api-contract.md`. No interview was possible: every open choice is marked **ASSUNZIONE** and collected at the end of this file so the lead can confirm them with the user in one round.
 
 ## Index
 
@@ -20,7 +20,7 @@ Shared rules every brief follows (from the direction contract and craft floor): 
 
 Tones are semantic, not CSS: **neutro** (grey/ink), **info** (blue, the "requested/in progress" family), **successo** (green), **attenzione** (amber), **critico** (red). Lime is never a status tone; turf blue is reserved for shell and selection. Every status is always rendered as icon + text label (+ tone); occupied slots and occupation types also carry a pattern. Icons are `lucide-react` component names.
 
-### Match (`stato_partita` and derived)
+### Match (`match_status` and derived)
 
 | Value | UI label | Icon | Tone |
 |---|---|---|---|
@@ -33,7 +33,7 @@ Tones are semantic, not CSS: **neutro** (grey/ink), **info** (blue, the "request
 | derived: result entered, not confirmed | Risultato da confermare | `Hourglass` | attenzione |
 | derived: period ended, not played | In ritardo | `AlarmClock` | critico |
 
-### Request (`stato_richiesta`)
+### Request (`request_status`)
 
 | Value | UI label | Icon | Tone |
 |---|---|---|---|
@@ -43,7 +43,7 @@ Tones are semantic, not CSS: **neutro** (grey/ink), **info** (blue, the "request
 | `annullata` | Annullata | `Ban` | neutro |
 | `conflitto` | Conflitto | `TriangleAlert` | critico |
 | `scaduta` (or `attesa` past `scadenza`) | Scaduta | `TimerOff` | neutro |
-| flag `fuori_griglia` | Fuori griglia | `Clock3` | info |
+| flag `off_grid` | Fuori griglia | `Clock3` | info |
 | flag `controproposta` | Proposta dal campo | `Repeat` | info |
 | acceptance given / missing | ha accettato / deve accettare | `CircleCheck` / `Hourglass` | successo / attenzione |
 
@@ -59,7 +59,7 @@ Tones are semantic, not CSS: **neutro** (grey/ink), **info** (blue, the "request
 | selection (not a state) | Selezionato | `Check` | lime outline | — |
 | impacted by off-grid | Inutilizzabile | `Ban` | neutro | hatch pattern |
 
-### Occupation type (`tipo_occupazione`, gestore timeline)
+### Occupation type (`booking_type`, gestore timeline)
 
 | Value | UI label | Icon | Pattern |
 |---|---|---|---|
@@ -68,7 +68,7 @@ Tones are semantic, not CSS: **neutro** (grey/ink), **info** (blue, the "request
 | `lezione` | Lezione | `GraduationCap` | diagonal hatch |
 | `chiusura` | Chiuso | `DoorClosed` | cross-hatch |
 
-### Team (`stato_squadra`) and tournament (`stato_torneo`)
+### Team (`team_status`) and tournament (`tournament_status`)
 
 | Value | UI label | Icon | Tone |
 |---|---|---|---|

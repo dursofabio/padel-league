@@ -17,11 +17,11 @@ import {
   Trophy,
   type LucideIcon,
 } from 'lucide-react';
-import { STATO_PARTITA, STATO_RICHIESTA, type IconaStato, type Tono, type Voce } from '../lib/copy';
-import type { StatoPartita, StatoRichiesta } from '../types';
+import { MATCH_STATUS, REQUEST_STATUS, type StatusEntry, type StatusIcon, type Tone } from '../lib/copy';
+import type { MatchStatus, RequestStatus } from '../types';
 import { cn } from '../ui/cn';
 
-export const ICONE: Record<IconaStato, LucideIcon> = {
+export const STATUS_ICONS: Record<StatusIcon, LucideIcon> = {
   'calendar-clock': CalendarClock,
   send: Send,
   'calendar-check': CalendarCheck,
@@ -40,7 +40,7 @@ export const ICONE: Record<IconaStato, LucideIcon> = {
   clock: Clock,
 };
 
-export const TONO_CLASSI: Record<Tono, string> = {
+export const TONE_CLASSES: Record<Tone, string> = {
   ok: 'bg-ok-soft text-ok-ink',
   warn: 'bg-warn-soft text-warn-ink',
   danger: 'bg-danger-soft text-danger-ink',
@@ -48,26 +48,26 @@ export const TONO_CLASSI: Record<Tono, string> = {
   idle: 'bg-idle-soft text-idle-ink',
 };
 
-export function Badge({ voce, className, children }: { voce: Voce; className?: string; children?: React.ReactNode }) {
-  const Icon = ICONE[voce.icona];
+export function Badge({ entry, className, children }: { entry: StatusEntry; className?: string; children?: React.ReactNode }) {
+  const Icon = STATUS_ICONS[entry.icon];
   return (
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap',
-        TONO_CLASSI[voce.tono],
+        TONE_CLASSES[entry.tone],
         className,
       )}
     >
       <Icon className="size-4" aria-hidden />
-      {children ?? voce.label}
+      {children ?? entry.label}
     </span>
   );
 }
 
-export function StatoPartitaBadge({ stato, className }: { stato: StatoPartita; className?: string }) {
-  return <Badge voce={STATO_PARTITA[stato]} className={className} />;
+export function MatchStatusBadge({ status, className }: { status: MatchStatus; className?: string }) {
+  return <Badge entry={MATCH_STATUS[status]} className={className} />;
 }
 
-export function StatoRichiestaBadge({ stato, className }: { stato: StatoRichiesta; className?: string }) {
-  return <Badge voce={STATO_RICHIESTA[stato]} className={className} />;
+export function RequestStatusBadge({ status, className }: { status: RequestStatus; className?: string }) {
+  return <Badge entry={REQUEST_STATUS[status]} className={className} />;
 }

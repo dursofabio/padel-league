@@ -1,7 +1,7 @@
-name: Migrazioni database
+name: Database migrations
 
 # Applies supabase/migrations to the hosted Supabase project.
-# Runs by hand (Actions → "Migrazioni database" → Run workflow) and on every
+# Runs by hand (Actions → "Database migrations" → Run workflow) and on every
 # push to main that changes a migration.
 #
 # Required settings (Settings → Secrets and variables → Actions):
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       seed:
-        description: Carica anche i campi di esempio (supabase/seed.sql)
+        description: Also load the sample courts (supabase/seed.sql)
         type: boolean
         default: false
   push:
@@ -36,15 +36,15 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Controllo configurazione
+      - name: Check configuration
         run: |
           missing=0
-          [ -n "$SUPABASE_PROJECT_REF" ] || { echo "::error::Manca la variabile SUPABASE_PROJECT_REF"; missing=1; }
-          [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Manca il secret SUPABASE_ACCESS_TOKEN"; missing=1; }
-          [ -n "$SUPABASE_DB_PASSWORD" ] || { echo "::error::Manca il secret SUPABASE_DB_PASSWORD"; missing=1; }
+          [ -n "$SUPABASE_PROJECT_REF" ] || { echo "::error::Missing variable SUPABASE_PROJECT_REF"; missing=1; }
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Missing secret SUPABASE_ACCESS_TOKEN"; missing=1; }
+          [ -n "$SUPABASE_DB_PASSWORD" ] || { echo "::error::Missing secret SUPABASE_DB_PASSWORD"; missing=1; }
           exit $missing
       - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
-      - name: Migrazioni in sospeso
+      - name: Pending migrations
         run: supabase migration list --linked
-      - name: Applica le migrazioni
+      - name: Apply the migrations
         run: supabase db push --linked --yes ${{ inputs.seed && '--include-seed' || '' }}

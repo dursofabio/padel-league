@@ -10,9 +10,9 @@
     "test": "vitest run src",
     "typecheck": "tsc -b",
     "seed:demo": "node scripts/seed-demo.mjs",
-    "locale": "node scripts/locale.mjs",
-    "locale:stop": "node scripts/locale.mjs --stop",
-    "locale:reset": "node scripts/locale.mjs --reset",
+    "local": "node scripts/local.mjs",
+    "local:stop": "node scripts/local.mjs --stop",
+    "local:reset": "node scripts/local.mjs --reset",
     "test:db": "bash scripts/db-test.sh"
   },
   "dependencies": {

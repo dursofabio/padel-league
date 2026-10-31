@@ -1,74 +1,74 @@
 /**
- * Off-grid proposal (only when config.consentiFuoriGriglia): court, day, start in passoFuoriGriglia steps,
+ * Off-grid proposal (only when config.allowOffGrid): court, day, start in offGridStep steps,
  * computed end, live checks, mini lanes preview of the grid slots it makes unusable, who must accept.
- * The server computes fuori_griglia and the acceptances; it stays the authority.
+ * The server computes off_grid and the acceptances; it stays the authority.
  */
 import { Ban, CircleCheck, Hourglass, Send, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { CourtLanes, LaneBlock, type LanesScala } from '../../../../components/CourtLanes';
-import { azioni } from '../../../../data/mutations';
-import { fasciaCopre, isSlotDiGriglia, occupazioniId, slotGriglia, slotImpattati, verificaFuoriGriglia } from '../../../../lib/slots';
+import { CourtLanes, LaneBlock, type LaneScale } from '../../../../components/CourtLanes';
+import { actions } from '../../../../data/mutations';
+import { checkOffGrid, courtDayId, gridSlots, impactedSlots, isGridSlot, windowsCover } from '../../../../lib/slots';
 import { addMin, labelDate, overlaps, toMin, today } from '../../../../lib/time';
-import type { Campo, Fasce, Occupazione, Richiesta } from '../../../../types';
+import type { Booking, Court, MatchRequest, Windows } from '../../../../types';
 import { Button, cn, Field, Segmented, Select, Sheet } from '../../../../ui';
-import type { ContestoPartita } from '../contesto';
-import { descriviOccupazione, elencoNomi, opzioniInizio } from '../logica';
-import { AVVOLGI, Avviso, useOra } from '../parti';
-import { useAzionePartita } from '../useAzionePartita';
+import type { MatchContext } from '../context';
+import { describeBooking, nameList, startOptions } from '../logic';
+import { Notice, useNowTick, WRAP } from '../parts';
+import { useMatchAction } from '../useMatchAction';
 
 export function OffGrid({
   ctx,
-  giorni,
-  campi,
-  occupazioni,
-  richieste,
-  fasce,
-  iniziale,
+  days,
+  courts,
+  bookings,
+  requests,
+  windows,
+  initial,
   onClose,
 }: {
-  ctx: ContestoPartita;
-  giorni: string[];
-  campi: Campo[];
-  occupazioni: Record<string, Record<string, Occupazione>>;
-  richieste: Richiesta[];
-  fasce: Record<string, Fasce | undefined>;
-  iniziale: { campoId?: string; data?: string };
+  ctx: MatchContext;
+  days: string[];
+  courts: Court[];
+  bookings: Record<string, Record<string, Booking>>;
+  requests: MatchRequest[];
+  windows: Record<string, Windows | undefined>;
+  initial: { courtId?: string; date?: string };
   onClose: () => void;
 }) {
-  const passo = ctx.torneo.config.passoFuoriGriglia;
-  const now = useOra();
-  const oggi = today();
-  const [campoId, setCampoId] = useState(iniziale.campoId ?? campi[0]?.id ?? '');
-  const [data, setData] = useState(iniziale.data && giorni.includes(iniziale.data) ? iniziale.data : giorni[0]);
-  const oraMin = new Date(now).getHours() * 60 + new Date(now).getMinutes();
-  const opzioni = useMemo(() => opzioniInizio(passo, data, oggi, oraMin), [passo, data, oggi, oraMin]);
-  const [inizioScelto, setInizio] = useState('');
-  const inizio = opzioni.includes(inizioScelto) ? inizioScelto : (opzioni.find((o) => o >= '15:00') ?? opzioni[0] ?? '');
-  const campo = campi.find((c) => c.id === campoId) ?? campi[0];
-  const invia = useAzionePartita(azioni.creaRichiesta, 'Proposta inviata al campo', passo);
+  const step = ctx.tournament.config.offGridStep;
+  const now = useNowTick();
+  const todayDate = today();
+  const [courtId, setCourtId] = useState(initial.courtId ?? courts[0]?.id ?? '');
+  const [date, setDate] = useState(initial.date && days.includes(initial.date) ? initial.date : days[0]);
+  const nowMin = new Date(now).getHours() * 60 + new Date(now).getMinutes();
+  const options = useMemo(() => startOptions(step, date, todayDate, nowMin), [step, date, todayDate, nowMin]);
+  const [chosenStart, setStart] = useState('');
+  const start = options.includes(chosenStart) ? chosenStart : (options.find((o) => o >= '15:00') ?? options[0] ?? '');
+  const court = courts.find((c) => c.id === courtId) ?? courts[0];
+  const submit = useMatchAction(actions.createRequest, 'Proposta inviata al campo', step);
 
-  const fine = campo && inizio ? addMin(inizio, campo.durata) : '';
-  const occ = campo ? occupazioni[occupazioniId(campo.id, data)] : undefined;
-  const verifica = campo && inizio ? verificaFuoriGriglia(campo, data, inizio, occ, richieste, now) : null;
-  const stessoInizio = verifica?.richiesteSovrapposte.some((r) => r.inizio === inizio);
-  const impattati = campo && inizio ? slotImpattati(campo, data, inizio, fine) : [];
-  const diGriglia = campo && inizio ? isSlotDiGriglia(campo, data, inizio) : false;
+  const end = court && start ? addMin(start, court.slotMinutes) : '';
+  const dayBookings = court ? bookings[courtDayId(court.id, date)] : undefined;
+  const check = court && start ? checkOffGrid(court, date, start, dayBookings, requests, now) : null;
+  const sameStart = check?.overlappingRequests.some((r) => r.start === start);
+  const impacted = court && start ? impactedSlots(court, date, start, end) : [];
+  const onGrid = court && start ? isGridSlot(court, date, start) : false;
 
-  const errori: string[] = [];
-  if (!campo) errori.push('Non ci sono campi configurati.');
-  else if (!inizio) errori.push('Non ci sono più orari disponibili in questo giorno: scegline un altro.');
-  if (verifica?.fuoriOrario) errori.push('Il campo è chiuso a quell’ora.');
-  if (verifica?.bloccanti.length) errori.push(`Si sovrappone a: ${verifica.bloccanti.map(descriviOccupazione).join(', ')}.`);
-  if (stessoInizio) errori.push('Questo orario è già stato chiesto per un’altra partita.');
-  const avvisoRichieste = !stessoInizio && !!verifica?.richiesteSovrapposte.length;
+  const errors: string[] = [];
+  if (!court) errors.push('Non ci sono campi configurati.');
+  else if (!start) errors.push('Non ci sono più orari disponibili in questo giorno: scegline un altro.');
+  if (check?.outsideHours) errors.push('Il campo è chiuso a quell’ora.');
+  if (check?.blocking.length) errors.push(`Si sovrappone a: ${check.blocking.map(describeBooking).join(', ')}.`);
+  if (sameStart) errors.push('Questo orario è già stato chiesto per un’altra partita.');
+  const requestsWarning = !sameStart && !!check?.overlappingRequests.length;
 
-  const subito = ctx.partita.giocatori.filter((g) => g === ctx.uid || (fine && fasciaCopre(fasce[g], data, inizio, fine)));
-  const devono = ctx.partita.giocatori.filter((g) => !subito.includes(g));
-  const chi = (g: string) => (g === ctx.uid ? 'tu' : ctx.nome(g));
+  const acceptNow = ctx.match.players.filter((p) => p === ctx.uid || (end && windowsCover(windows[p], date, start, end)));
+  const mustAccept = ctx.match.players.filter((p) => !acceptNow.includes(p));
+  const who = (p: string) => (p === ctx.uid ? 'tu' : ctx.name(p));
 
   // mini lanes: ± 2 h around the proposal
-  const scala: LanesScala | null = fine
-    ? { da: Math.max(0, Math.floor((toMin(inizio) - 120) / 30) * 30), a: Math.min(24 * 60, Math.ceil((toMin(fine) + 120) / 30) * 30), px: 0.7 }
+  const scale: LaneScale | null = end
+    ? { from: Math.max(0, Math.floor((toMin(start) - 120) / 30) * 30), to: Math.min(24 * 60, Math.ceil((toMin(end) + 120) / 30) * 30), px: 0.7 }
     : null;
 
   return (
@@ -83,35 +83,35 @@ export function OffGrid({
           size="lg"
           block
           className="whitespace-normal"
-          disabled={errori.length > 0}
-          loading={invia.isPending}
-          onClick={() => invia.esegui({ partita: ctx.partita.id, campo: campo.id, data, inizio }, { onSuccess: onClose })}
+          disabled={errors.length > 0}
+          loading={submit.isPending}
+          onClick={() => submit.run({ match: ctx.match.id, court: court.id, date, start }, { onSuccess: onClose })}
         >
           <Send aria-hidden /> Invia proposta
         </Button>
       }
     >
-      <div className={cn('grid gap-5', AVVOLGI)}>
+      <div className={cn('grid gap-5', WRAP)}>
         <div className="grid gap-1.5">
           <span className="text-sm font-semibold">Campo</span>
-          <Segmented label="Campo" value={campoId} onValueChange={setCampoId} options={campi.map((c) => ({ value: c.id, label: c.nome }))} />
+          <Segmented label="Campo" value={courtId} onValueChange={setCourtId} options={courts.map((c) => ({ value: c.id, label: c.name }))} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Giorno">
             {(p) => (
-              <Select {...p} value={data} onChange={(e) => setData(e.target.value)}>
-                {giorni.map((g) => (
-                  <option key={g} value={g}>
-                    {labelDate(g)}
+              <Select {...p} value={date} onChange={(e) => setDate(e.target.value)}>
+                {days.map((d) => (
+                  <option key={d} value={d}>
+                    {labelDate(d)}
                   </option>
                 ))}
               </Select>
             )}
           </Field>
-          <Field label="Inizio" hint={fine ? `fine ${fine}, ${campo.durata} minuti` : undefined}>
+          <Field label="Inizio" hint={end ? `fine ${end}, ${court.slotMinutes} minuti` : undefined}>
             {(p) => (
-              <Select {...p} value={inizio} onChange={(e) => setInizio(e.target.value)} disabled={!opzioni.length}>
-                {opzioni.map((o) => (
+              <Select {...p} value={start} onChange={(e) => setStart(e.target.value)} disabled={!options.length}>
+                {options.map((o) => (
                   <option key={o} value={o}>
                     {o}
                   </option>
@@ -122,57 +122,57 @@ export function OffGrid({
         </div>
 
         <div aria-live="polite" className="grid gap-2">
-          {errori.map((e) => (
-            <Avviso key={e} icona={TriangleAlert} tono="danger">
+          {errors.map((e) => (
+            <Notice key={e} icon={TriangleAlert} tone="danger">
               {e}
-            </Avviso>
+            </Notice>
           ))}
-          {avvisoRichieste && (
-            <Avviso icona={TriangleAlert} tono="warn">
+          {requestsWarning && (
+            <Notice icon={TriangleAlert} tone="warn">
               Si sovrappone a un’altra richiesta in attesa: il campo potrà confermarne una sola.
-            </Avviso>
+            </Notice>
           )}
-          {diGriglia && <Avviso icona={CircleCheck}>Questo è un orario della griglia: la richiesta sarà normale.</Avviso>}
-          {!errori.length && impattati.length > 0 && (
-            <Avviso icona={Ban}>
-              Rende inutilizzabili gli slot delle {elencoNomi(impattati.map((s) => s.inizio))} sul {campo.nome}.
-            </Avviso>
+          {onGrid && <Notice icon={CircleCheck}>Questo è un orario della griglia: la richiesta sarà normale.</Notice>}
+          {!errors.length && impacted.length > 0 && (
+            <Notice icon={Ban}>
+              Rende inutilizzabili gli slot delle {nameList(impacted.map((s) => s.start))} sul {court.name}.
+            </Notice>
           )}
         </div>
 
-        {scala && campo && (
+        {scale && court && (
           <CourtLanes
-            caption={<span className="tabular">{labelDate(data)}: anteprima</span>}
-            campi={campi}
-            scala={scala}
+            caption={<span className="tabular">{labelDate(date)}: anteprima</span>}
+            courts={courts}
+            scale={scale}
             renderLane={(c) => {
-              const slots = slotGriglia(c, data).filter((s) => overlaps(s.inizio, s.fine, addMin('00:00', scala.da), addMin('00:00', scala.a)));
-              const occs = Object.values(occupazioni[occupazioniId(c.id, data)] ?? {});
-              const impatto = c.id === campo.id ? impattati.map((s) => s.inizio) : [];
+              const slots = gridSlots(c, date).filter((s) => overlaps(s.start, s.end, addMin('00:00', scale.from), addMin('00:00', scale.to)));
+              const busy = Object.values(bookings[courtDayId(c.id, date)] ?? {});
+              const impact = c.id === court.id ? impacted.map((s) => s.start) : [];
               return (
                 <>
                   {slots.map((s) =>
-                    impatto.includes(s.inizio) ? (
-                      <LaneBlock key={s.inizio} scala={scala} inizio={s.inizio} fine={s.fine} tono="idle" pattern="hatch" ariaLabel={`${c.nome} ${s.inizio}, inutilizzabile`}>
+                    impact.includes(s.start) ? (
+                      <LaneBlock key={s.start} scale={scale} start={s.start} end={s.end} tone="idle" pattern="hatch" ariaLabel={`${c.name} ${s.start}, inutilizzabile`}>
                         <span className="tabular flex items-center gap-1 text-sm font-semibold">
-                          <Ban className="size-3.5" aria-hidden /> {s.inizio} inutilizzabile
+                          <Ban className="size-3.5" aria-hidden /> {s.start} inutilizzabile
                         </span>
                       </LaneBlock>
                     ) : (
-                      <LaneBlock key={s.inizio} scala={scala} inizio={s.inizio} fine={s.fine} tono="idle" ariaLabel={`${c.nome} ${s.inizio}, slot di griglia`}>
-                        <span className="tabular text-sm">{s.inizio}</span>
+                      <LaneBlock key={s.start} scale={scale} start={s.start} end={s.end} tone="idle" ariaLabel={`${c.name} ${s.start}, slot di griglia`}>
+                        <span className="tabular text-sm">{s.start}</span>
                       </LaneBlock>
                     ),
                   )}
-                  {occs.map((o, i) => (
-                    <LaneBlock key={`o${i}`} scala={scala} inizio={o.inizio} fine={o.fine} tono="danger" pattern="hatch" sfalsato ariaLabel={descriviOccupazione(o)}>
-                      <span className="text-sm font-semibold">{descriviOccupazione(o)}</span>
+                  {busy.map((b, i) => (
+                    <LaneBlock key={`o${i}`} scale={scale} start={b.start} end={b.end} tone="danger" pattern="hatch" narrow ariaLabel={describeBooking(b)}>
+                      <span className="text-sm font-semibold">{describeBooking(b)}</span>
                     </LaneBlock>
                   ))}
-                  {c.id === campo.id && fine && (
-                    <LaneBlock scala={scala} inizio={inizio} fine={fine} tono="info" sfalsato className="z-10 border-2" ariaLabel={`Proposta ${inizio}–${fine}`}>
+                  {c.id === court.id && end && (
+                    <LaneBlock scale={scale} start={start} end={end} tone="info" narrow className="z-10 border-2" ariaLabel={`Proposta ${start}–${end}`}>
                       <span className="tabular flex items-center gap-1 text-sm font-bold">
-                        <Send className="size-3.5" aria-hidden /> Proposta {inizio}–{fine}
+                        <Send className="size-3.5" aria-hidden /> Proposta {start}–{end}
                       </span>
                     </LaneBlock>
                   )}
@@ -182,15 +182,15 @@ export function OffGrid({
           />
         )}
 
-        {fine && (
+        {end && (
           <div className="grid gap-1">
-            <Avviso icona={CircleCheck} tono="ok">
-              Accettano subito: {elencoNomi(subito.map(chi))}.
-            </Avviso>
-            {devono.length > 0 && (
-              <Avviso icona={Hourglass} tono="warn">
-                {devono.length === 1 ? 'Deve' : 'Devono'} accettare: {elencoNomi(devono.map(chi))}.
-              </Avviso>
+            <Notice icon={CircleCheck} tone="ok">
+              Accettano subito: {nameList(acceptNow.map(who))}.
+            </Notice>
+            {mustAccept.length > 0 && (
+              <Notice icon={Hourglass} tone="warn">
+                {mustAccept.length === 1 ? 'Deve' : 'Devono'} accettare: {nameList(mustAccept.map(who))}.
+              </Notice>
             )}
           </div>
         )}

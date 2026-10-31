@@ -2,7 +2,7 @@
   "name": "padel-league-cron",
   "private": true,
   "type": "module",
-  "description": "Promemoria email del campionato (GitHub Actions): legge email_promemoria() da Supabase e invia via SMTP",
+  "description": "League reminder emails (GitHub Actions): reads reminder_emails() from Supabase and sends them via SMTP",
   "scripts": {
     "cron": "node cron.mjs"
   },

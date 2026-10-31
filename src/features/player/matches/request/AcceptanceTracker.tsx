@@ -4,124 +4,124 @@
  */
 import { AlarmClock, Check, CircleCheck, Hourglass, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { StatoRichiestaBadge } from '../../../../components/StatusBadge';
+import { RequestStatusBadge } from '../../../../components/StatusBadge';
 import { WhatsAppButton } from '../../../../components/WhatsAppButton';
-import { azioni } from '../../../../data/mutations';
+import { actions } from '../../../../data/mutations';
 import { labelDate } from '../../../../lib/time';
-import type { Richiesta } from '../../../../types';
+import type { MatchRequest } from '../../../../types';
 import { Button, cn, ConfirmDialog } from '../../../../ui';
-import { nomeCampo, type ContestoPartita } from '../contesto';
-import { accettate, elencoNomi, quando, scadenzaEffettiva, traQuanto } from '../logica';
-import { Avviso, ControPropostaBadge, FuoriGrigliaBadge, useOra } from '../parti';
-import { useAzionePartita } from '../useAzionePartita';
+import { courtName, type MatchContext } from '../context';
+import { acceptedCount, effectiveExpiry, formatWhen, nameList, timeUntil } from '../logic';
+import { CounterProposalBadge, Notice, OffGridBadge, useNowTick } from '../parts';
+import { useMatchAction } from '../useMatchAction';
 
-export function AcceptanceTracker({ ctx, richiesta }: { ctx: ContestoPartita; richiesta: Richiesta }) {
-  const { partita, nome } = ctx;
-  const now = useOra(30_000);
-  const [conferma, setConferma] = useState(false);
-  const accetta = useAzionePartita(azioni.accettaRichiesta, 'Hai accettato la richiesta');
-  const annulla = useAzionePartita(azioni.annullaRichiesta, 'Richiesta annullata');
-  const tot = richiesta.giocatori.length;
-  const n = accettate(richiesta);
-  const completa = n >= tot;
-  const mancanti = richiesta.giocatori.filter((g) => !richiesta.accettazioni[g]);
-  const devoAccettare = !!ctx.uid && mancanti.includes(ctx.uid);
-  const giocatore = !!ctx.mioLato;
-  const campo = nomeCampo(ctx.campi, richiesta.campoId);
-  const orario = `${labelDate(richiesta.data)} alle ${richiesta.inizio}`;
+export function AcceptanceTracker({ ctx, request }: { ctx: MatchContext; request: MatchRequest }) {
+  const { match, name } = ctx;
+  const now = useNowTick(30_000);
+  const [confirming, setConfirming] = useState(false);
+  const accept = useMatchAction(actions.acceptRequest, 'Hai accettato la richiesta');
+  const cancel = useMatchAction(actions.cancelRequest, 'Richiesta annullata');
+  const total = request.players.length;
+  const n = acceptedCount(request);
+  const complete = n >= total;
+  const missing = request.players.filter((p) => !request.acceptances[p]);
+  const mustAccept = !!ctx.uid && missing.includes(ctx.uid);
+  const isPlayer = !!ctx.mySide;
+  const court = courtName(ctx.courts, request.courtId);
+  const slotTime = `${labelDate(request.date)} alle ${request.start}`;
   // the earlier of the server expiry and the slot start (critique M1)
-  const scad = scadenzaEffettiva(richiesta);
-  const tra = traQuanto(scad, now);
-  const urgente = scad - now < 2 * 3_600_000;
+  const expiry = effectiveExpiry(request);
+  const until = timeUntil(expiry, now);
+  const urgent = expiry - now < 2 * 3_600_000;
 
   // polite announcement of realtime changes ("Marta ha accettato: 4 su 4")
-  const prima = useRef<Record<string, boolean> | null>(null);
-  const [annuncio, setAnnuncio] = useState('');
+  const before = useRef<Record<string, boolean> | null>(null);
+  const [announcement, setAnnouncement] = useState('');
   useEffect(() => {
-    const ora = Object.fromEntries(richiesta.giocatori.map((g) => [g, !!richiesta.accettazioni[g]]));
-    const prev = prima.current;
-    prima.current = ora;
+    const current = Object.fromEntries(request.players.map((p) => [p, !!request.acceptances[p]]));
+    const prev = before.current;
+    before.current = current;
     if (!prev) return;
-    const nuovi = richiesta.giocatori.filter((g) => ora[g] && !prev[g] && g !== ctx.uid);
-    if (nuovi.length) setAnnuncio(`${elencoNomi(nuovi.map((g) => nome(g)))} ${nuovi.length === 1 ? 'ha' : 'hanno'} accettato: ${n} su ${tot}`);
-  }, [richiesta, n, tot, nome, ctx.uid]);
+    const added = request.players.filter((p) => current[p] && !prev[p] && p !== ctx.uid);
+    if (added.length) setAnnouncement(`${nameList(added.map((p) => name(p)))} ${added.length === 1 ? 'ha' : 'hanno'} accettato: ${n} su ${total}`);
+  }, [request, n, total, name, ctx.uid]);
 
-  const scadenza = (
-    <Avviso icona={AlarmClock} tono={urgente ? 'danger' : 'idle'}>
+  const expiryNotice = (
+    <Notice icon={AlarmClock} tone={urgent ? 'danger' : 'idle'}>
       <span className="tabular">
-        {tra ? `Scade ${tra}` : 'Scade a momenti'} ({quando(scad)})
+        {until ? `Scade ${until}` : 'Scade a momenti'} ({formatWhen(expiry)})
       </span>
-    </Avviso>
+    </Notice>
   );
 
   return (
     <div className="grid gap-4">
       <p className="sr-only" aria-live="polite">
-        {annuncio}
+        {announcement}
       </p>
-      {urgente && scadenza}
+      {urgent && expiryNotice}
       <div className="grid gap-2">
         <p className="tabular text-xl font-bold">
-          Richiesta per {labelDate(richiesta.data)} · {richiesta.inizio}–{richiesta.fine} · {campo}
+          Richiesta per {labelDate(request.date)} · {request.start}–{request.end} · {court}
         </p>
         <div className="flex flex-wrap gap-2">
-          <StatoRichiestaBadge stato="attesa" />
-          {richiesta.fuoriGriglia && <FuoriGrigliaBadge />}
-          {richiesta.controproposta && <ControPropostaBadge />}
+          <RequestStatusBadge status="pending" />
+          {request.offGrid && <OffGridBadge />}
+          {request.counterProposal && <CounterProposalBadge />}
         </div>
-        {richiesta.controproposta && (
+        {request.counterProposal && (
           <p>
             Il campo propone questo orario al posto di quello che avevate chiesto.
-            {richiesta.nota ? ` Nota del campo: «${richiesta.nota}».` : ''}
+            {request.note ? ` Nota del campo: «${request.note}».` : ''}
           </p>
         )}
-        {!richiesta.controproposta && richiesta.nota && <p className="text-ink-muted">Nota per il campo: «{richiesta.nota}»</p>}
+        {!request.counterProposal && request.note && <p className="text-ink-muted">Nota per il campo: «{request.note}»</p>}
       </div>
 
       <ol className="grid gap-2 sm:grid-cols-2" aria-label="Avanzamento">
-        <Passo numero={1} attivo={!completa} fatto={completa}>
-          Accettazioni {n} su {tot}
-        </Passo>
-        <Passo numero={2} attivo={completa} fatto={false}>
+        <Step number={1} active={!complete} done={complete}>
+          Accettazioni {n} su {total}
+        </Step>
+        <Step number={2} active={complete} done={false}>
           Conferma del campo
-        </Passo>
+        </Step>
       </ol>
 
-      {completa && (
-        <Avviso icona={Hourglass} tono="info">
+      {complete && (
+        <Notice icon={Hourglass} tone="info">
           Aspettiamo la conferma del campo.
-        </Avviso>
+        </Notice>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {(
           [
-            [ctx.nomeA, partita.giocatoriA],
-            [ctx.nomeB, partita.giocatoriB],
+            [ctx.nameA, match.playersA],
+            [ctx.nameB, match.playersB],
           ] as const
-        ).map(([coppia, gs]) => (
-          <div key={coppia} className="grid content-start gap-1">
-            <p className="font-bold">{coppia}</p>
+        ).map(([team, players]) => (
+          <div key={team} className="grid content-start gap-1">
+            <p className="font-bold">{team}</p>
             <ul className="court-rule">
-              {gs
-                .filter((g) => richiesta.giocatori.includes(g))
-                .map((g) => {
-                  const ok = !!richiesta.accettazioni[g];
-                  const stato = g === richiesta.creatoDa ? 'ha chiesto' : ok ? 'ha accettato' : 'deve accettare';
+              {players
+                .filter((p) => request.players.includes(p))
+                .map((p) => {
+                  const ok = !!request.acceptances[p];
+                  const state = p === request.createdBy ? 'ha chiesto' : ok ? 'ha accettato' : 'deve accettare';
                   return (
-                    <li key={g} className="flex min-h-11 flex-wrap items-center justify-between gap-2 py-1.5">
+                    <li key={p} className="flex min-h-11 flex-wrap items-center justify-between gap-2 py-1.5">
                       <span className="flex items-center gap-2">
                         {ok ? <CircleCheck className="size-5 shrink-0 text-ok-ink" aria-hidden /> : <Hourglass className="size-5 shrink-0 text-warn-ink" aria-hidden />}
                         <span>
-                          <span className="font-semibold">{g === ctx.uid ? 'Tu' : nome(g)}</span>{' '}
-                          <span className={ok ? 'text-ink-muted' : 'font-semibold text-warn-ink'}>· {g === ctx.uid && !ok ? 'devi accettare' : stato}</span>
+                          <span className="font-semibold">{p === ctx.uid ? 'Tu' : name(p)}</span>{' '}
+                          <span className={ok ? 'text-ink-muted' : 'font-semibold text-warn-ink'}>· {p === ctx.uid && !ok ? 'devi accettare' : state}</span>
                         </span>
                       </span>
-                      {!ok && giocatore && g !== ctx.uid && (
+                      {!ok && isPlayer && p !== ctx.uid && (
                         <WhatsAppButton
                           size="sm"
-                          telefono={ctx.telefono(g)}
-                          testo={`${nome(g)}, manca solo la tua conferma per ${orario} (${campo}) → ${ctx.link}`}
+                          phone={ctx.phone(p)}
+                          text={`${name(p)}, manca solo la tua conferma per ${slotTime} (${court}) → ${ctx.link}`}
                         >
                           Sollecita
                         </WhatsAppButton>
@@ -134,64 +134,64 @@ export function AcceptanceTracker({ ctx, richiesta }: { ctx: ContestoPartita; ri
         ))}
       </div>
 
-      {!urgente && scadenza}
+      {!urgent && expiryNotice}
 
-      {giocatore && (
+      {isPlayer && (
         <div className="flex flex-wrap items-center gap-2">
-          {devoAccettare && (
-            <Button variant="primary" size="lg" loading={accetta.isPending} onClick={() => accetta.esegui(richiesta.id)}>
+          {mustAccept && (
+            <Button variant="primary" size="lg" loading={accept.isPending} onClick={() => accept.run(request.id)}>
               <Check aria-hidden /> Accetta
             </Button>
           )}
           <WhatsAppButton
-            testo={
-              mancanti.length
-                ? `Ho chiesto il campo per ${orario} (${campo}). ${elencoNomi(mancanti.map((g) => nome(g)))}: accettate qui → ${ctx.link}`
-                : `Abbiamo chiesto il campo per ${orario} (${campo}) per ${ctx.titolo}: aspettiamo la conferma → ${ctx.link}`
+            text={
+              missing.length
+                ? `Ho chiesto il campo per ${slotTime} (${court}). ${nameList(missing.map((p) => name(p)))}: accettate qui → ${ctx.link}`
+                : `Abbiamo chiesto il campo per ${slotTime} (${court}) per ${ctx.title}: aspettiamo la conferma → ${ctx.link}`
             }
           >
             Condividi su WhatsApp
           </WhatsAppButton>
           <ConfirmDialog
-            open={conferma}
-            onOpenChange={setConferma}
+            open={confirming}
+            onOpenChange={setConfirming}
             title="Annullare la richiesta per tutti?"
             description="Il campo non la vedrà più. Potrete sceglierne un’altra subito dopo."
             confirmLabel="Annulla richiesta"
             cancelLabel="Tieni"
-            loading={annulla.isPending}
-            onConfirm={() => annulla.esegui({ richiesta: richiesta.id }, { onSuccess: () => setConferma(false), onError: () => setConferma(false) })}
+            loading={cancel.isPending}
+            onConfirm={() => cancel.run({ request: request.id }, { onSuccess: () => setConfirming(false), onError: () => setConfirming(false) })}
             trigger={<Button variant="danger">Annulla richiesta</Button>}
           />
         </div>
       )}
-      {devoAccettare && (
+      {mustAccept && (
         <p className="text-sm text-ink-muted">
           Se l’orario non ti va bene, annulla la richiesta: si annulla per tutti e potrete sceglierne un altro.
         </p>
       )}
-      {!giocatore && (
-        <Avviso icona={Send} tono="info">
-          {mancanti.length ? `Manca ancora: ${elencoNomi(mancanti.map((g) => nome(g)))}.` : 'Tutti e 4 hanno accettato.'}
-        </Avviso>
+      {!isPlayer && (
+        <Notice icon={Send} tone="info">
+          {missing.length ? `Manca ancora: ${nameList(missing.map((p) => name(p)))}.` : 'Tutti e 4 hanno accettato.'}
+        </Notice>
       )}
     </div>
   );
 }
 
-function Passo({ numero, attivo, fatto, children }: { numero: number; attivo: boolean; fatto: boolean; children: React.ReactNode }) {
+function Step({ number, active, done, children }: { number: number; active: boolean; done: boolean; children: React.ReactNode }) {
   return (
     <li
-      aria-current={attivo ? 'step' : undefined}
+      aria-current={active ? 'step' : undefined}
       className={cn(
         'flex min-h-11 items-center gap-2 rounded-control px-3 py-2 font-semibold',
-        attivo ? 'bg-court text-court-ink' : 'border border-line text-ink-muted',
-        fatto && 'text-ink',
+        active ? 'bg-court text-court-ink' : 'border border-line text-ink-muted',
+        done && 'text-ink',
       )}
     >
-      {fatto ? <Check className="size-5 text-ok-ink" strokeWidth={3} aria-hidden /> : <span className="tabular">{numero}.</span>}
+      {done ? <Check className="size-5 text-ok-ink" strokeWidth={3} aria-hidden /> : <span className="tabular">{number}.</span>}
       <span className="tabular">{children}</span>
-      {fatto && <span className="sr-only">(fatto)</span>}
+      {done && <span className="sr-only">(fatto)</span>}
     </li>
   );
 }

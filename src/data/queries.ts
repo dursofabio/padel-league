@@ -5,19 +5,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import type { Campo, Disponibilita, Partita, Periodo, Richiesta, Ricorrenza, Squadra, Torneo, UserProfile } from '../types';
+import type { Availability, Court, Match, MatchRequest, Period, Recurrence, Team, TeamStatus, Tournament, UserProfile } from '../types';
 import {
-  occupazioniPerGiorno,
-  toCampo,
-  toDisponibilita,
-  toOccupazione,
-  toPartite,
-  toPeriodo,
+  bookingsByCourtDay,
+  toAvailability,
+  toBooking,
+  toCourt,
+  toMatches,
+  toPeriod,
   toProfile,
-  toRichieste,
-  toRicorrenza,
-  toSquadre,
-  toTorneo,
+  toRecurrence,
+  toRequests,
+  toTeams,
+  toTournament,
 } from './adapters';
 import type { Tables } from './database.types';
 import { qk } from './keys';
@@ -30,179 +30,185 @@ function check<T>(r: { data: T | null; error: unknown }): T {
 
 // ------------------------------------------------------------------ tournaments
 
-export function useTornei() {
+export function useTournaments() {
   return useQuery({
-    queryKey: qk.tornei(),
-    queryFn: async (): Promise<Torneo[]> =>
-      check(await supabase.from('tornei').select('*').order('created_at', { ascending: false })).map(toTorneo),
+    queryKey: qk.tournaments(),
+    queryFn: async (): Promise<Tournament[]> =>
+      check(await supabase.from('tournaments').select('*').order('created_at', { ascending: false })).map(toTournament),
   });
 }
 
-export function useTorneo(tid: string | undefined) {
+export function useTournament(tid: string | undefined) {
   return useQuery({
-    queryKey: qk.torneo(tid ?? ''),
+    queryKey: qk.tournament(tid ?? ''),
     enabled: !!tid,
-    queryFn: async (): Promise<Torneo> => toTorneo(check(await supabase.from('tornei').select('*').eq('id', tid!).single())),
+    queryFn: async (): Promise<Tournament> =>
+      toTournament(check(await supabase.from('tournaments').select('*').eq('id', tid!).single())),
   });
 }
 
-export function usePeriodi(tid: string | undefined) {
+export function usePeriods(tid: string | undefined) {
   return useQuery({
-    queryKey: qk.periodi(tid ?? ''),
+    queryKey: qk.periods(tid ?? ''),
     enabled: !!tid,
-    queryFn: async (): Promise<Periodo[]> =>
-      check(await supabase.from('periodi').select('*').eq('torneo_id', tid!).order('inizio')).map(toPeriodo),
+    queryFn: async (): Promise<Period[]> =>
+      check(await supabase.from('periods').select('*').eq('tournament_id', tid!).order('starts_on')).map(toPeriod),
   });
 }
 
-export function useSquadre(tid: string | undefined) {
+export function useTeams(tid: string | undefined) {
   return useQuery({
-    queryKey: qk.squadre(tid ?? ''),
+    queryKey: qk.teams(tid ?? ''),
     enabled: !!tid,
-    queryFn: async (): Promise<Squadra[]> => {
-      const [s, m] = await Promise.all([
-        supabase.from('squadre').select('*').eq('torneo_id', tid!).order('nome'),
-        supabase.from('squadra_giocatori').select('*').eq('torneo_id', tid!),
+    queryFn: async (): Promise<Team[]> => {
+      const [t, p] = await Promise.all([
+        supabase.from('teams').select('*').eq('tournament_id', tid!).order('name'),
+        supabase.from('team_players').select('*').eq('tournament_id', tid!),
       ]);
-      return toSquadre(check(s), check(m));
+      return toTeams(check(t), check(p));
     },
   });
 }
 
-export function usePartite(tid: string | undefined) {
+export function useMatches(tid: string | undefined) {
   return useQuery({
-    queryKey: qk.partite(tid ?? ''),
+    queryKey: qk.matches(tid ?? ''),
     enabled: !!tid,
-    queryFn: async (): Promise<Partita[]> =>
-      toPartite(check(await supabase.from('partite_v').select('*').eq('torneo_id', tid!).order('codice'))),
+    queryFn: async (): Promise<Match[]> =>
+      toMatches(check(await supabase.from('matches_v').select('*').eq('tournament_id', tid!).order('code'))),
   });
 }
 
 /** Everything a tournament screen needs, with lookup maps. */
-export function useTorneoData(tid: string | undefined) {
-  const torneo = useTorneo(tid);
-  const periodi = usePeriodi(tid);
-  const squadre = useSquadre(tid);
-  const partite = usePartite(tid);
-  const squadraById = useMemo(() => new Map((squadre.data ?? []).map((s) => [s.id, s])), [squadre.data]);
-  const queries = [torneo, periodi, squadre, partite];
+export function useTournamentData(tid: string | undefined) {
+  const tournament = useTournament(tid);
+  const periods = usePeriods(tid);
+  const teams = useTeams(tid);
+  const matches = useMatches(tid);
+  const teamById = useMemo(() => new Map((teams.data ?? []).map((t) => [t.id, t])), [teams.data]);
+  const queries = [tournament, periods, teams, matches];
   return {
-    torneo: torneo.data,
-    periodi: periodi.data ?? [],
-    squadre: squadre.data ?? [],
-    partite: partite.data ?? [],
-    squadraById,
+    tournament: tournament.data,
+    periods: periods.data ?? [],
+    teams: teams.data ?? [],
+    matches: matches.data ?? [],
+    teamById,
     isPending: queries.some((q) => q.isPending),
     error: queries.find((q) => q.error)?.error ?? null,
     refetch: () => queries.forEach((q) => q.refetch()),
   };
 }
 
-// ------------------------------------------------------------------ courts and occupations
+// ------------------------------------------------------------------ courts and bookings
 
-export function useCampi() {
+export function useCourts() {
   return useQuery({
-    queryKey: qk.campi(),
-    queryFn: async (): Promise<Campo[]> =>
-      check(await supabase.from('campi').select('*').order('ordine').order('nome')).map(toCampo),
+    queryKey: qk.courts(),
+    queryFn: async (): Promise<Court[]> =>
+      check(await supabase.from('courts').select('*').order('sort_order').order('name')).map(toCourt),
   });
 }
 
-export function useRicorrenze() {
+export function useRecurrences() {
   return useQuery({
-    queryKey: qk.ricorrenze(),
-    queryFn: async (): Promise<Ricorrenza[]> =>
-      check(await supabase.from('ricorrenze').select('*').order('giorno_settimana').order('inizio')).map(toRicorrenza),
+    queryKey: qk.recurrences(),
+    queryFn: async (): Promise<Recurrence[]> =>
+      check(await supabase.from('recurrences').select('*').order('weekday').order('start_time')).map(toRecurrence),
   });
 }
 
-/** Occupations between two dates (inclusive): rows plus a per-court-day map for src/lib/slots. */
-export function useOccupazioni(from: string, to: string, enabled = true) {
+/** Bookings between two dates (inclusive): rows plus a per-court-day map for src/lib/slots. */
+export function useBookings(from: string, to: string, enabled = true) {
   const q = useQuery({
-    queryKey: qk.occupazioni(from, to),
+    queryKey: qk.bookings(from, to),
     enabled,
     queryFn: async () =>
-      check(await supabase.from('occupazioni').select('*').gte('data', from).lte('data', to).order('inizio')).map(toOccupazione),
+      check(await supabase.from('bookings').select('*').gte('date', from).lte('date', to).order('start_time')).map(toBooking),
   });
-  const perGiorno = useMemo(() => occupazioniPerGiorno(q.data ?? []), [q.data]);
-  return { ...q, righe: q.data ?? [], perGiorno };
+  const byCourtDay = useMemo(() => bookingsByCourtDay(q.data ?? []), [q.data]);
+  return { ...q, rows: q.data ?? [], byCourtDay };
 }
 
 // ------------------------------------------------------------------ requests
 
-async function richiesteDa(query: PromiseLike<{ data: Tables<'richieste'>[] | null; error: unknown }>): Promise<Richiesta[]> {
+async function requestsFrom(query: PromiseLike<{ data: Tables<'requests'>[] | null; error: unknown }>): Promise<MatchRequest[]> {
   const rows = check(await query);
   if (!rows.length) return [];
-  const g = check(
-    await supabase.from('richiesta_giocatori').select('*').in('richiesta_id', rows.map((r) => r.id)),
+  const players = check(
+    await supabase.from('request_players').select('*').in('request_id', rows.map((r) => r.id)),
   );
-  return toRichieste(rows, g);
+  return toRequests(rows, players);
 }
 
-/** Requests in a date window (to color the slot grid and the timeline). */
-export function useRichiesteFinestra(from: string, to: string, enabled = true) {
+/** Requests in a date range (to color the slot grid and the timeline). */
+export function useRequestsInRange(from: string, to: string, enabled = true) {
   return useQuery({
-    queryKey: qk.richieste('finestra', from, to),
+    queryKey: qk.requests('range', from, to),
     enabled,
-    queryFn: () => richiesteDa(supabase.from('richieste').select('*').gte('data', from).lte('data', to)),
+    queryFn: () => requestsFrom(supabase.from('requests').select('*').gte('date', from).lte('date', to)),
   });
 }
 
 /** Pending requests (court manager's inbox). */
-export function useRichiesteInAttesa(enabled = true) {
+export function usePendingRequests(enabled = true) {
   return useQuery({
-    queryKey: qk.richieste('attesa'),
+    queryKey: qk.requests('pending'),
     enabled,
-    queryFn: () => richiesteDa(supabase.from('richieste').select('*').eq('stato', 'attesa').order('data').order('inizio')),
+    queryFn: () =>
+      requestsFrom(supabase.from('requests').select('*').eq('status', 'pending').order('date').order('start_time')),
   });
 }
 
 /** Confirmed requests from a given day on (upcoming matches, court manager side). */
-export function useRichiesteConfermate(from: string, enabled = true) {
+export function useConfirmedRequests(from: string, enabled = true) {
   return useQuery({
-    queryKey: qk.richieste('confermate', from),
+    queryKey: qk.requests('confirmed', from),
     enabled,
     queryFn: () =>
-      richiesteDa(supabase.from('richieste').select('*').eq('stato', 'confermata').gte('data', from).order('data').order('inizio')),
+      requestsFrom(
+        supabase.from('requests').select('*').eq('status', 'confirmed').gte('date', from).order('date').order('start_time'),
+      ),
   });
 }
 
 /** Requests that involve a player (to accept, to follow). */
-export function useRichiesteGiocatore(uid: string | undefined) {
+export function usePlayerRequests(uid: string | undefined) {
   return useQuery({
-    queryKey: qk.richieste('giocatore', uid),
+    queryKey: qk.requests('player', uid),
     enabled: !!uid,
     queryFn: async () => {
-      const ids = check(await supabase.from('richiesta_giocatori').select('richiesta_id').eq('user_id', uid!)).map(
-        (r) => r.richiesta_id,
+      const ids = check(await supabase.from('request_players').select('request_id').eq('user_id', uid!)).map(
+        (r) => r.request_id,
       );
       if (!ids.length) return [];
-      return richiesteDa(supabase.from('richieste').select('*').in('id', ids).in('stato', ['attesa', 'confermata', 'conflitto', 'scaduta', 'rifiutata']));
+      return requestsFrom(
+        supabase.from('requests').select('*').in('id', ids).in('status', ['pending', 'confirmed', 'conflict', 'expired', 'rejected']),
+      );
     },
   });
 }
 
-export function useRichiesta(id: string | null | undefined) {
+export function useRequest(id: string | null | undefined) {
   return useQuery({
-    queryKey: qk.richieste('una', id ?? ''),
+    queryKey: qk.requests('one', id ?? ''),
     enabled: !!id,
-    queryFn: async () => (await richiesteDa(supabase.from('richieste').select('*').eq('id', id!)))[0] ?? null,
+    queryFn: async () => (await requestsFrom(supabase.from('requests').select('*').eq('id', id!)))[0] ?? null,
   });
 }
 
 // ------------------------------------------------------------------ availability
 
-/** Availability of several players (the 4 of a match) in a tournament: uid → fasce. */
-export function useDisponibilita(tid: string | undefined, uids: string[]) {
+/** Availability of several players (the 4 of a match) in a tournament: uid → availability. */
+export function useAvailability(tid: string | undefined, uids: string[]) {
   const sorted = [...uids].sort();
   return useQuery({
-    queryKey: qk.disponibilita(tid ?? '', sorted),
+    queryKey: qk.availability(tid ?? '', sorted),
     enabled: !!tid && sorted.length > 0,
-    queryFn: async (): Promise<Record<string, Disponibilita | undefined>> => {
-      const rows = check(await supabase.from('disponibilita').select('*').eq('torneo_id', tid!).in('user_id', sorted)).map(
-        toDisponibilita,
-      );
-      return Object.fromEntries(rows.map((d) => [d.uid, d]));
+    queryFn: async (): Promise<Record<string, Availability | undefined>> => {
+      const rows = check(
+        await supabase.from('availability').select('*').eq('tournament_id', tid!).in('user_id', sorted),
+      ).map(toAvailability);
+      return Object.fromEntries(rows.map((a) => [a.uid, a]));
     },
   });
 }
@@ -210,55 +216,59 @@ export function useDisponibilita(tid: string | undefined, uids: string[]) {
 // ------------------------------------------------------------------ people
 
 /** All profiles (authenticated users only). */
-export function useProfili() {
+export function useProfiles() {
   const { user } = useAuth();
   return useQuery({
-    queryKey: qk.profili(),
+    queryKey: qk.profiles(),
     enabled: !!user,
-    queryFn: async (): Promise<UserProfile[]> => check(await supabase.from('profiles').select('*').order('nome')).map(toProfile),
+    queryFn: async (): Promise<UserProfile[]> =>
+      check(await supabase.from('profiles').select('*').order('name')).map(toProfile),
   });
 }
 
 /**
- * Player names: from public profiles if not logged in, from full profiles otherwise.
- * Returns `nome(uid)` that never fails ("…" while loading).
+ * Player names from the public_players view.
+ * Returns `name(uid)` that never fails ("…" while loading).
  */
-export function useNomi() {
+export function useNames() {
   const { user } = useAuth();
   const q = useQuery({
-    queryKey: [...qk.nomi(), !!user],
+    queryKey: [...qk.names(), !!user],
     queryFn: async () => {
-      const rows = check(await supabase.from('giocatori_pubblici').select('*'));
-      return new Map(rows.map((r) => [r.id, r.nome]));
+      const rows = check(await supabase.from('public_players').select('*'));
+      return new Map(rows.map((r) => [r.id, r.name]));
     },
     staleTime: 5 * 60_000,
   });
   return useMemo(() => {
     const map = q.data ?? new Map<string, string>();
-    return { ...q, nome: (uid: string | null | undefined) => (uid ? (map.get(uid) ?? '…') : '—') };
+    return { ...q, name: (uid: string | null | undefined) => (uid ? (map.get(uid) ?? '…') : '—') };
   }, [q]);
 }
 
-export function useMioInvito(squadraId: string | undefined, enabled = true) {
+export function useMyInvite(teamId: string | undefined, enabled = true) {
   return useQuery({
-    queryKey: qk.invito(squadraId ?? ''),
-    enabled: !!squadraId && enabled,
-    queryFn: () => rpc('my_invite_token', { p_squadra: squadraId! }),
+    queryKey: qk.invite(teamId ?? ''),
+    enabled: !!teamId && enabled,
+    queryFn: () => rpc('my_invite_token', { p_team: teamId! }),
   });
 }
 
-export function useInvito(token: string | undefined) {
+/** Public data of an invite (get_invite RPC). */
+export interface InviteInfo {
+  team_id: string;
+  tournament_id: string;
+  name: string;
+  creator_name: string;
+  status: TeamStatus;
+  /** Number of players already in the team. */
+  players: number;
+}
+
+export function useInvite(token: string | undefined) {
   return useQuery({
-    queryKey: ['invito-token', token],
+    queryKey: ['invite-token', token],
     enabled: !!token,
-    queryFn: async () =>
-      (await rpc('get_invite', { p_token: token! })) as {
-        squadra_id: string;
-        torneo_id: string;
-        nome: string;
-        creatore_nome: string;
-        stato: string;
-        giocatori: number;
-      } | null,
+    queryFn: async () => (await rpc('get_invite', { p_token: token! })) as unknown as InviteInfo | null,
   });
 }

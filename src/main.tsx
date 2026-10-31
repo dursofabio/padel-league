@@ -3,12 +3,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
 import { router } from './app/router';
-import { initTema } from './app/theme';
+import { initTheme } from './app/theme';
 import { AuthProvider } from './auth/AuthProvider';
 import { supabaseConfigured } from './data/supabase';
 import './styles/index.css';
 
-initTema();
+initTheme();
 
 const queryClient = new QueryClient({
   defaultOptions: {

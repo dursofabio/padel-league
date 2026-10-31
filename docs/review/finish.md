@@ -51,7 +51,7 @@ There is no comp, so this is an element matrix against the contract and the conf
 
 | Item | Status | Evidence |
 |---|---|---|
-| Critique M1: expiry later than the slot | resolved | `flow2/03`: expiry 13:00 for a 14:00 slot. Server trigger in `supabase/migrations/20261101001300_scadenza_entro_inizio.sql`. |
+| Critique M1: expiry later than the slot | resolved | `flow2/03`: expiry 13:00 for a 14:00 slot. Server trigger in `supabase/migrations/20261031001300_expiry_before_start.sql`. |
 | Critique M2: phone slot grid wall | resolved | `flow2/01`: the filter is on by default ("Mostro solo gli orari buoni"), empty days collapse to "Nessun orario buono · Mostra", and with no good slot the grid hides behind "Mostra la griglia completa". The lane header is sticky (`CourtLanes.tsx:72`). |
 | Critique M3: 28 expanded availability days | resolved | `giocatore-disponibilita-390-*`: compact one-line days with "+ Aggiungi", week headers, presets as chips under "Compila veloce", and a rail with 08/14/20/24 labels only when a day has windows |
 | Critique M4: desktop availability has no visible add affordance | resolved | `giocatore-disponibilita-1440-*`: "Clicca un giorno per aggiungere o togliere un orario.", a tick legend, and "+ Aggiungi" under every column |
@@ -88,7 +88,7 @@ This is not a material finding for an Operate surface. Earned familiarity is the
 1. **Floor (side stripe), all desktop screens, sidebar.** The active nav item draws a 3 px lime inset left stripe. Remove `shadow-[inset_3px_0_0_var(--ball)]` at `src/components/AppShell.tsx:239`. Carry the active state with the fill plus a lime icon, or with a 1 px white court line across the item. In dark theme, make the active fill clearly distinct from `--court-deep` (today it is L 0.31 against 0.25).
 2. **S6 regression, phone tab bar with 5 items (manager, organizer, multi-role; every `gestore-*-390`, `org-*-390`, light and dark).** "Disponibilità" breaks mid-word into "Disponibilit / à". Drop `break-words` at `AppShell.tsx:227` so labels only wrap at word boundaries (`break-normal`, `hyphens-none`). Then make the label fit at 78 px: use a shorter tab label on 5-item bars (for example "Orari", with the page h1 unchanged), or move one destination into the top bar. Re-check at 390 px and at 200% text.
 3. **Dark theme selection states, Configurazione (`org-configurazione-*-dark`), Disponibilità chips and segments.** The checked Switch track (`bg-court`, L 0.31) is darker than an unchecked one (`--line-strong`, L 0.55), so ON reads as OFF. The selected segment, chip and preset are navy on near-black (WCAG 1.4.11). In `src/ui/misc.tsx:33`, give the checked state the world's selection colour in dark: a `--ball` track with a `--ball-ink` thumb, or a court track with a lime ring. Apply the same selected token to the segmented control and preset or period chips so current selection is lime, as OWN-WORLD specifies.
-4. **Manager timeline (signature), lesson and occupation blocks shorter than about 90' (`gestore-richieste-820/1440-*`, `flow2/04`).** The third line ("Scuola padel") is clipped mid-glyph by `overflow-hidden` (`src/components/CourtLanes.tsx:160`, content from `src/features/gestore/GiornoLanes.tsx`). For short blocks, put the title and time on one line and move the note to the accessible name or the block's sheet, so no visible text is ever cut.
+4. **Manager timeline (signature), lesson and occupation blocks shorter than about 90' (`gestore-richieste-820/1440-*`, `flow2/04`).** The third line ("Scuola padel") is clipped mid-glyph by `overflow-hidden` (`src/components/CourtLanes.tsx:160`, content from `src/features/manager/DayLanes.tsx`). For short blocks, put the title and time on one line and move the note to the accessible name or the block's sheet, so no visible text is ever cut.
 
 ## keep
 
@@ -115,7 +115,7 @@ Scored against the 48 recaptures at the same paths. Regressions were judged on t
 
 ## remaining
 
-- **Fix 4, 820 px, manager timeline** (`src/features/gestore/GiornoLanes.tsx`). When the lane is too narrow for "title + time" on one line, do not truncate. Either let the 60' block take two lines (title on the first, time on the second; a 60' block is about 60 px tall and fits two lines at the current leading), or drop the time and show icon plus title. The block's start and end are already readable on the hour gutter. Re-check at 820 and 390.
+- **Fix 4, 820 px, manager timeline** (`src/features/manager/DayLanes.tsx`). When the lane is too narrow for "title + time" on one line, do not truncate. Either let the 60' block take two lines (title on the first, time on the second; a 60' block is about 60 px tall and fits two lines at the current leading), or drop the time and show icon plus title. The block's start and end are already readable on the hour gutter. Re-check at 820 and 390.
 
 disposition: fix
 
@@ -127,7 +127,7 @@ disposition: fix
 
 | # | Fix | Score | Evidence |
 |---|---|---|---|
-| 4 | Manager timeline must never show cut text | resolved | **820** (`gestore-richieste-820-light`): the lesson block reads "Lezione 16:00–17:00" in full, with no ellipsis and no clipped glyph. **1440** (`gestore-richieste-1440-light/dark`): "Lezione" and "16:00–17:00" sit on one line, uncut. **390** (`gestore-giornata-390-*`): the lanes and free-slot blocks are intact, but no occupation is captured that day, so the narrow case is not shown on screen. **Source** (`src/features/gestore/GiornoLanes.tsx:162-169`): for blocks of 75' or less, the title has no truncate or clamp. The time is hidden below a 10rem container width, so a narrow block shows icon plus the full title, and the hour axis gives the time. |
+| 4 | Manager timeline must never show cut text | resolved | **820** (`gestore-richieste-820-light`): the lesson block reads "Lezione 16:00–17:00" in full, with no ellipsis and no clipped glyph. **1440** (`gestore-richieste-1440-light/dark`): "Lezione" and "16:00–17:00" sit on one line, uncut. **390** (`gestore-giornata-390-*`): the lanes and free-slot blocks are intact, but no occupation is captured that day, so the narrow case is not shown on screen. **Source** (`src/features/manager/DayLanes.tsx:162-169`): for blocks of 75' or less, the title has no truncate or clamp. The time is hidden below a 10rem container width, so a narrow block shows icon plus the full title, and the hour axis gives the time. |
 
 **Regressions:** none.
 

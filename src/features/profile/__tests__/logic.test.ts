@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { normalizzaTelefono, schemaProfilo } from '../logic';
+import { normalizePhone, profileSchema } from '../logic';
 
 describe('profile', () => {
   it('normalizes phone numbers', () => {
-    expect(normalizzaTelefono(' +39 333-123 4567 ')).toBe('+393331234567');
-    expect(normalizzaTelefono('')).toBeNull();
+    expect(normalizePhone(' +39 333-123 4567 ')).toBe('+393331234567');
+    expect(normalizePhone('')).toBeNull();
   });
   it('validates name and optional phone', () => {
-    expect(schemaProfilo.safeParse({ nome: 'Luca Neri', telefono: '' }).success).toBe(true);
-    expect(schemaProfilo.safeParse({ nome: 'Luca Neri', telefono: '+39 333 123 4567' }).success).toBe(true);
-    expect(schemaProfilo.safeParse({ nome: 'L', telefono: '' }).success).toBe(false);
-    expect(schemaProfilo.safeParse({ nome: 'Luca', telefono: 'abc' }).success).toBe(false);
+    expect(profileSchema.safeParse({ name: 'Luca Neri', phone: '' }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: 'Luca Neri', phone: '+39 333 123 4567' }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: 'L', phone: '' }).success).toBe(false);
+    expect(profileSchema.safeParse({ name: 'Luca', phone: 'abc' }).success).toBe(false);
   });
 });

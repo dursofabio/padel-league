@@ -1,12 +1,13 @@
-import type { FormatoSet, Partita, SetScore } from '../types';
+import type { Match, SetFormat, SetScore } from '../types';
 
-export interface EsitoValidazione {
+export interface ValidationOutcome {
   ok: boolean;
-  errore?: string;
-  vincitore?: 'A' | 'B';
+  /** Italian message shown to the user. */
+  error?: string;
+  winner?: 'A' | 'B';
 }
 
-function setNormaleValido(a: number, b: number): boolean {
+function validRegularSet(a: number, b: number): boolean {
   const hi = Math.max(a, b);
   const lo = Math.min(a, b);
   if (hi === 6) return lo <= 4;
@@ -14,86 +15,86 @@ function setNormaleValido(a: number, b: number): boolean {
   return false;
 }
 
-function superTieBreakValido(a: number, b: number): boolean {
+function validSuperTieBreak(a: number, b: number): boolean {
   const hi = Math.max(a, b);
   const lo = Math.min(a, b);
   if (hi < 10 || hi - lo < 2) return false;
   return hi === 10 || hi - lo === 2;
 }
 
-export function isSetDecisivo(index: number, formato: FormatoSet): boolean {
-  return index === formato.setPerVincere * 2 - 2;
+export function isDecidingSet(index: number, format: SetFormat): boolean {
+  return index === format.setsToWin * 2 - 2;
 }
 
-export function validaRisultato(set: SetScore[], formato: FormatoSet): EsitoValidazione {
-  const max = formato.setPerVincere * 2 - 1;
-  if (set.length === 0) return { ok: false, errore: 'Inserisci almeno un set' };
-  if (set.length > max) return { ok: false, errore: `Al massimo ${max} set` };
-  let va = 0;
-  let vb = 0;
-  for (let i = 0; i < set.length; i++) {
-    const { a, b } = set[i];
+export function validateResult(sets: SetScore[], format: SetFormat): ValidationOutcome {
+  const max = format.setsToWin * 2 - 1;
+  if (sets.length === 0) return { ok: false, error: 'Inserisci almeno un set' };
+  if (sets.length > max) return { ok: false, error: `Al massimo ${max} set` };
+  let wa = 0;
+  let wb = 0;
+  for (let i = 0; i < sets.length; i++) {
+    const { a, b } = sets[i];
     if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || b < 0)
-      return { ok: false, errore: `Set ${i + 1}: punteggio non valido` };
-    if (va === formato.setPerVincere || vb === formato.setPerVincere)
-      return { ok: false, errore: 'La partita era già finita prima di questo set' };
-    const stb = formato.superTieBreak && isSetDecisivo(i, formato);
-    const valido = stb ? superTieBreakValido(a, b) : setNormaleValido(a, b);
-    if (!valido)
+      return { ok: false, error: `Set ${i + 1}: punteggio non valido` };
+    if (wa === format.setsToWin || wb === format.setsToWin)
+      return { ok: false, error: 'La partita era già finita prima di questo set' };
+    const stb = format.superTieBreak && isDecidingSet(i, format);
+    const valid = stb ? validSuperTieBreak(a, b) : validRegularSet(a, b);
+    if (!valid)
       return {
         ok: false,
-        errore: stb
+        error: stb
           ? `Set ${i + 1}: super tie-break non valido (a 10, con 2 punti di scarto)`
           : `Set ${i + 1}: punteggio non valido (6-0…6-4, 7-5, 7-6)`,
       };
-    if (a > b) va++;
-    else vb++;
+    if (a > b) wa++;
+    else wb++;
   }
-  if (va < formato.setPerVincere && vb < formato.setPerVincere)
-    return { ok: false, errore: 'La partita non è conclusa' };
-  return { ok: true, vincitore: va > vb ? 'A' : 'B' };
+  if (wa < format.setsToWin && wb < format.setsToWin) return { ok: false, error: 'La partita non è conclusa' };
+  return { ok: true, winner: wa > wb ? 'A' : 'B' };
 }
 
-export interface Stat {
-  setA: number;
-  setB: number;
-  gameA: number;
-  gameB: number;
-  vincitore: 'A' | 'B';
-  setDecisivo: boolean;
+export interface MatchStats {
+  setsA: number;
+  setsB: number;
+  gamesA: number;
+  gamesB: number;
+  winner: 'A' | 'B';
+  decidingSet: boolean;
 }
 
-/** Il super tie-break conta come un set vinto e un game. */
-export function statistiche(set: SetScore[], formato: FormatoSet): Stat {
-  let setA = 0, setB = 0, gameA = 0, gameB = 0;
-  set.forEach(({ a, b }, i) => {
-    if (a > b) setA++;
-    else setB++;
-    if (formato.superTieBreak && isSetDecisivo(i, formato)) {
-      if (a > b) gameA++;
-      else gameB++;
+/** The super tie-break counts as one set won and one game. */
+export function matchStats(sets: SetScore[], format: SetFormat): MatchStats {
+  let setsA = 0, setsB = 0, gamesA = 0, gamesB = 0;
+  sets.forEach(({ a, b }, i) => {
+    if (a > b) setsA++;
+    else setsB++;
+    if (format.superTieBreak && isDecidingSet(i, format)) {
+      if (a > b) gamesA++;
+      else gamesB++;
     } else {
-      gameA += a;
-      gameB += b;
+      gamesA += a;
+      gamesB += b;
     }
   });
   return {
-    setA, setB, gameA, gameB,
-    vincitore: setA > setB ? 'A' : 'B',
-    setDecisivo: set.length === formato.setPerVincere * 2 - 1,
+    setsA, setsB, gamesA, gamesB,
+    winner: setsA > setsB ? 'A' : 'B',
+    decidingSet: sets.length === format.setsToWin * 2 - 1,
   };
 }
 
-/** Solo i risultati confermati (o assegnati a tavolino) contano. */
-export function risultatoUfficiale(p: Partita): boolean {
-  return (p.stato === 'giocata' || p.stato === 'tavolino') && !!p.risultato?.set?.length;
+/** Only confirmed results (or forfeits) count. */
+export function hasOfficialResult(m: Match): boolean {
+  return (m.status === 'played' || m.status === 'forfeit') && !!m.result?.sets?.length;
 }
 
-export function vincitore(p: Partita, formato: FormatoSet): string | null {
-  if (!risultatoUfficiale(p)) return null;
-  return statistiche(p.risultato!.set, formato).vincitore === 'A' ? p.squadraA : p.squadraB;
+/** Winning team id, or null without an official result. */
+export function matchWinner(m: Match, format: SetFormat): string | null {
+  if (!hasOfficialResult(m)) return null;
+  return matchStats(m.result!.sets, format).winner === 'A' ? m.teamA : m.teamB;
 }
 
-export function formatRisultato(set: SetScore[] | undefined): string {
-  return (set ?? []).map((s) => `${s.a}-${s.b}`).join(' ');
+export function formatScore(sets: SetScore[] | undefined): string {
+  return (sets ?? []).map((s) => `${s.a}-${s.b}`).join(' ');
 }

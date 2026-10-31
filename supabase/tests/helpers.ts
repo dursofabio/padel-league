@@ -9,7 +9,7 @@ import pg from 'pg';
 import { afterAll } from 'vitest';
 
 const url = process.env.DATABASE_URL;
-if (!url) throw new Error('DATABASE_URL mancante: usa `npm run test:db`');
+if (!url) throw new Error('DATABASE_URL missing: use `npm run test:db`');
 
 // dates stay 'YYYY-MM-DD' strings, as PostgREST returns them
 pg.types.setTypeParser(1082, (v: string) => v);
@@ -51,7 +51,7 @@ export class Db {
 
   async one(sql: string, params: unknown[] = []): Promise<Row> {
     const rows = await this.q(sql, params);
-    if (rows.length !== 1) throw new Error(`attesa 1 riga, trovate ${rows.length}: ${sql}`);
+    if (rows.length !== 1) throw new Error(`expected 1 row, got ${rows.length}: ${sql}`);
     return rows[0];
   }
 
@@ -116,7 +116,7 @@ export class Actor {
     return (await this.q(sql, params)).rows;
   }
 
-  /** Calls an RPC with named arguments: rpc('create_request', { p_partita: id, … }). */
+  /** Calls an RPC with named arguments: rpc('create_request', { p_match: id, … }). */
   async rpc<T = any>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
     const keys = Object.keys(args);
     const list = keys.map((k, i) => `${k} => $${i + 1}`).join(', ');
@@ -135,7 +135,7 @@ export class Actor {
     } catch (e) {
       return e as PgErr;
     }
-    throw new Error(`atteso un errore per ${this.who}`);
+    throw new Error(`expected an error for ${this.who}`);
   }
 }
 
@@ -159,9 +159,9 @@ export async function expectHint(p: Promise<unknown>, hint: string): Promise<PgE
   } catch (e) {
     err = e as PgErr;
   }
-  if (!err) throw new Error(`atteso errore ${hint}, nessun errore`);
+  if (!err) throw new Error(`expected error ${hint}, got none`);
   if (err.code !== 'P0001' || err.hint !== hint)
-    throw new Error(`atteso ${hint}, ottenuto ${err.code}/${err.hint}: ${err.message}`);
+    throw new Error(`expected ${hint}, got ${err.code}/${err.hint}: ${err.message}`);
   return err;
 }
 
@@ -173,124 +173,124 @@ export async function expectCode(p: Promise<unknown>, code: string): Promise<PgE
   } catch (e) {
     err = e as PgErr;
   }
-  if (!err) throw new Error(`atteso errore ${code}, nessun errore`);
-  if (err.code !== code) throw new Error(`atteso ${code}, ottenuto ${err.code}: ${err.message}`);
+  if (!err) throw new Error(`expected error ${code}, got none`);
+  if (err.code !== code) throw new Error(`expected ${code}, got ${err.code}: ${err.message}`);
   return err;
 }
 
 // ------------------------------------------------------------------ fixtures
 
-export const DATA = '2099-11-14';
+export const DATE = '2099-11-14';
 
-export async function creaUtente(db: Db, nome: string, roles: string[] = ['giocatore']): Promise<string> {
+export async function createUser(db: Db, name: string, roles: string[] = ['player']): Promise<string> {
   const id = await db.val<string>(
     `insert into auth.users (email, raw_user_meta_data) values ($1, jsonb_build_object('full_name', $2::text)) returning id`,
-    [`${nome}@x.it`, nome],
+    [`${name}@x.it`, name],
   );
-  if (roles.join() !== 'giocatore') await db.q('update public.profiles set roles = $2 where id = $1', [id, roles]);
+  if (roles.join() !== 'player') await db.q('update public.profiles set roles = $2 where id = $1', [id, roles]);
   return id;
 }
 
 export interface Base {
   admin: string;
   org: string;
-  gest: string;
+  mgr: string;
   a1: string;
   a2: string;
   b1: string;
   b2: string;
   x: string;
   T: string;
-  sA: string;
-  sB: string;
+  teamA: string;
+  teamB: string;
   P: string;
   /** a second group match between the same teams */
   P2: string;
-  periodo: string;
+  period: string;
 }
 
 /**
- * Same world as the old tests/rules.test.ts: admin, org, gest, players a1 a2 (team A),
- * b1 b2 (team B), outsider x; tournament T in "gironi" with off-grid disabled; match P.
+ * Same world as the old tests/rules.test.ts: admin, org, mgr (court manager), players a1 a2 (team A),
+ * b1 b2 (team B), outsider x; tournament T in "groups" with off-grid disabled; match P.
  */
-export async function base(db: Db, config: Record<string, unknown> = { consentiFuoriGriglia: false }): Promise<Base> {
-  const admin = await creaUtente(db, 'admin', ['admin', 'giocatore']);
-  const org = await creaUtente(db, 'org', ['organizzatore', 'giocatore']);
-  const gest = await creaUtente(db, 'gest', ['gestore', 'giocatore']);
-  const a1 = await creaUtente(db, 'a1');
-  const a2 = await creaUtente(db, 'a2');
-  const b1 = await creaUtente(db, 'b1');
-  const b2 = await creaUtente(db, 'b2');
-  const x = await creaUtente(db, 'x');
+export async function base(db: Db, config: Record<string, unknown> = { allowOffGrid: false }): Promise<Base> {
+  const admin = await createUser(db, 'admin', ['admin', 'player']);
+  const org = await createUser(db, 'org', ['organizer', 'player']);
+  const mgr = await createUser(db, 'mgr', ['manager', 'player']);
+  const a1 = await createUser(db, 'a1');
+  const a2 = await createUser(db, 'a2');
+  const b1 = await createUser(db, 'b1');
+  const b2 = await createUser(db, 'b2');
+  const x = await createUser(db, 'x');
   const T = await db.val<string>(
-    `insert into public.tornei (nome, stato, config) values ('T', 'gironi', private.config_default() || $1::jsonb) returning id`,
+    `insert into public.tournaments (name, status, config) values ('T', 'groups', private.config_default() || $1::jsonb) returning id`,
     [JSON.stringify(config)],
   );
-  const periodo = await db.val<string>(
-    `insert into public.periodi (torneo_id, inizio, fine, etichetta) values ($1, '2099-11-01', '2099-11-30', 'P1') returning id`,
+  const period = await db.val<string>(
+    `insert into public.periods (tournament_id, starts_on, ends_on, label) values ($1, '2099-11-01', '2099-11-30', 'P1') returning id`,
     [T],
   );
-  const squadra = async (nome: string, g1: string, g2: string) => {
-    const s = await db.val<string>(
-      `insert into public.squadre (torneo_id, nome, girone, stato, creato_da) values ($1, $2, 'A', 'approvata', $3) returning id`,
-      [T, nome, g1],
+  const team = async (name: string, p1: string, p2: string) => {
+    const t = await db.val<string>(
+      `insert into public.teams (tournament_id, name, group_name, status, created_by) values ($1, $2, 'A', 'approved', $3) returning id`,
+      [T, name, p1],
     );
     await db.q(
-      `insert into public.squadra_giocatori (squadra_id, torneo_id, user_id, ordine) values ($1, $2, $3, 1), ($1, $2, $4, 2)`,
-      [s, T, g1, g2],
+      `insert into public.team_players (team_id, tournament_id, user_id, position) values ($1, $2, $3, 1), ($1, $2, $4, 2)`,
+      [t, T, p1, p2],
     );
-    return s;
+    return t;
   };
-  const sA = await squadra('sA', a1, a2);
-  const sB = await squadra('sB', b1, b2);
-  const partita = (codice: string) =>
+  const teamA = await team('teamA', a1, a2);
+  const teamB = await team('teamB', b1, b2);
+  const groupMatch = (code: string) =>
     db.val<string>(
-      `insert into public.partite (torneo_id, codice, fase, girone, turno, squadra_a, squadra_b, periodo_id)
-       values ($1, $2, 'gironi', 'A', 1, $3, $4, $5) returning id`,
-      [T, codice, sA, sB, periodo],
+      `insert into public.matches (tournament_id, code, phase, group_name, round, team_a, team_b, period_id)
+       values ($1, $2, 'groups', 'A', 1, $3, $4, $5) returning id`,
+      [T, code, teamA, teamB, period],
     );
-  const P = await partita('gA-01-1');
-  const P2 = await partita('gA-02-1');
-  return { admin, org, gest, a1, a2, b1, b2, x, T, sA, sB, P, P2, periodo };
+  const P = await groupMatch('gA-01-1');
+  const P2 = await groupMatch('gA-02-1');
+  return { admin, org, mgr, a1, a2, b1, b2, x, T, teamA, teamB, P, P2, period };
 }
 
-/** Availability for some players on a day. */
-export async function fasce(db: Db, T: string, users: string[], data: string, ...fasce: string[]) {
+/** Availability windows for some players on a day. */
+export async function setWindows(db: Db, T: string, users: string[], date: string, ...windows: string[]) {
   for (const u of users)
     await db.q(
-      `insert into public.disponibilita (torneo_id, user_id, fasce) values ($1, $2, jsonb_build_object($3::text, $4::jsonb))
-       on conflict (torneo_id, user_id) do update set fasce = excluded.fasce`,
-      [T, u, data, JSON.stringify(fasce)],
+      `insert into public.availability (tournament_id, user_id, windows) values ($1, $2, jsonb_build_object($3::text, $4::jsonb))
+       on conflict (tournament_id, user_id) do update set windows = excluded.windows`,
+      [T, u, date, JSON.stringify(windows)],
     );
 }
 
-export async function richiesta(db: Db, id: string): Promise<Row> {
-  return db.one('select * from public.richieste where id = $1', [id]);
+export async function request(db: Db, id: string): Promise<Row> {
+  return db.one('select * from public.requests where id = $1', [id]);
 }
 
-export async function partita(db: Db, id: string): Promise<Row> {
-  return db.one('select * from public.partite where id = $1', [id]);
+export async function match(db: Db, id: string): Promise<Row> {
+  return db.one('select * from public.matches where id = $1', [id]);
 }
 
-export async function accettazioni(db: Db, richiestaId: string): Promise<Record<string, boolean>> {
-  const rows = await db.q('select user_id, accettata_at is not null as ok from public.richiesta_giocatori where richiesta_id = $1', [
-    richiestaId,
+export async function acceptances(db: Db, requestId: string): Promise<Record<string, boolean>> {
+  const rows = await db.q('select user_id, accepted_at is not null as ok from public.request_players where request_id = $1', [
+    requestId,
   ]);
   return Object.fromEntries(rows.map((r) => [r.user_id, r.ok]));
 }
 
 /** Creates a request (as a1) and has all 4 players accept it. */
-export async function richiestaCompleta(
+export async function acceptedRequest(
   db: Db,
   b: Base,
-  opts: { partita?: string; campo?: string; data?: string; inizio?: string } = {},
+  opts: { match?: string; court?: string; date?: string; start?: string } = {},
 ): Promise<string> {
   const id = await db.as(b.a1).rpc<string>('create_request', {
-    p_partita: opts.partita ?? b.P,
-    p_campo: opts.campo ?? 'c1',
-    p_data: opts.data ?? DATA,
-    p_inizio: opts.inizio ?? '18:00',
+    p_match: opts.match ?? b.P,
+    p_court: opts.court ?? 'c1',
+    p_date: opts.date ?? DATE,
+    p_start: opts.start ?? '18:00',
   });
-  for (const u of [b.a2, b.b1, b.b2]) await db.as(u).rpc('accept_request', { p_richiesta: id });
+  for (const u of [b.a2, b.b1, b.b2]) await db.as(u).rpc('accept_request', { p_request: id });
   return id;
 }

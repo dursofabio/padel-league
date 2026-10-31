@@ -3,19 +3,19 @@ import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { PageHeader } from '../../components/PageHeader';
-import { EmptyState, QueryState, SkeletonRighe } from '../../components/states';
-import { useTornei } from '../../data/queries';
+import { EmptyState, QueryState, SkeletonRows } from '../../components/states';
+import { useTournaments } from '../../data/queries';
 import { buttonVariants } from '../../ui/button';
-import { RigaLink, STATO_TORNEO } from '../public/comune';
+import { LinkRow, TOURNAMENT_STATUS_LABEL } from '../../components/common';
 
 // The feed (attention logic, mutations, rows) is only downloaded by logged-in users.
-const DaFare = lazy(() => import('./DaFare').then((m) => ({ default: m.DaFare })));
+const TodoFeed = lazy(() => import('./TodoFeed').then((m) => ({ default: m.TodoFeed })));
 
-function Caricamento() {
+function Loading() {
   return (
     <>
-      <PageHeader titolo="Da fare" />
-      <SkeletonRighe righe={3} />
+      <PageHeader title="Da fare" />
+      <SkeletonRows rows={3} />
     </>
   );
 }
@@ -23,46 +23,46 @@ function Caricamento() {
 /** "/": the "Da fare" feed when logged in; the tournaments to follow when logged out. */
 export default function HomePage() {
   const { user, loading } = useAuth();
-  if (loading) return <Caricamento />;
+  if (loading) return <Loading />;
   return user ? (
-    <Suspense fallback={<Caricamento />}>
-      <DaFare />
+    <Suspense fallback={<Loading />}>
+      <TodoFeed />
     </Suspense>
   ) : (
-    <Pubblica />
+    <PublicHome />
   );
 }
 
-function Pubblica() {
-  const tornei = useTornei();
+function PublicHome() {
+  const tournaments = useTournaments();
   return (
     <>
-      <PageHeader titolo="Tornei" sottotitolo="Classifiche, calendario e tabelloni: si leggono senza accedere." />
+      <PageHeader title="Tornei" subtitle="Classifiche, calendario e tabelloni: si leggono senza accedere." />
       <div className="grid max-w-3xl gap-8">
         <QueryState
-          isPending={tornei.isPending}
-          error={tornei.error}
-          data={tornei.data}
-          onRiprova={() => void tornei.refetch()}
-          vuoto={(t) =>
-            t.length ? null : <EmptyState titolo="Non c’è ancora nessun torneo." testo="Quando l’organizzatore crea il torneo, lo trovi qui." />
+          isPending={tournaments.isPending}
+          error={tournaments.error}
+          data={tournaments.data}
+          onRetry={() => void tournaments.refetch()}
+          empty={(t) =>
+            t.length ? null : <EmptyState title="Non c’è ancora nessun torneo." text="Quando l’organizzatore crea il torneo, lo trovi qui." />
           }
         >
           {(t) => (
             <ul className="court-rule">
               {t.map((x) => (
                 <li key={x.id}>
-                  <RigaLink to={`/t/${x.id}`} dettaglio={STATO_TORNEO[x.stato]}>
-                    {x.nome}
-                  </RigaLink>
+                  <LinkRow to={`/t/${x.id}`} detail={TOURNAMENT_STATUS_LABEL[x.status]}>
+                    {x.name}
+                  </LinkRow>
                 </li>
               ))}
             </ul>
           )}
         </QueryState>
 
-        <section aria-labelledby="accedi" className="grid justify-items-start gap-3 border-t border-line pt-5">
-          <h2 id="accedi" className="text-lg font-bold">
+        <section aria-labelledby="sign-in" className="grid justify-items-start gap-3 border-t border-line pt-5">
+          <h2 id="sign-in" className="text-lg font-bold">
             Giochi in un torneo?
           </h2>
           <p className="max-w-prose text-ink-muted">Accedi per segnare quando puoi giocare, programmare le tue partite e inserire i risultati.</p>
